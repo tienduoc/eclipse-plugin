@@ -28,13 +28,13 @@ public class AutoHint {
 	}
 
 	private AutoHint() {
-		map=new TreeMap<>();
+		map=new TreeMap<Integer, Integer>();
 	}
 
 	public void setStyledText(StyledText styledText) {
 		this.styledText = styledText;
 		start=end=ne=0; candidates=null;
-		map=new TreeMap<>();
+		map=new TreeMap<Integer, Integer>();
 	}
 
 	public StyledText getStyledText() {

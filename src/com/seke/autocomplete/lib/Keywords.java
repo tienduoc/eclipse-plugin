@@ -33,7 +33,7 @@ public class Keywords {
 
 	public static boolean isKeyWord(String word) {
 		if (set == null || set.isEmpty())
-			set = new HashSet<>(Arrays.asList(KEYWORDS));
+			set = new HashSet<String>(Arrays.asList(KEYWORDS));
 		return set.contains(word);
 	}
 

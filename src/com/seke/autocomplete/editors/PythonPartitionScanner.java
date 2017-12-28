@@ -13,7 +13,7 @@ public class PythonPartitionScanner extends RuleBasedPartitionScanner {
 		IToken comment = new Token(PYTHON_COMMENT);
 		//IToken keyword = new Token(PYTHON_KEYWORD);
 
-		ArrayList<IPredicateRule> arrayList = new ArrayList<>();
+		ArrayList<IPredicateRule> arrayList = new ArrayList<IPredicateRule>();
 		arrayList.add(new EndOfLineRule("#", comment));
 		/*
 		 * arrayList.add(new SingleLineRule("import", " ", keyword));

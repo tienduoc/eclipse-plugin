@@ -9,7 +9,7 @@
             extensions="py"
             icon="icons/sample.gif"
             id="com.seke.autocomplete.editors.PythonEditor"
-            name="Python Editor">
+            name="%editor.name">
       </editor>
       <editor
             class="com.seke.autocomplete.editors.PythonEditor"
@@ -17,7 +17,7 @@
             extensions="j"
             icon="icons/sample.gif"
             id="com.seke.autocomplete.editors.JavaEditor"
-            name="Java Editor">
+            name="%editor.name.0">
       </editor>
       <editor
             class="com.seke.autocomplete.editors.PythonEditor"
@@ -25,7 +25,7 @@
             extensions="c"
             icon="icons/sample.gif"
             id="com.seke.autocomplete.editors.CEditor"
-            name="C Editor">
+            name="%editor.name.1">
       </editor>
    </extension>
    <extension
@@ -34,22 +34,22 @@
          <command
             categoryId="org.eclipse.ui.category.textEditor"
             id="com.seke.autocomplete.command.Insert"
-            name="Insert">
+            name="%command.name">
       	</command>
       	<command
                defaultHandler="com.seke.autocomplete.handler.SetColorHandler"
                id="com.seke.autocomplete.command.SetColor"
-               name="SetColor">
+               name="%command.name.0">
             <commandParameter
                   id="color"
-                  name="color"
+                  name="%commandParameter.name"
                   optional="true">
             </commandParameter>
          </command>
          <command
                defaultHandler="com.seke.autocomplete.handler.SetLengthHandler"
                id="com.seke.autocomplete.command.SetLength"
-               name="SetLength">
+               name="%command.name.1">
          </command>
          
    </extension>
@@ -77,17 +77,17 @@
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="autoCompleteMenu"
-               label="自动补全">
+               label="%menu.label">
             <command
                   commandId="com.seke.autocomplete.command.SetLength"
-                  label="设置提示长度 "
+                  label="%command.label"
                   style="push">
             </command>
             <menu
-                  label="设置颜色">
+                  label="%menu.label.0">
                <command
                      commandId="com.seke.autocomplete.command.SetColor"
-                     label="关键词颜色"
+                     label="%command.label.0"
                      style="push">
                   <parameter
                         name="color"
@@ -96,7 +96,7 @@
                </command>
                <command
                      commandId="com.seke.autocomplete.command.SetColor"
-                     label="已补全背景色"
+                     label="%command.label.1"
                      style="push">
                   <parameter
                         name="color"
@@ -105,7 +105,7 @@
                </command>
                <command
                      commandId="com.seke.autocomplete.command.SetColor"
-                     label="已补全背景色2"
+                     label="%command.label.2"
                      style="push">
                   <parameter
                         name="color"
@@ -114,7 +114,7 @@
                </command>
                <command
                      commandId="com.seke.autocomplete.command.SetColor"
-                     label="代码提示色"
+                     label="%command.label.3"
                      style="push">
                   <parameter
                         name="color"
@@ -123,7 +123,7 @@
                </command>
                <command
                      commandId="com.seke.autocomplete.command.SetColor"
-                     label="代码提示背景色"
+                     label="%command.label.4"
                      style="push">
                   <parameter
                         name="color"

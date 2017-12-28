@@ -30,7 +30,7 @@ public class JSON {
 	 */
 	public JSON() {
 		type = TYPE.JSON;
-		map = new HashMap<>();
+		map = new HashMap<String, JSON>();
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class JSON {
 	 */
 	public JSON(Map<String, JSON> map) {
 		type = TYPE.JSON;
-		this.map = new HashMap<>(map);
+		this.map = new HashMap<String, JSON>(map);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class JSON {
 	 */
 	public JSON(List<JSON> list) {
 		type = TYPE.LIST;
-		listValue = new ArrayList<>(list);
+		listValue = new ArrayList<JSON>(list);
 	}
 
 	/**
@@ -460,7 +460,7 @@ public class JSON {
 	 */
 	public void set(List<JSON> list) {
 		type = TYPE.LIST;
-		listValue = new ArrayList<>(list);
+		listValue = new ArrayList<JSON>(list);
 	}
 
 	/**
@@ -609,7 +609,7 @@ public class JSON {
 		int state = 0;
 		String key = null;
 		StringBuilder builder = new StringBuilder();
-		HashMap<String, JSON> map = new HashMap<>();
+		HashMap<String, JSON> map = new HashMap<String, JSON>();
 
 		for (int i = 0; i < string.length(); i++) {
 			char c = string.charAt(i);
@@ -771,12 +771,12 @@ public class JSON {
 			return null;
 		string = string.substring(1, string.length() - 1).trim();
 		if (string.isEmpty())
-			return new JSON(new ArrayList<>());
+			return new JSON(new ArrayList<JSON>());
 		boolean inQuote = false;
 		int a = 0, b = 0, pos = 0;
 
-		List<JSON> ans = new ArrayList<>();
-		ArrayList<String> arrayList = new ArrayList<>();
+		List<JSON> ans = new ArrayList<JSON>();
+		ArrayList<String> arrayList = new ArrayList<String>();
 		for (int i = 0; i < string.length(); i++) {
 			char c = string.charAt(i);
 			if (Character.isWhitespace(c))
@@ -828,7 +828,7 @@ public class JSON {
 		}
 		if (another.type == TYPE.LIST) {
 			json.type = TYPE.LIST;
-			json.listValue = new ArrayList<>();
+			json.listValue = new ArrayList<JSON>();
 			for (JSON js : another.listValue) {
 				json.listValue.add(JSON.deepCopy(js));
 			}
@@ -933,7 +933,7 @@ public class JSON {
 		}
 		if (map.size() == 0)
 			return (newLine ? prefix : "") + "{}";
-		ArrayList<String> list = new ArrayList<>();
+		ArrayList<String> list = new ArrayList<String>();
 		for (Map.Entry<String, JSON> entry : map.entrySet()) {
 			StringBuilder builder = new StringBuilder(prefix + "  ");
 			builder.append(String.format("\"%s\": ", entry.getKey()));
