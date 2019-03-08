@@ -1,153 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="com.seke.autocomplete.editors.PythonEditor"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            extensions="py"
-            icon="icons/sample.gif"
-            id="com.seke.autocomplete.editors.PythonEditor"
-            name="%editor.name">
-      </editor>
-      <editor
-            class="com.seke.autocomplete.editors.PythonEditor"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            extensions="j"
-            icon="icons/sample.gif"
-            id="com.seke.autocomplete.editors.JavaEditor"
-            name="%editor.name.0">
-      </editor>
-      <editor
-            class="com.seke.autocomplete.editors.PythonEditor"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            extensions="c"
-            icon="icons/sample.gif"
-            id="com.seke.autocomplete.editors.CEditor"
-            name="%editor.name.1">
-      </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-         
-         <command
-            categoryId="org.eclipse.ui.category.textEditor"
-            id="com.seke.autocomplete.command.Insert"
-            name="%command.name">
-      	</command>
-      	<command
-               defaultHandler="com.seke.autocomplete.handler.SetColorHandler"
-               id="com.seke.autocomplete.command.SetColor"
-               name="%command.name.0">
-            <commandParameter
-                  id="color"
-                  name="%commandParameter.name"
-                  optional="true">
-            </commandParameter>
-         </command>
-         <command
-               defaultHandler="com.seke.autocomplete.handler.SetLengthHandler"
-               id="com.seke.autocomplete.command.SetLength"
-               name="%command.name.1">
-         </command>
-         
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="com.seke.autocomplete.handler.InsertHandler"
-            commandId="com.seke.autocomplete.command.Insert">
-            <activeWhen>
-            	<with variable="activeEditorId">
-            		<or>
-            			<equals value="com.seke.autocomplete.editors.PythonEditor"/>
-            			<equals value="com.seke.autocomplete.editors.JavaEditor"/>
-            			<equals value="com.seke.autocomplete.editors.CEditor"/>
-            		</or>
-            	</with>
-            </activeWhen>
-      </handler>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu">
-         <menu
-               id="autoCompleteMenu"
-               label="%menu.label">
-            <command
-                  commandId="com.seke.autocomplete.command.SetLength"
-                  label="%command.label"
-                  style="push">
-            </command>
-            <menu
-                  label="%menu.label.0">
-               <command
-                     commandId="com.seke.autocomplete.command.SetColor"
-                     label="%command.label.0"
-                     style="push">
-                  <parameter
-                        name="color"
-                        value="color_keyword">
-                  </parameter>
-               </command>
-               <command
-                     commandId="com.seke.autocomplete.command.SetColor"
-                     label="%command.label.1"
-                     style="push">
-                  <parameter
-                        name="color"
-                        value="color_completed_bg">
-                  </parameter>
-               </command>
-               <command
-                     commandId="com.seke.autocomplete.command.SetColor"
-                     label="%command.label.2"
-                     style="push">
-                  <parameter
-                        name="color"
-                        value="color_completed_bg2">
-                  </parameter>
-               </command>
-               <command
-                     commandId="com.seke.autocomplete.command.SetColor"
-                     label="%command.label.3"
-                     style="push">
-                  <parameter
-                        name="color"
-                        value="color_hint">
-                  </parameter>
-               </command>
-               <command
-                     commandId="com.seke.autocomplete.command.SetColor"
-                     label="%command.label.4"
-                     style="push">
-                  <parameter
-                        name="color"
-                        value="color_hint_bg">
-                  </parameter>
-               </command>
-            </menu>
-         </menu>
-      </menuContribution>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="com.seke.autocomplete.command.Insert"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="TAB">
-      </key>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.startup">
-      <startup class="com.seke.autocomplete.StartUp"/>
-   </extension>
-
+	<extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+	   id="textual_proposals"
+	   name="Text Proposals">
+		<proposalCategory icon="icons/aix_log.png"/>
+	</extension>
+	<extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+	   id="WordCompletionProposalComputer"
+	   name="Word Completion Proposal Computer">
+	   <javaCompletionProposalComputer
+	  class="com.aixcoder.AiXProposalComputer"
+	  activate="true"
+	  categoryId="org.eclipse.ui.texteditor.textual_proposals">
+		</javaCompletionProposalComputer>
+	</extension>
 </plugin>

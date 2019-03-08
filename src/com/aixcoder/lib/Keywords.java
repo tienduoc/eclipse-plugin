@@ -1,4 +1,4 @@
-package com.seke.autocomplete.lib;
+package com.aixcoder.lib;
 
 import java.util.Arrays;
 import java.util.HashSet;

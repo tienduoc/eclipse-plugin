@@ -1,4 +1,4 @@
-package com.seke.autocomplete.lib;
+package com.aixcoder.lib;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;

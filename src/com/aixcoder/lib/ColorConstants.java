@@ -1,4 +1,4 @@
-package com.seke.autocomplete.lib;
+package com.aixcoder.lib;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;

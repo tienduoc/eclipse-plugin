@@ -1,4 +1,4 @@
-package com.seke.autocomplete.lib;
+package com.aixcoder.lib;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;

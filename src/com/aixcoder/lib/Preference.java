@@ -1,4 +1,4 @@
-package com.seke.autocomplete.lib;
+package com.aixcoder.lib;
 
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;

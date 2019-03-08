@@ -1,4 +1,4 @@
-package com.seke.autocomplete;
+package com.aixcoder;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
