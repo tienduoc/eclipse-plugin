@@ -10,7 +10,7 @@
 	   id="WordCompletionProposalComputer"
 	   name="Word Completion Proposal Computer">
 	   <javaCompletionProposalComputer
-	  class="com.aixcoder.AiXProposalComputer"
+	  class="com.aixcoder.extension.AiXProposalComputer"
 	  activate="true"
 	  categoryId="org.eclipse.ui.texteditor.textual_proposals">
 		</javaCompletionProposalComputer>

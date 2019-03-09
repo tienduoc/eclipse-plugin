@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: aiXcoder;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.aixcoder.Activator
+Bundle-Activator: com.aixcoder.extension.Activator
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

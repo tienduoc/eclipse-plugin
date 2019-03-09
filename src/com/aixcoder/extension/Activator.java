@@ -1,4 +1,4 @@
-package com.aixcoder;
+package com.aixcoder.extension;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

@@ -3,7 +3,6 @@ package com.aixcoder.lang;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -12,6 +11,7 @@ public abstract class LangOptions {
 
     protected final static HashMap<Boolean, BiFunction<ArrayList<String>, Integer, Boolean>> defaultSupplier = new HashMap<>();
     static final String SpacingKeyALL = "#All#";
+    public String lang = null;
 
     static {
         defaultSupplier.put(Boolean.TRUE, (tokens, nextI) -> Boolean.TRUE);
@@ -21,11 +21,11 @@ public abstract class LangOptions {
     // <previousToken, <nextToken, (tokens, nextIndex) -> hasSpace>>
     protected final HashMap<String, HashMap<String, BiFunction<ArrayList<String>, Integer, Boolean>>> hasSpaceBetweenMap = new HashMap<>();
 
-    public static LangOptions getInstance(String lang, Map<String, String> options) {
+    public static LangOptions getInstance(String lang) {
         LangOptions impl;
         switch (lang) {
             case "java":
-                impl = new JavaLangOptions(options);
+                impl = new JavaLangOptions();
                 break;
             default:
                 return null;
