@@ -16,9 +16,7 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
-		ImageDescriptor image = Activator
-				.imageDescriptorFromPlugin(Activator.getDefault().getBundle().getSymbolicName(), "icons/aix_log.png");
-		ProposalFactory proposalFactory = new ProposalFactory(context, image);
+		ProposalFactory proposalFactory = new ProposalFactory(context );
 		try {
 			// step 1: get text before cursor
 			int offset = context.getInvocationOffset();

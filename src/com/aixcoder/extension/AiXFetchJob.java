@@ -49,7 +49,6 @@ public class AiXFetchJob extends Job {
 			AiXUIJob job = new AiXUIJob(Display.getDefault(), "aixcoder async insertion",
 					proposalFactory.context.getViewer(), proposal);
 			job.schedule();
-			System.out.println("job scheduled");
 		}
 		return Status.OK_STATUS;
 	}
