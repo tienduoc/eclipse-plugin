@@ -21,6 +21,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 			return -1;
 		if (p2 instanceof AiXCompletionProposal)
 			return 1;
+		if(sorter == null) return 1;
 		return sorter.compare(p1, p2);
 	}
 
