@@ -21,8 +21,8 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 			// step 1: get text before cursor
 			int offset = context.getInvocationOffset();
 			String prefix = context.getDocument().get(0, offset);
-			System.out.println("computeCompletionProposals + " + prefix.substring(prefix.length() - 50));
-			System.out.println("==============");
+//			System.out.println("computeCompletionProposals + " + prefix.substring(prefix.length() - 50));
+//			System.out.println("==============");
 			// step 2: send request
 			// Eclipse's way of using its thread pool
 			new AiXFetchJob(prefix, proposalFactory).schedule();
