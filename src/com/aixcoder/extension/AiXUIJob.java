@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -84,14 +85,18 @@ public class AiXUIJob extends UIJob {
 				System.out.println("predictResult" + (predictResult == null ? "null" : predictResult.toString()));
 				if (predictResult == null) {
 					if (!prefix.equals(newPrefix)) {
+						IRegion line = viewer.getDocument().getLineInformationOfOffset(selection.x);
+						String remainingText = viewer.getDocument().get(selection.x,
+								line.getOffset() + line.getLength() - selection.x);
 						// 文本变化，重新发起请求
-						new AiXFetchJob(newPrefix, proposalFactory).schedule();
+						new AiXFetchJob(newPrefix, remainingText, proposalFactory).schedule();
 					} // else 预测结果为空
 				} else {
 					ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
 					RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current);
 
-					ICompletionProposal proposal = proposalFactory.createProposal(rendered.display, rendered.insert);
+					ICompletionProposal proposal = proposalFactory.createProposal(rendered.display, rendered.insert,
+							predictResult.rCompletions);
 
 					fComputedProposal.add(0, proposal);
 					// call proposal table update function

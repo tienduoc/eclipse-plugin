@@ -14,8 +14,8 @@ public class ProposalFactory {
 		this.context = context;
 	}
 
-	public ICompletionProposal createProposal(String display, String insert) {
+	public ICompletionProposal createProposal(String display, String insert, String[] rCompletion) {
 		return new AiXCompletionProposal(insert, context.getInvocationOffset(), 0, insert.length(), image.createImage(),
-				display, null, "additionalProposalInfo");
+				display, null, "additionalProposalInfo", rCompletion);
 	}
 }

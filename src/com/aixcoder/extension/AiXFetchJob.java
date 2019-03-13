@@ -20,10 +20,12 @@ public class AiXFetchJob extends Job {
 
 	private ProposalFactory proposalFactory;
 	private String prefix;
+	private String remainingText;
 
-	public AiXFetchJob(String prefix, ProposalFactory proposalFactory) {
+	public AiXFetchJob(String prefix, String remainingText, ProposalFactory proposalFactory) {
 		super("aixcoder fetch");
 		this.prefix = prefix;
+		this.remainingText = remainingText;
 		this.proposalFactory = proposalFactory;
 	}
 
@@ -31,7 +33,7 @@ public class AiXFetchJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		PredictResult predictResult = PredictCache.getInstance().get(prefix);
 		if (predictResult == null) {
-			predictResult = Predict.predict(prefix);
+			predictResult = Predict.predict(prefix, remainingText);
 			PredictCache.getInstance().put(prefix, predictResult);
 		}
 		// TODO: format result

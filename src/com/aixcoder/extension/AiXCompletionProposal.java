@@ -31,6 +31,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	private Image fImage;
 	/** The context information of this proposal. */
 	private IContextInformation fContextInformation;
+	private String[] fRCompletion;
 
 	/**
 	 * Creates a new completion proposal based on the provided information. The
@@ -45,7 +46,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	 */
 	public AiXCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
 			int cursorPosition) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null);
+		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null, null);
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	 */
 	public AiXCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
 			int cursorPosition, Image image, String displayString, IContextInformation contextInformation,
-			String additionalProposalInfo) {
+			String additionalProposalInfo, String[] rCompletion) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -79,13 +80,20 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		fCursorPosition = cursorPosition;
 		fImage = image;
 		fDisplayString = displayString;
+		if (rCompletion != null && rCompletion.length > 0) {
+			fDisplayString += "..." + String.join("", rCompletion);
+		}
 		fContextInformation = contextInformation;
+		fRCompletion = rCompletion;
 	}
 
 	@Override
 	public void apply(IDocument document) {
 		try {
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+			if (fRCompletion != null) {
+				document.replace(fReplacementOffset + fReplacementString.length(), 0, String.join("", fRCompletion));
+			}
 		} catch (BadLocationException x) {
 			// ignore
 		}

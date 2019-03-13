@@ -57,7 +57,7 @@ public class PredictCache {
 					// => current: Str
 					String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
 					newTokens[0] = newTokens[0].substring(newString.length());
-					return new PredictResult(newTokens, second.current + newString);
+					return new PredictResult(newTokens, second.current + newString, second.rCompletions);
 				} else {
 					if (newString.isEmpty()) {
 						// at end of word
@@ -73,7 +73,7 @@ public class PredictCache {
 						if (i == 1) {
 							newCurrent = second.current + newCurrent;
 						}
-						return new PredictResult(newTokens, newCurrent);
+						return new PredictResult(newTokens, newCurrent, second.rCompletions);
 					} else {
 						// cache : St [ring, str, =]
 						// newPrefix: String s
@@ -82,7 +82,7 @@ public class PredictCache {
 						// => current: s
 						String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
 						newTokens[0] = newTokens[0].substring(newString.length());
-						return new PredictResult(newTokens, newString);
+						return new PredictResult(newTokens, newString, second.rCompletions);
 					}
 				}
 			} else {
