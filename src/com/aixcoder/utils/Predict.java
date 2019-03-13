@@ -16,6 +16,10 @@ public class Predict {
 			this.tokens = tokens;
 			this.current = current;
 		}
+
+		public String toString() {
+			return "PredictResult: (" + current + ")[" + String.join(" ", tokens) + "]";
+		}
 	}
 
 	private final static String URL = "https://api.aixcoder.com/predict";
@@ -43,5 +47,4 @@ public class Predict {
 		}
 		return new PredictResult(new String[0], "");
 	}
-
 }

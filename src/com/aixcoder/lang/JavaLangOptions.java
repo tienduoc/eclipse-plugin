@@ -11,12 +11,12 @@ public class JavaLangOptions extends LangOptions {
 		this.lang = "java";
 	}
 
-	private final static HashSet<String> keywords = new HashSet<>(Arrays.asList("abstract", "continue", "for", "new",
-			"switch", "assert", "default", "goto", "package", "synchronized", "boolean", "do", "if", "private", "this",
-			"break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case",
-			"enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final",
-			"interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float",
-			"native", "super", "while"));
+	private final static HashSet<String> keywords = new HashSet<String>(Arrays.asList("abstract", "continue", "for",
+			"new", "switch", "assert", "default", "goto", "package", "synchronized", "boolean", "do", "if", "private",
+			"this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws",
+			"case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char",
+			"final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const",
+			"float", "native", "super", "while"));
 
 	public HashSet<String> getKeywords() {
 		return keywords;
@@ -45,16 +45,16 @@ public class JavaLangOptions extends LangOptions {
 
 	private void initConfigurableOptions() {
 		addSpacingOptionAround("=", SpacingKeyALL, true);
-		addSpacingOptionAround("+=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("-=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("*=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("/=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("%=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("<<=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround(">>=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("&=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("^=", SpacingKeyALL, () -> true);
-		addSpacingOptionAround("|=", SpacingKeyALL, () -> true);
+		addSpacingOptionAround("+=", SpacingKeyALL, true);
+		addSpacingOptionAround("-=", SpacingKeyALL, true);
+		addSpacingOptionAround("*=", SpacingKeyALL, true);
+		addSpacingOptionAround("/=", SpacingKeyALL, true);
+		addSpacingOptionAround("%=", SpacingKeyALL, true);
+		addSpacingOptionAround("<<=", SpacingKeyALL, true);
+		addSpacingOptionAround(">>=", SpacingKeyALL, true);
+		addSpacingOptionAround("&=", SpacingKeyALL, true);
+		addSpacingOptionAround("^=", SpacingKeyALL, true);
+		addSpacingOptionAround("|=", SpacingKeyALL, true);
 
 		addSpacingOptionAround("&&", SpacingKeyALL, true);
 		addSpacingOptionAround("||", SpacingKeyALL, true);
@@ -63,51 +63,40 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOptionAround("!=", SpacingKeyALL, true);
 
 		addSpacingOption(">", SpacingKeyALL, true);
-		addSpacingOption(SpacingKeyALL, ">", (tokens, nextI) -> {
-			// > ***: has space if (1. is not closing bracket && 2. space around relational
-			// op)
-			int level = 1;
-			for (int i = nextI - 1; i >= 0; i--) {
-				if (!tokens.get(i).matches("[a-zA-Z0-9_$]+|[><,]")) {
-					break;
-				}
-				switch (tokens.get(i)) {
-				case "<":
-					level--;
-					if (level == 0) {
-						return false;
+		addSpacingOption(SpacingKeyALL, ">", new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				// > ***: has space if (1. is not closing bracket && 2. space around relational
+				// op)
+				int level = 1;
+				for (int i = nextI - 1; i >= 0; i--) {
+					if (!tokens.get(i).matches("[a-zA-Z0-9_$]+|[><,]")) {
+						break;
 					}
-					break;
-				case ">":
-					level++;
-					break;
-				}
-			}
-			return true;
-		});
-		addSpacingOption("<", SpacingKeyALL, (tokens, nextI) -> {
-			// > ***: has space if (1. is not closing bracket && 2. space around relational
-			// op)
-			int level = 1;
-			for (int i = nextI; i < tokens.size(); i++) {
-				if (!tokens.get(i).matches("[a-zA-Z0-9_$]+|[><,]")) {
-					break;
-				}
-				switch (tokens.get(i)) {
-				case "<":
-					level++;
-					break;
-				case ">":
-					level--;
-					if (level == 0) {
-						return false;
+					if (tokens.get(i).equals("<")) {
+						level--;
+						if (level == 0) {
+							return false;
+						}
+					} else if (tokens.get(i).equals(">")) {
+						level++;
 					}
-					break;
 				}
+				return true;
 			}
-			return true;
 		});
-		addSpacingOption(SpacingKeyALL, "<", true);
+		addSpacingOption("<", SpacingKeyALL, new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return nextI >= 2 && tokens.size() > nextI - 2 && tokens.get(nextI - 2).matches("[a-z0-9_$]+|[><,]");
+			}
+		});
+		addSpacingOption(SpacingKeyALL, "<", new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return nextI >= 1 && tokens.size() > nextI - 1 && tokens.get(nextI - 1).matches("[a-z0-9_$]+|[><,]");
+			}
+		});
 		addSpacingOptionAround(">=", SpacingKeyALL, true);
 		addSpacingOptionAround("<=", SpacingKeyALL, true);
 
@@ -115,20 +104,43 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOptionAround("|", SpacingKeyALL, true);
 		addSpacingOptionAround("^", SpacingKeyALL, true);
 
-		BiFunction<ArrayList<String>, Integer, Boolean> plusMinusSignBinaryOpChecker = (tokens, preOpTokenI) -> {
-			if (preOpTokenI >= 0) {
-				String preOpToken = tokens.get(preOpTokenI);
-				if (preOpToken.matches("--|\\+\\+|[)\\]\"']|[a-zA-Z_][a-zA-Z0-9_]+"))
-					return false;
-				else
-					return false;
+		final BiFunction<ArrayList<String>, Integer, Boolean> plusMinusSignBinaryOpChecker = new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer preOpTokenI) {
+				if (preOpTokenI >= 0) {
+					String preOpToken = tokens.get(preOpTokenI);
+					if (preOpToken.matches("--|\\+\\+|[)\\]\"']|[a-zA-Z_][a-zA-Z0-9_]+"))
+						return false;
+					else
+						return false;
+				}
+				return false;
 			}
-			return false;
 		};
-		addSpacingOption("+", SpacingKeyALL, (tokens, nextI) -> plusMinusSignBinaryOpChecker.apply(tokens, nextI - 2));
-		addSpacingOption(SpacingKeyALL, "+", (tokens, nextI) -> plusMinusSignBinaryOpChecker.apply(tokens, nextI - 1));
-		addSpacingOption("-", SpacingKeyALL, (tokens, nextI) -> plusMinusSignBinaryOpChecker.apply(tokens, nextI - 2));
-		addSpacingOption(SpacingKeyALL, "-", (tokens, nextI) -> plusMinusSignBinaryOpChecker.apply(tokens, nextI - 1));
+		addSpacingOption("+", SpacingKeyALL, new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return plusMinusSignBinaryOpChecker.apply(tokens, nextI - 2);
+			}
+		});
+		addSpacingOption(SpacingKeyALL, "+", new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return plusMinusSignBinaryOpChecker.apply(tokens, nextI - 1);
+			}
+		});
+		addSpacingOption("-", SpacingKeyALL, new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return plusMinusSignBinaryOpChecker.apply(tokens, nextI - 2);
+			}
+		});
+		addSpacingOption(SpacingKeyALL, "-", new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				return plusMinusSignBinaryOpChecker.apply(tokens, nextI - 1);
+			}
+		});
 
 		addSpacingOptionAround("*", SpacingKeyALL, true);
 		addSpacingOptionAround("/", SpacingKeyALL, true);
@@ -156,21 +168,28 @@ public class JavaLangOptions extends LangOptions {
 
 		addSpacingOption("(", SpacingKeyALL, false);
 		addSpacingOption(SpacingKeyALL, ")", false);
+		addSpacingOption(SpacingKeyALL, "[", false);
 		addSpacingOption("[", SpacingKeyALL, false);
 		addSpacingOption(SpacingKeyALL, "]", false);
 
 //        addSpacingOption(":", SpacingKeyALL, () -> getCodeStyleSettings().SPACE_WITHIN_ARRAY_INITIALIZER_BRACES);
-		addSpacingOption("{", SpacingKeyALL, (tokens, nextI) -> {
-			if (nextI >= 3 && tokens.get(nextI - 2).equals("]") && tokens.get(nextI - 3).equals("["))
+		addSpacingOption("{", SpacingKeyALL, new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				if (nextI >= 3 && tokens.get(nextI - 2).equals("]") && tokens.get(nextI - 3).equals("["))
+					return true;
 				return true;
-			return true;
-		});
-		addSpacingOption(SpacingKeyALL, "}", (tokens, nextI) -> {
-			int i = findMatching(tokens, nextI, "}", "{");
-			if (i >= 0) {
-				return hasSpaceBetween(tokens, i + 1);
 			}
-			return true;
+		});
+		addSpacingOption(SpacingKeyALL, "}", new BiFunction<ArrayList<String>, Integer, Boolean>() {
+			@Override
+			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
+				int i = findMatching(tokens, nextI, "}", "{");
+				if (i >= 0) {
+					return hasSpaceBetween(tokens, i + 1);
+				}
+				return true;
+			}
 		});
 //        addSpacingOption( ":", SpacingKeyALL, () -> getCodeStyleSettings().SPACE_AFTER_TYPE_CAST);
 		addSpacingOption(SpacingKeyALL, "(", false);

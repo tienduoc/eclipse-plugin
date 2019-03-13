@@ -6,7 +6,7 @@ import java.util.HashMap;
 import com.aixcoder.lang.LangOptions;
 
 public class CodeUtils {
-	private static HashMap<String, CodeUtils> instances = new HashMap<>();
+	private static HashMap<String, CodeUtils> instances = new HashMap<String, CodeUtils>();
 	private String lang;
 
 	public CodeUtils(String lang) {

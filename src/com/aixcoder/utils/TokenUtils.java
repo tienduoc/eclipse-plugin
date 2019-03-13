@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.aixcoder.lang.LangOptions;
 
@@ -20,21 +21,18 @@ public class TokenUtils {
 		while (index < tokens.size()) {
 			boolean shouldBreak = false;
 			String token = tokens.get(index);
-			switch (token) {
-			case "<ENTER>":
+			if (token.equals("<ENTER>")) {
 				builder.append("\n");
 				String indentString = utils.getIndentString(indent);
 				builder.append(indentString);
-				break;
-			case "<IND>":
+			} else if (token.equals("<IND>")) {
 				int indentSize = langOptions.getIndentSize();
 				indent += indentSize;
 				builder.append(utils.getIndentString(indentSize));
-				break;
-			case "<BREAK>":
-				break;
+			} else if (token.equals("<BREAK>")) {
+			}
 
-			case "<UNIND>":
+			else if (token.equals("<UNIND>")) {
 				int remainingIndentSize = langOptions.getIndentSize();
 				indent -= remainingIndentSize;
 				int i;
@@ -54,8 +52,7 @@ public class TokenUtils {
 					// compensate with spaces
 					builder.append(' ');
 				}
-				break;
-			default:
+			} else {
 				for (String s : new String[] { "int", "float", "double", "long", "bool", "str", "char" }) {
 					String prefix = "<" + s + ">";
 					if (token.startsWith(prefix)) {
@@ -73,12 +70,12 @@ public class TokenUtils {
 				}
 				builder.append(token);
 				shouldBreak = true;
-				break;
 			}
 			index++;
 			if (shouldBreak)
 				break;
 		}
+
 		TokensUpdate r = new TokensUpdate();
 		r.newIndent = indent;
 		r.newIndex = index;
@@ -91,11 +88,16 @@ public class TokenUtils {
 		if (tokens == null || tokens.isEmpty()) {
 			return null;
 		}
-		tokens = new ArrayList<>(tokens);
+		tokens = new ArrayList<String>(tokens);
 		tokens.removeAll(Collections.singleton("<BREAK>"));
-		ArrayList<String> allTokens = new ArrayList<>(
+		ArrayList<String> allTokens = new ArrayList<String>(
 				Arrays.asList(line.split("(?<=[^a-zA-Z0-9_]) *|(?=[^a-zA-Z0-9_]) *")));
-		allTokens.removeIf(token -> token.length() == 0);
+		allTokens.removeIf(new Predicate<String>() {
+			@Override
+			public boolean test(String token) {
+				return token.length() == 0;
+			}
+		});
 		int indexInAllTokens = allTokens.size();
 		String firstToken = tokens.isEmpty() ? "" : tokens.get(0);
 		int indexInTokens = 0;
