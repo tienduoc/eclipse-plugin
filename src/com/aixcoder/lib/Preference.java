@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.aixcoder.extension.Activator;
+import com.aixcoder.extension.AiXPreInitializer;
 
 public class Preference {
 
@@ -13,6 +14,7 @@ public class Preference {
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
 	
 	public static boolean isActive() {
+		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getBoolean("ACTIVE");
 	}
 

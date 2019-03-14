@@ -1,10 +1,7 @@
 package com.aixcoder.utils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.aixcoder.utils.shims.DigestUtils;
 
 /**
  * 保存上一次给服务器发送的代码，服务器会维护一份一样的数据。 通过比较保存的数据和即将发送的数据，CodeStore避免发送相同的代码前缀部分，减少网络传输
@@ -33,17 +30,6 @@ public class CodeStore {
 			instance = new CodeStore();
 		}
 		return instance;
-	}
-
-	public String getMD5(String content) {
-		byte[] bytes;
-		try {
-			bytes = content.getBytes("utf-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return DigestUtils.md5Hex(bytes);
 	}
 
 	/**

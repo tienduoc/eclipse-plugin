@@ -1,4 +1,4 @@
-package com.aixcoder.extension;
+package com.aixcoder.core;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -17,7 +17,7 @@ public class PredictCache {
 		return instance;
 	}
 
-	List<Pair<String, PredictResult>> cache = new LinkedList<Pair<String, PredictResult>>();
+	public List<Pair<String, PredictResult>> cache = new LinkedList<Pair<String, PredictResult>>();
 
 	public void put(String prefix, PredictResult predictResult) {
 		cache.add(new Pair<String, PredictResult>(prefix, predictResult));

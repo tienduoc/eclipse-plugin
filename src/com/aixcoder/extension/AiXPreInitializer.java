@@ -1,5 +1,7 @@
 package com.aixcoder.extension;
 
+import java.io.IOException;
+
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -17,6 +19,11 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 			scopedPreferenceStore.setDefault("INITIALIZED", true);
 			scopedPreferenceStore.setDefault("PARAMS", "");
 			Preference.getUUID();
+			try {
+				scopedPreferenceStore.save();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

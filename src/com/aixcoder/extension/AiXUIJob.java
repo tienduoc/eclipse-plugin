@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.UIJob;
 
 import com.aixcoder.utils.Predict.PredictResult;
+import com.aixcoder.core.PredictCache;
+import com.aixcoder.core.PredictContext;
 import com.aixcoder.utils.RenderedInfo;
 import com.aixcoder.utils.TokenUtils;
 
@@ -31,15 +33,15 @@ public class AiXUIJob extends UIJob {
 	private ProposalFactory proposalFactory;
 	private ITextViewer viewer;
 	private PredictResult predictResult;
-	private String prefix;
+	private PredictContext predictContext;
 
 	public AiXUIJob(Display jobDisplay, String name, ITextViewer viewer, ProposalFactory proposalFactory,
-			PredictResult predictResult, String prefix) {
+			PredictResult predictResult, PredictContext predictContext) {
 		super(jobDisplay, name);
 		this.viewer = viewer;
 		this.proposalFactory = proposalFactory;
 		this.predictResult = predictResult;
-		this.prefix = prefix;
+		this.predictContext = predictContext;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -84,12 +86,14 @@ public class AiXUIJob extends UIJob {
 				predictResult = PredictCache.getInstance().get(newPrefix);
 				System.out.println("predictResult" + (predictResult == null ? "null" : predictResult.toString()));
 				if (predictResult == null) {
-					if (!prefix.equals(newPrefix)) {
+					if (!predictContext.prefix.equals(newPrefix)) {
 						IRegion line = viewer.getDocument().getLineInformationOfOffset(selection.x);
 						String remainingText = viewer.getDocument().get(selection.x,
 								line.getOffset() + line.getLength() - selection.x);
 						// 文本变化，重新发起请求
-						new AiXFetchJob(newPrefix, remainingText, proposalFactory).schedule();
+						PredictContext newPredictContext = new PredictContext(newPrefix, predictContext.proj,
+								predictContext.filename);
+						new AiXFetchJob(newPredictContext, remainingText, proposalFactory).schedule();
 					} // else 预测结果为空
 				} else {
 					ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
