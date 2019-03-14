@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.JSON;
+import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.shims.CollectionUtils;
 
 public class Predict {
@@ -24,7 +25,6 @@ public class Predict {
 		}
 	}
 
-	public final static String URL = "https://api.aixcoder.com/";
 	public final static int TIME_OUT = 2500;
 
 	public static PredictResult predict(String text, String remainingText) {
@@ -38,10 +38,11 @@ public class Predict {
 			int offset = CodeStore.getInstance().getDiffPosition(fileid, text);
 			String md5 = CodeStore.getInstance().getMD5(text);
 
-			HttpRequest httpRequest = HttpRequest.post(URL + "predict").connectTimeout(TIME_OUT).readTimeout(TIME_OUT)
-					.useCaches(false).contentType("x-www-form-urlencoded", "UTF-8").form("text", text.substring(offset))
-					.form("uuid", uuid).form("project", proj).form("ext", "java(Java)").form("fileid", fileid)
-					.form("remaining_text", remainingText).form("offset", String.valueOf(offset)).form("md5", md5);
+			HttpRequest httpRequest = HttpRequest.post(Preference.getEndpoint() + "predict").connectTimeout(TIME_OUT)
+					.readTimeout(TIME_OUT).useCaches(false).contentType("x-www-form-urlencoded", "UTF-8")
+					.form("text", text.substring(offset)).form("uuid", uuid).form("project", proj)
+					.form("ext", Preference.getModel()).form("fileid", fileid).form("remaining_text", remainingText)
+					.form("offset", String.valueOf(offset)).form("md5", md5);
 			String string = httpRequest.body();
 			httpRequest.disconnect();
 			List<JSON> list = JSON.decode(string).getList();

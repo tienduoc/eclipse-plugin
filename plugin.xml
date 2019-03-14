@@ -15,4 +15,18 @@
 	  categoryId="org.eclipse.ui.texteditor.textual_proposals">
 		</javaCompletionProposalComputer>
 	</extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="com.aixcoder.extension.AiXPreferencePage"
+          id="aixcoder.preferencepage"
+          name="AiXcoder Preferences">
+    </page>
+ </extension>
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer
+          class="com.aixcoder.extension.AiXPreInitializer">
+    </initializer>
+ </extension>
 </plugin>

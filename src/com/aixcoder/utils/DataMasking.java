@@ -6,6 +6,7 @@ import java.util.Set;
 import com.aixcoder.lang.LangOptions;
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.JSON;
+import com.aixcoder.lib.Preference;
 
 /**
  * 数据脱敏
@@ -25,10 +26,10 @@ public class DataMasking {
 	public static String mask(String s) {	
 		if (trivialLiterals == null) {
 			try {
-				HttpRequest httpRequest = HttpRequest.post(Predict.URL + "trivial_literals")
+				HttpRequest httpRequest = HttpRequest.post(Preference.getEndpoint() + "trivial_literals")
 						.connectTimeout(Predict.TIME_OUT).readTimeout(Predict.TIME_OUT).useCaches(false)
 						.contentType("x-www-form-urlencoded", "UTF-8").form("uuid", "eclipse-plugin")
-						.form("ext", "java(Java)");
+						.form("ext", Preference.getModel());
 				String string = httpRequest.body();
 				JSON json = JSON.decode(string);
 				trivialLiterals = new HashSet<String>();
