@@ -31,11 +31,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.pde.api.tools.apiAnalysisNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>ECLIPSE_HOME</name>
-			<type>2</type>
-			<locationURI>ECLIPSE_HOME</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

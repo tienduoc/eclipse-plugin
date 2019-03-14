@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import com.aixcoder.lang.LangOptions;
+import com.aixcoder.utils.shims.CollectionUtils;
 
 public class CodeUtils {
 	private static HashMap<String, CodeUtils> instances = new HashMap<String, CodeUtils>();
@@ -91,10 +92,10 @@ public class CodeUtils {
 	public String getIndentString(int size, boolean forceUseSpace) {
 		size = Math.max(size, 0);
 		if (forceUseSpace || LangOptions.getInstance(lang).getIndentType() == ' ') {
-			return String.join("", Collections.nCopies(size, " "));
+			return CollectionUtils.join("", Collections.nCopies(size, " "));
 		} else {
 			int tabSize = LangOptions.getInstance(lang).getTabSize();
-			return String.join("", Collections.nCopies(size / tabSize, "\t")) + getIndentString(size % tabSize, true);
+			return CollectionUtils.join("", Collections.nCopies(size / tabSize, "\t")) + getIndentString(size % tabSize, true);
 		}
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.JSON;
+import com.aixcoder.utils.shims.CollectionUtils;
 
 public class Predict {
 	public static class PredictResult {
@@ -19,7 +20,7 @@ public class Predict {
 		}
 
 		public String toString() {
-			return "PredictResult: (" + current + ")[" + String.join(" ", tokens) + "]";
+			return "PredictResult: (" + current + ")[" + CollectionUtils.join(" ", tokens) + "]";
 		}
 	}
 

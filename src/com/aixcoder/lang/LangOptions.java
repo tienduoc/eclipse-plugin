@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+
+import com.aixcoder.utils.shims.BiFunction;
+import com.aixcoder.utils.shims.Supplier;
 
 public abstract class LangOptions {
 

@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 import com.aixcoder.lang.LangOptions;
+import com.aixcoder.utils.shims.CollectionUtils;
+import com.aixcoder.utils.shims.Predicate;
 
 public class TokenUtils {
 
@@ -92,7 +93,7 @@ public class TokenUtils {
 		tokens.removeAll(Collections.singleton("<BREAK>"));
 		ArrayList<String> allTokens = new ArrayList<String>(
 				Arrays.asList(line.split("(?<=[^a-zA-Z0-9_]) *|(?=[^a-zA-Z0-9_]) *")));
-		allTokens.removeIf(new Predicate<String>() {
+		CollectionUtils.removeIf(allTokens, new Predicate<String>() {
 			@Override
 			public boolean test(String token) {
 				return token.length() == 0;

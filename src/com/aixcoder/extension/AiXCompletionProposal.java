@@ -10,6 +10,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.aixcoder.utils.shims.CollectionUtils;
+
 /**
  * This represents a single proposal item in the proposals (a.k.a. suggestions)
  * list. Code copied from
@@ -81,7 +83,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		fImage = image;
 		fDisplayString = displayString;
 		if (rCompletion != null && rCompletion.length > 0) {
-			fDisplayString += "..." + String.join("", rCompletion);
+			fDisplayString += "..." + CollectionUtils.join("", rCompletion);
 		}
 		fContextInformation = contextInformation;
 		fRCompletion = rCompletion;
@@ -92,7 +94,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		try {
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
 			if (fRCompletion != null) {
-				document.replace(fReplacementOffset + fReplacementString.length(), 0, String.join("", fRCompletion));
+				document.replace(fReplacementOffset + fReplacementString.length(), 0, CollectionUtils.join("", fRCompletion));
 			}
 		} catch (BadLocationException x) {
 			// ignore

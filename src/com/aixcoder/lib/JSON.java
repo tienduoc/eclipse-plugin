@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aixcoder.utils.shims.CollectionUtils;
+
 /**
  * A class to handle JSON. Created by ckcz123 on 2017/3/6.
  */
@@ -948,7 +950,7 @@ public class JSON {
 			list.add(builder.toString());
 		}
 		return String.format("%s{\n%s\n%s}", newLine ? prefix : "",
-				String.join(",\n", list), prefix);
+				CollectionUtils.join(",\n", list), prefix);
 	}
 
 	/**
