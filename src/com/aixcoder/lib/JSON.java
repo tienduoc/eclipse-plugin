@@ -1040,4 +1040,12 @@ public class JSON {
 		return string;
 	}
 
+
+	public static String[] getStringList(List<JSON> list) {
+		String[] r = new String[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			r[i] = list.get(i).getString();
+		}
+		return r;
+	}
 }
