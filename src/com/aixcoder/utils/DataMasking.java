@@ -1,5 +1,6 @@
 package com.aixcoder.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.aixcoder.lang.LangOptions;
@@ -21,22 +22,29 @@ public class DataMasking {
 	 * @param s 原始字符串
 	 * @return 脱隐后字符串
 	 */
-	public static String mask(String s) {
+	public static String mask(String s) {	
 		if (trivialLiterals == null) {
-			HttpRequest httpRequest = HttpRequest.post(Predict.URL + "trivial_literals")
-					.connectTimeout(Predict.TIME_OUT).readTimeout(Predict.TIME_OUT).useCaches(false)
-					.contentType("x-www-form-urlencoded", "UTF-8").form("uuid", "eclipse-plugin")
-					.form("ext", "java(Java)");
-			String string = httpRequest.body();
-			JSON json = JSON.decode(string);
-			String[] literals = JSON.getStringList(json.getList());
-			for (String l : literals) {
-				String lit = String.valueOf(l);
-				if (lit.startsWith("<str>")) {
-					trivialLiterals.add(lit.substring("<str>".length()).replaceAll("<str_space>", " "));
+			try {
+				HttpRequest httpRequest = HttpRequest.post(Predict.URL + "trivial_literals")
+						.connectTimeout(Predict.TIME_OUT).readTimeout(Predict.TIME_OUT).useCaches(false)
+						.contentType("x-www-form-urlencoded", "UTF-8").form("uuid", "eclipse-plugin")
+						.form("ext", "java(Java)");
+				String string = httpRequest.body();
+				JSON json = JSON.decode(string);
+				trivialLiterals = new HashSet<String>();
+				String[] literals = JSON.getStringList(json.getList());
+				for (String l : literals) {
+					String lit = String.valueOf(l);
+					if (lit.startsWith("<str>")) {
+						trivialLiterals.add(lit.substring("<str>".length()).replaceAll("<str_space>", " "));
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			return s;
+		} else {
+			return LangOptions.getInstance("java").datamask(s, trivialLiterals);
 		}
-		return LangOptions.getInstance("java").datamask(s, trivialLiterals);
 	}
 }

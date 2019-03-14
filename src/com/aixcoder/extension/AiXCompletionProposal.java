@@ -134,14 +134,15 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		monitor.setTaskName("aix fetch");
-		try {
-			// wait up to 500ms by default
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return "long long result " + Math.random();
+//		monitor.setTaskName("aix fetch");
+//		try {
+//			// wait up to 500ms by default
+//			Thread.sleep(300);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return "long long result " + Math.random();
+		return null;
 	}
 }

@@ -1,5 +1,7 @@
 package com.aixcoder.utils;
 
+import java.util.List;
+
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.JSON;
 import com.aixcoder.utils.shims.CollectionUtils;
@@ -25,22 +27,33 @@ public class Predict {
 	public final static String URL = "https://api.aixcoder.com/";
 	public final static int TIME_OUT = 2500;
 
-	public static PredictResult predict(String prefix, String remainingText) {
+	public static PredictResult predict(String text, String remainingText) {
 		try {
-			prefix = DataMasking.mask(prefix);
+			String fileid = "eclipse-file";
+			String uuid = "eclipse-plugin";
+			String proj = "eclipse-proj";
+
+			text = DataMasking.mask(text);
 			remainingText = DataMasking.mask(remainingText);
+			int offset = CodeStore.getInstance().getDiffPosition(fileid, text);
+			String md5 = CodeStore.getInstance().getMD5(text);
+
 			HttpRequest httpRequest = HttpRequest.post(URL + "predict").connectTimeout(TIME_OUT).readTimeout(TIME_OUT)
-					.useCaches(false).contentType("x-www-form-urlencoded", "UTF-8").form("text", prefix)
-					.form("uuid", "eclipse-plugin").form("project", "eclipse-proj").form("ext", "java(Java)")
-					.form("fileid", "eclipse-file").form("remaining_text", remainingText);
+					.useCaches(false).contentType("x-www-form-urlencoded", "UTF-8").form("text", text.substring(offset))
+					.form("uuid", uuid).form("project", proj).form("ext", "java(Java)").form("fileid", fileid)
+					.form("remaining_text", remainingText).form("offset", String.valueOf(offset)).form("md5", md5);
 			String string = httpRequest.body();
 			httpRequest.disconnect();
-			JSON json = JSON.decode(string).getList().get(0);
-			String[] tokens = JSON.getStringList(json.getList("tokens"));
-			String current = json.getString("current");
-			String[] rCompletion = JSON.getStringList(json.getList("r_completion"));
-			return new PredictResult(tokens, current, rCompletion);
+			List<JSON> list = JSON.decode(string).getList();
+			if (list.size() > 0) {
+				JSON json = list.get(0);
+				String[] tokens = JSON.getStringList(json.getList("tokens"));
+				String current = json.getString("current");
+				String[] rCompletion = JSON.getStringList(json.getList("r_completion"));
+				return new PredictResult(tokens, current, rCompletion);
+			}
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return new PredictResult(new String[0], "", null);
 	}
