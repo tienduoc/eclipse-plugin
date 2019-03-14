@@ -30,6 +30,10 @@ public class Predict {
 	public final static int TIME_OUT = 2500;
 
 	public static PredictResult predict(PredictContext predictContext, String remainingText) {
+		return predict(true, predictContext, remainingText);
+	}
+
+	public static PredictResult predict(boolean allowRetry, PredictContext predictContext, String remainingText) {
 		try {
 			String fileid = predictContext.filename;
 			String uuid = "eclipse-" + Preference.getUUID();
@@ -46,14 +50,24 @@ public class Predict {
 					.form("ext", Preference.getModel()).form("fileid", DigestUtils.getMD5(fileid))
 					.form("remaining_text", remainingText).form("offset", String.valueOf(offset)).form("md5", md5);
 			String string = httpRequest.body();
-			httpRequest.disconnect();
-			List<JSON> list = JSON.decode(string).getList();
-			if (list.size() > 0) {
-				JSON json = list.get(0);
-				String[] tokens = JSON.getStringList(json.getList("tokens"));
-				String current = json.getString("current");
-				String[] rCompletion = JSON.getStringList(json.getList("r_completion"));
-				return new PredictResult(tokens, current, rCompletion);
+			if (string.equals("err:Conflict")) {
+				CodeStore.getInstance().invalidateFile(proj, fileid);
+				if (allowRetry) {
+					return predict(false, predictContext, remainingText);
+				}
+			} else {
+				httpRequest.disconnect();
+				System.out.println(string);
+				List<JSON> list = JSON.decode(string).getList();
+				if (list.size() > 0) {
+					CodeStore.getInstance().saveLastSent(proj, fileid, text);
+
+					JSON json = list.get(0);
+					String[] tokens = JSON.getStringList(json.getList("tokens"));
+					String current = json.getString("current");
+					String[] rCompletion = JSON.getStringList(json.getList("r_completion"));
+					return new PredictResult(tokens, current, rCompletion);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
