@@ -30,7 +30,7 @@ public class Predict {
 	public static PredictResult predict(String text, String remainingText) {
 		try {
 			String fileid = "eclipse-file";
-			String uuid = "eclipse-plugin";
+			String uuid = "eclipse-" + Preference.getUUID();
 			String proj = "eclipse-proj";
 
 			text = DataMasking.mask(text);

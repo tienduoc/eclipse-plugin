@@ -14,7 +14,6 @@ import com.aixcoder.lib.JSON;
 import com.aixcoder.lib.Preference;
 
 public class AiXPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-	private ComboFieldEditor modelsEditor;
 	private IPropertyChangeListener onPropertyChange;
 
 	public AiXPreferencePage() {
@@ -27,9 +26,8 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(new StringFieldEditor("ENDPOINT", "&Server URL", getFieldEditorParent()));
 
 		String[][] entryNamesAndValues = getModels();
-		modelsEditor = new ComboFieldEditor("MODEL", "&Model", entryNamesAndValues, getFieldEditorParent());
-		modelsEditor.load();
-		addField(modelsEditor);
+		addField(new ComboFieldEditor("MODEL", "&Model", entryNamesAndValues, getFieldEditorParent()));
+		addField(new StringFieldEditor("PARAMS", "Additional &Parameters", getFieldEditorParent()));
 	}
 
 	private String[][] getModels() {
