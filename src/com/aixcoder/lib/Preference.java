@@ -32,4 +32,8 @@ public class Preference {
 		}
 		return preferenceManager.getString("UUID");
 	}
+	
+	public static String getParams() {
+		return preferenceManager.getString("PARAMS");
+	}
 }

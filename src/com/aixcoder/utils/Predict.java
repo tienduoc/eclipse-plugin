@@ -49,6 +49,15 @@ public class Predict {
 					.form("text", text.substring(offset)).form("uuid", uuid).form("project", proj)
 					.form("ext", Preference.getModel()).form("fileid", DigestUtils.getMD5(fileid))
 					.form("remaining_text", remainingText).form("offset", String.valueOf(offset)).form("md5", md5);
+
+			String params = Preference.getParams();
+			for (String param : params.split("&")) {
+				String[] paramParts = param.split("=");
+				String paramKey = paramParts[0];
+				String paramValue = paramParts[1];
+				httpRequest.form(paramKey, paramValue);
+			}
+			
 			String string = httpRequest.body();
 			if (string.equals("err:Conflict")) {
 				CodeStore.getInstance().invalidateFile(proj, fileid);

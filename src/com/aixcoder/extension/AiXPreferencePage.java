@@ -59,7 +59,8 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 			}
 		};
 		getPreferenceStore().addPropertyChangeListener(onPropertyChange);
-		setDescription("AiXcoder preferences");
+		setDescription(
+				"AiXcoder is an AI-powered code completion service. Visit https://aixcoder.com for more information.");
 	}
 
 	public void dispose() {
