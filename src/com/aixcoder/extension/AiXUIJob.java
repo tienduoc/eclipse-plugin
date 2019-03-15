@@ -84,7 +84,7 @@ public class AiXUIJob extends UIJob {
 				String lastLine = newPrefix.substring(newPrefix.lastIndexOf("\n") + 1);
 				// step 3: render results
 				predictResult = PredictCache.getInstance().get(newPrefix);
-				System.out.println("predictResult" + (predictResult == null ? "null" : predictResult.toString()));
+				System.out.println("predictResult: " + (predictResult == null ? "null" : predictResult.toString()));
 				if (predictResult == null) {
 					if (!predictContext.prefix.equals(newPrefix)) {
 						IRegion line = viewer.getDocument().getLineInformationOfOffset(selection.x);
@@ -98,8 +98,7 @@ public class AiXUIJob extends UIJob {
 				} else {
 					ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
 					RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current);
-
-					ICompletionProposal proposal = proposalFactory.createProposal(rendered.display, rendered.insert,
+					ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display, rendered.insert,
 							predictResult.rCompletions);
 
 					fComputedProposal.add(0, proposal);
