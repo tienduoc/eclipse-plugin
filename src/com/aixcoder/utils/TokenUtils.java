@@ -138,17 +138,6 @@ public class TokenUtils {
 		}
 		String rendered = builder.toString();
 
-		// 遗留问题:如果两个token一样时,第一个token输入完成后,第二个token无法正常显示
-		if (rendered.length() > 0 && line.length() > 0
-				&& (rendered.charAt(0) == ' ' && line.charAt(line.length() - 1) == ' ')) {
-			// If first space is extraneous, remove it
-			rendered = rendered.substring(1);
-		}
-		if (rendered.startsWith("<UNK>")) {
-			// Hide first <UNK>
-			rendered = rendered.substring("<UNK>".length());
-		}
-
 		rendered = replaceTags(rendered, langOptions);
 		return new RenderedInfo(current_yu + rendered, rendered);
 	}
