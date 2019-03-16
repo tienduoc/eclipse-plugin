@@ -134,6 +134,7 @@ public class API {
 			HttpHelper.post(Preference.getEndpoint() + "zipfile", params, new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest t) {
+					t.connectTimeout(60 * 1000).readTimeout(60 * 1000);
 					t.send(arr);
 				}
 			});

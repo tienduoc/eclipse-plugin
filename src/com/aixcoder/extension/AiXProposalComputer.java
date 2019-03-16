@@ -17,6 +17,7 @@ import org.eclipse.ui.IEditorPart;
 
 import com.aixcoder.core.PredictContext;
 import com.aixcoder.lib.Preference;
+import com.aixcoder.utils.zipfile.ProjectScan;
 
 /**
  * Extension class to extend org.eclipse.jdt.ui.javaCompletionProposalComputer.
@@ -27,6 +28,7 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 		if (Preference.isActive()) {
+
 			ProposalFactory proposalFactory = new ProposalFactory(context);
 			try {
 				// step 1: get text before cursor
@@ -42,6 +44,9 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 						project = resource.getProject();
 					}
 				}
+
+				ProjectScan.getInstance(project).start();
+
 				IDocument document = context.getDocument();
 				String prefix = document.get(0, offset);
 				IRegion line = document.getLineInformationOfOffset(offset);

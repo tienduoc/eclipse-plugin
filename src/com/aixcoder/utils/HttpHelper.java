@@ -33,6 +33,7 @@ public class HttpHelper {
 						paramsSB.append("&");
 					}
 					paramsSB.append(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "utf-8"));
+					first = false;
 				}
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
