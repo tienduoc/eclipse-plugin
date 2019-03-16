@@ -27,10 +27,10 @@ public class Preference {
 	}
 	
 	public static String getUUID() {
-		if (preferenceManager.getString("UUID") == null) {
+		if (preferenceManager.getString("UUID") == null || preferenceManager.getString("UUID").isEmpty()) {
 			preferenceManager.setValue("UUID", UUID.randomUUID().toString());
 		}
-		return preferenceManager.getString("UUID");
+		return "eclipse-" + preferenceManager.getString("UUID");
 	}
 	
 	public static String getParams() {

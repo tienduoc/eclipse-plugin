@@ -9,9 +9,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import com.aixcoder.core.API;
 import com.aixcoder.core.PredictCache;
-import com.aixcoder.lib.HttpRequest;
-import com.aixcoder.lib.JSON;
 import com.aixcoder.lib.Preference;
 
 public class AiXPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
@@ -34,9 +33,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 	private String[][] getModels() {
 		String[][] entryNamesAndValues;
 		try {
-			String body = HttpRequest.get(getPreferenceStore().getString("ENDPOINT") + "getmodels").connectTimeout(2000)
-					.readTimeout(2000).body();
-			String[] models = JSON.getStringList(JSON.decode(body).getList());
+			String[] models = API.getModels();
 			entryNamesAndValues = new String[models.length][2];
 			for (int i = 0; i < models.length; i++) {
 				entryNamesAndValues[i] = new String[] { models[i], models[i] };

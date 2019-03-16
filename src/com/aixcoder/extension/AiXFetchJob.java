@@ -36,17 +36,23 @@ public class AiXFetchJob extends Job {
 		PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
 		if (predictResult == null) {
 			predictResult = Predict.predict(predictContext, remainingText);
-			PredictCache.getInstance().put(predictContext.prefix, predictResult);
+			if (predictResult != null) {
+				PredictCache.getInstance().put(predictContext.prefix, predictResult);
+			}
 		}
-		// TODO: format result
-		// CodeFormatter formatter = getCodeFormatter(context);
-		// String lineSeparator = prefix.charAt(prefix.length() - lastLine.length()) ==
-		// '\r' ? "\r\n" : "\n";
-		// step 4: add proposal to list
-		AiXUIJob job = new AiXUIJob(Display.getDefault(), "aixcoder async insertion",
-				proposalFactory.context.getViewer(), proposalFactory, predictResult, predictContext);
-		job.schedule();
-		return Status.OK_STATUS;
+		if (predictResult != null) {
+			// TODO: format result
+			// CodeFormatter formatter = getCodeFormatter(context);
+			// String lineSeparator = prefix.charAt(prefix.length() - lastLine.length()) ==
+			// '\r' ? "\r\n" : "\n";
+			// step 4: add proposal to list
+			AiXUIJob job = new AiXUIJob(Display.getDefault(), "aixcoder async insertion",
+					proposalFactory.context.getViewer(), proposalFactory, predictResult, predictContext);
+			job.schedule();
+			return Status.OK_STATUS;
+		} else {
+			return Status.CANCEL_STATUS;
+		}
 	}
 
 	static CodeFormatter formatter;
