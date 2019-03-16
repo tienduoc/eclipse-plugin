@@ -64,6 +64,7 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOptionAround("!=", SpacingKeyALL, true);
 
 		addSpacingOption(">", SpacingKeyALL, true);
+		addSpacingOption(">", "(", false); // new ArrayList<Byte>()
 		addSpacingOption(SpacingKeyALL, ">", new BiFunction<ArrayList<String>, Integer, Boolean>() {
 			@Override
 			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
@@ -168,7 +169,6 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOption(SpacingKeyALL, ";", false);
 
 		addSpacingOption("(", SpacingKeyALL, false);
-		addSpacingOption(SpacingKeyALL, ")", false);
 		addSpacingOption(SpacingKeyALL, "[", false);
 		addSpacingOption("[", SpacingKeyALL, false);
 		addSpacingOption(SpacingKeyALL, "]", false);
