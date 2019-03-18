@@ -17,6 +17,8 @@ import org.eclipse.ui.IEditorPart;
 
 import com.aixcoder.core.PredictContext;
 import com.aixcoder.lib.Preference;
+import com.aixcoder.mina.ClientIoHandler;
+import com.aixcoder.mina.ClientService;
 import com.aixcoder.utils.zipfile.ProjectScan;
 
 /**
@@ -28,7 +30,6 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 		if (Preference.isActive()) {
-
 			ProposalFactory proposalFactory = new ProposalFactory(context);
 			try {
 				// step 1: get text before cursor
@@ -45,6 +46,8 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 					}
 				}
 
+				ClientService.start();
+				ClientIoHandler.viewer = context.getViewer();
 				ProjectScan.getInstance(project).start();
 
 				IDocument document = context.getDocument();

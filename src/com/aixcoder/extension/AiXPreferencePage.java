@@ -24,6 +24,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		new AiXPreInitializer().initializeDefaultPreferences();
 		addField(new BooleanFieldEditor("ACTIVE", "&Enable aiXcoder", getFieldEditorParent()));
 		addField(new StringFieldEditor("ENDPOINT", "&Server URL", getFieldEditorParent()));
+		addField(new StringFieldEditor("SOCKET_ENDPOINT", "S&ocket Endpoint", getFieldEditorParent()));
 
 		String[][] entryNamesAndValues = getModels();
 		addField(new ComboFieldEditor("MODEL", "&Model", entryNamesAndValues, getFieldEditorParent()));

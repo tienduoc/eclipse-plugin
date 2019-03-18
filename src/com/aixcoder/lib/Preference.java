@@ -36,4 +36,14 @@ public class Preference {
 	public static String getParams() {
 		return preferenceManager.getString("PARAMS");
 	}
+	
+	public static String getSocketEndpoint() {
+		String endpoint = preferenceManager.getString("SOCKET_ENDPOINT");
+		return endpoint.substring(0, endpoint.lastIndexOf(":"));
+	}
+	
+	public static int getSocketEndpointPort() {
+		String endpoint = preferenceManager.getString("SOCKET_ENDPOINT");
+		return Integer.parseInt(endpoint.substring(endpoint.lastIndexOf(":") + 1));
+	}
 }

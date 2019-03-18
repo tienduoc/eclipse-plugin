@@ -12,8 +12,12 @@ public class Pair<T1, T2> {
 	public T1 getFirst() {
 		return first;
 	}
-	
+
 	public T2 getSecond() {
 		return second;
+	}
+
+	public String toString() {
+		return "Pair(" + String.valueOf(first) + "," + String.valueOf(second) + ")";
 	}
 }

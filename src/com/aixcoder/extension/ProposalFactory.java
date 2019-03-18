@@ -7,7 +7,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 public class ProposalFactory {
 	ContentAssistInvocationContext context;
 	static final ImageDescriptor image = Activator
-			.imageDescriptorFromPlugin(Activator.getDefault().getBundle().getSymbolicName(), "icons/aix_log.png");;
+			.imageDescriptorFromPlugin(Activator.getDefault().getBundle().getSymbolicName(), "icons/aix_log.png");
 
 	public ProposalFactory(ContentAssistInvocationContext context) {
 		super();
