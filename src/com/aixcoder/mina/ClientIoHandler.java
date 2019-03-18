@@ -22,7 +22,7 @@ public class ClientIoHandler extends SimpleChannelInboundHandler<Message> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext channelHandlerContext, Message msg) throws Exception {
-		System.out.println("server - >" + msg.toJsonString());
+//		System.out.println("server - >" + msg.toJsonString());
 		switch (msg.getType()) {
 		case Message.sort:
 			sort(msg);
@@ -54,5 +54,11 @@ public class ClientIoHandler extends SimpleChannelInboundHandler<Message> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		super.channelInactive(ctx);
+		ClientService.started = false;
 	}
 }

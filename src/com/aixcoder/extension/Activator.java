@@ -29,6 +29,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		plugin = this;
 	}
 

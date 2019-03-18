@@ -42,7 +42,7 @@ public class HttpHelper {
 		return paramsSB.toString();
 	}
 
-	public final static int TIME_OUT = 2500;
+	public final static int TIME_OUT = 5000;
 
 	public static IProxyData lastSuccessfulProxy;
 

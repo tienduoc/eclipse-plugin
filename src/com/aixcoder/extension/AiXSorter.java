@@ -69,7 +69,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 	double getScore(ICompletionProposal p, String s) {
 		if (list != null) {
 			for (Pair<Double, String> pair : list) {
-				if (s.equals(pair.second) || s.startsWith(pair.second + " ")) {
+				if (s.equals(pair.second) || s.startsWith(pair.second + " ") || s.startsWith(pair.second + "(")) {
 					Image i = p.getImage();
 					if (i != null) {
 						OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(),
@@ -102,9 +102,6 @@ public class AiXSorter implements ICompletionProposalSorter {
 								e.printStackTrace();
 							}
 						}
-					}
-					if (!imageSet) {
-						System.out.println(p);
 					}
 					return pair.first;
 				}
