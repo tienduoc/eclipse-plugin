@@ -37,12 +37,13 @@ public class AiXFetchJob extends Job {
 		PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
 		ITextViewer viewer = proposalFactory.context.getViewer();
 		if (predictResult == null) {
+			AiXSortUIIJob.lastPrefix = predictContext.prefix;
 			predictResult = Predict.predict(predictContext, remainingText);
 			if (predictResult != null) {
 				PredictCache.getInstance().put(predictContext.prefix, predictResult);
 			}
 		} else {
-			new AiXSortUIIJob(Display.getDefault(), viewer, null).schedule();;
+			new AiXSortUIIJob(Display.getDefault(), viewer, null, predictContext.prefix).schedule();
 		}
 		if (predictResult != null) {
 			// TODO: format result

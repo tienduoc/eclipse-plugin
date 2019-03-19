@@ -50,7 +50,7 @@ public class ClientIoHandler extends SimpleChannelInboundHandler<Message> {
 				String word = pair.get(1).getString();
 				list.add(new Pair<Double, String>(prob, word));
 			}
-			new AiXSortUIIJob(Display.getDefault(), viewer, list).schedule();
+			new AiXSortUIIJob(Display.getDefault(), viewer, list, null).schedule();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
