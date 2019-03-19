@@ -3,6 +3,7 @@ package com.aixcoder.extension;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,11 +57,23 @@ public abstract class AiXUIJob extends UIJob {
 			Class<?> completionProposalPopupClz = fProposalPopup.getClass();
 			Field fComputedProposalsField = completionProposalPopupClz.getDeclaredField("fComputedProposals");
 			fComputedProposalsField.setAccessible(true);
-			List<ICompletionProposal> fComputedProposal = (List<ICompletionProposal>) fComputedProposalsField
-					.get(fProposalPopup);
+			Object fComputedProposals = fComputedProposalsField.get(fProposalPopup);
+			List<ICompletionProposal> fComputedProposal;
+			if (fComputedProposals == null) {
+				if (fComputedProposalsField.getType().getSimpleName().equals("ICompletionProposal[]")) {
+					fComputedProposals = new ICompletionProposal[0];
+				} else{
+					fComputedProposals = new ArrayList<ICompletionProposal>();
+				}
+			}
+			if (fComputedProposals instanceof List) {
+				fComputedProposal = (List<ICompletionProposal>) fComputedProposals;
+			} else {
+				fComputedProposal = Arrays.asList((ICompletionProposal[])fComputedProposals);
+			}
 			if (fComputedProposal == null) {
-				// 系统框已经关闭，原因：用户在aixcoder网络返回之前就继续输入，然后系统框里没有匹配的候选了
-				// TODO: 是否要重新弹出提示框?
+				// 绯荤粺妗嗗凡缁忓叧闂紝鍘熷洜锛氱敤鎴峰湪aixcoder缃戠粶杩斿洖涔嬪墠灏辩户缁緭鍏ワ紝鐒跺悗绯荤粺妗嗛噷娌℃湁鍖归厤鐨勫�欓�変簡
+				// TODO: 鏄惁瑕侀噸鏂板脊鍑烘彁绀烘?
 			} else {
 				// insert aixcoder proposal
 				fComputedProposal = new ArrayList<ICompletionProposal>(fComputedProposal);
@@ -69,10 +82,17 @@ public abstract class AiXUIJob extends UIJob {
 					computeProposals(fComputedProposal, (AiXSorter)fSorter);
 
 					// call proposal table update function
+					try {
 					Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", List.class,
 							boolean.class);
 					setProposals.setAccessible(true);
 					setProposals.invoke(fProposalPopup, fComputedProposal, false);
+					} catch(NoSuchMethodException e) {
+						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", Class.forName("[Lorg.eclipse.jface.text.contentassist.ICompletionProposal;"),
+								boolean.class);
+						setProposals.setAccessible(true);
+						setProposals.invoke(fProposalPopup, fComputedProposal.toArray(new ICompletionProposal[0]), false);
+					}
 					Method dislayProposals = completionProposalPopupClz.getDeclaredMethod("displayProposals");
 					dislayProposals.setAccessible(true);
 					dislayProposals.invoke(fProposalPopup);

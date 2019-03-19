@@ -37,10 +37,10 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				IEditorPart editor = Activator.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage()
 						.getActiveEditor();
 				IEditorInput input = editor.getEditorInput();
-				IFile file = input.getAdapter(IFile.class);
-				IProject project = input.getAdapter(IProject.class);
+				IFile file = (IFile) input.getAdapter(IFile.class);
+				IProject project = (IProject) input.getAdapter(IProject.class);
 				if (project == null) {
-					IResource resource = input.getAdapter(IResource.class);
+					IResource resource = (IResource) input.getAdapter(IResource.class);
 					if (resource != null) {
 						project = resource.getProject();
 					}

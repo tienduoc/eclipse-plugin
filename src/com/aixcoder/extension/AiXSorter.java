@@ -123,7 +123,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 		if (scoreDiff > 0) {
 			return -1;
 		} else if (scoreDiff == 0) {
-			return sorter.compare(p1, p2);
+			return sorter == null ? 0 : sorter.compare(p1, p2);
 		} else {
 			return 1;
 		}
