@@ -56,7 +56,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 				ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
 				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current);
 				ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
-						rendered.insert, predictResult.rCompletions);
+						rendered.insert, predictResult.current, predictResult.rCompletions);
 
 				fComputedProposal.add(0, proposal);
 			}
