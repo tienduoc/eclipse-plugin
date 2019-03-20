@@ -28,7 +28,9 @@ public class Preference {
 	
 	public static String getUUID() {
 		if (preferenceManager.getString("UUID") == null || preferenceManager.getString("UUID").isEmpty()) {
-			preferenceManager.setValue("UUID", UUID.randomUUID().toString());
+			synchronized (id) {
+				preferenceManager.setValue("UUID", UUID.randomUUID().toString());
+			}
 		}
 		return "eclipse-" + preferenceManager.getString("UUID");
 	}

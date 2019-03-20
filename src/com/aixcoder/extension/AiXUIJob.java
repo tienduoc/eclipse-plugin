@@ -2,8 +2,10 @@ package com.aixcoder.extension;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,9 +26,16 @@ public abstract class AiXUIJob extends UIJob {
 
 	protected ITextViewer viewer;
 
+	void log(String s) {
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		System.out.println(timeStamp + " " + this + " " + s);
+	}
+
 	public AiXUIJob(Display jobDisplay, String name, ITextViewer viewer) {
 		super(jobDisplay, name);
 		this.viewer = viewer;
+//		log("AiXUIJob constructor " + name);
+//		log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
 	}
 
 	public abstract void computeProposals(List<ICompletionProposal> fComputedProposal, AiXSorter fSorter)
@@ -39,7 +48,8 @@ public abstract class AiXUIJob extends UIJob {
 			Field fContentAssistantField = SourceViewer.class.getDeclaredField("fContentAssistant");
 			fContentAssistantField.setAccessible(true);
 			ContentAssistant fContentAssistant = (ContentAssistant) fContentAssistantField.get(viewer);
-
+//			log("runInUIThread");
+//			log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
 			// set sorter
 			Field fSorterField = ContentAssistant.class.getDeclaredField("fSorter");
 			fSorterField.setAccessible(true);
@@ -62,14 +72,14 @@ public abstract class AiXUIJob extends UIJob {
 			if (fComputedProposals == null) {
 				if (fComputedProposalsField.getType().getSimpleName().equals("ICompletionProposal[]")) {
 					fComputedProposals = new ICompletionProposal[0];
-				} else{
+				} else {
 					fComputedProposals = new ArrayList<ICompletionProposal>();
 				}
 			}
 			if (fComputedProposals instanceof List) {
 				fComputedProposal = (List<ICompletionProposal>) fComputedProposals;
 			} else {
-				fComputedProposal = Arrays.asList((ICompletionProposal[])fComputedProposals);
+				fComputedProposal = Arrays.asList((ICompletionProposal[]) fComputedProposals);
 			}
 			if (fComputedProposal == null) {
 				// 绯荤粺妗嗗凡缁忓叧闂紝鍘熷洜锛氱敤鎴峰湪aixcoder缃戠粶杩斿洖涔嬪墠灏辩户缁緭鍏ワ紝鐒跺悗绯荤粺妗嗛噷娌℃湁鍖归厤鐨勫�欓�変簡
@@ -79,23 +89,37 @@ public abstract class AiXUIJob extends UIJob {
 				fComputedProposal = new ArrayList<ICompletionProposal>(fComputedProposal);
 
 				try {
-					computeProposals(fComputedProposal, (AiXSorter)fSorter);
+					computeProposals(fComputedProposal, (AiXSorter) fSorter);
 
 					// call proposal table update function
+//					log("setProposals: " + fComputedProposal);
+//					log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
 					try {
-					Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", List.class,
-							boolean.class);
-					setProposals.setAccessible(true);
-					setProposals.invoke(fProposalPopup, fComputedProposal, false);
-					} catch(NoSuchMethodException e) {
-						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", Class.forName("[Lorg.eclipse.jface.text.contentassist.ICompletionProposal;"),
+						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", List.class,
 								boolean.class);
 						setProposals.setAccessible(true);
-						setProposals.invoke(fProposalPopup, fComputedProposal.toArray(new ICompletionProposal[0]), false);
+						setProposals.invoke(fProposalPopup, fComputedProposal, false);
+					} catch (NoSuchMethodException e) {
+						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals",
+								Class.forName("[Lorg.eclipse.jface.text.contentassist.ICompletionProposal;"),
+								boolean.class);
+						setProposals.setAccessible(true);
+						setProposals.invoke(fProposalPopup, fComputedProposal.toArray(new ICompletionProposal[0]),
+								false);
 					}
-					Method dislayProposals = completionProposalPopupClz.getDeclaredMethod("displayProposals");
-					dislayProposals.setAccessible(true);
-					dislayProposals.invoke(fProposalPopup);
+					Field fIsFilteredSubsetField = completionProposalPopupClz.getDeclaredField("fIsFilteredSubset");
+					fIsFilteredSubsetField.setAccessible(true);
+					if (fIsFilteredSubsetField.getBoolean(fProposalPopup)) {
+//						log("filterProposals");
+						Method filterProposalsMethod = completionProposalPopupClz.getDeclaredMethod("filterProposals");
+						filterProposalsMethod.setAccessible(true);
+						filterProposalsMethod.invoke(fProposalPopup);
+					} else {
+//						log("displayProposals" + fComputedProposal);
+						Method dislayProposals = completionProposalPopupClz.getDeclaredMethod("displayProposals");
+						dislayProposals.setAccessible(true);
+						dislayProposals.invoke(fProposalPopup);
+					}
 				} catch (AiXAbortInsertionException e) {
 				}
 			}

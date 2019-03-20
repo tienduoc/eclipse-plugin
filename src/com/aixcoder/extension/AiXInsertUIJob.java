@@ -40,13 +40,14 @@ public class AiXInsertUIJob extends AiXUIJob {
 			String lastLine = newPrefix.substring(newPrefix.lastIndexOf("\n") + 1);
 			// step 3: render results
 			predictResult = PredictCache.getInstance().get(newPrefix);
-			System.out.println("predictResult: " + (predictResult == null ? "null" : predictResult.toString()));
+			log("predictResult: " + (predictResult == null ? "null" : predictResult.toString()));
 			if (predictResult == null) {
 				if (!predictContext.prefix.equals(newPrefix)) {
 					IRegion line = viewer.getDocument().getLineInformationOfOffset(selection.x);
 					String remainingText = viewer.getDocument().get(selection.x,
 							line.getOffset() + line.getLength() - selection.x);
 					// 文本变化，重新发起请求
+					log("文本变化，重新发起请求");
 					PredictContext newPredictContext = new PredictContext(newPrefix, predictContext.proj,
 							predictContext.filename);
 					new AiXFetchJob(newPredictContext, remainingText, proposalFactory).schedule();
@@ -61,6 +62,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 				fComputedProposal.add(0, proposal);
 			}
 		} catch (AiXAbortInsertionException e) {
+			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new AiXAbortInsertionException(e);

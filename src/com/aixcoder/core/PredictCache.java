@@ -10,7 +10,7 @@ import com.aixcoder.utils.Predict.PredictResult;
 public class PredictCache {
 	protected static PredictCache instance;
 
-	public static PredictCache getInstance() {
+	public synchronized static PredictCache getInstance() {
 		if (instance == null) {
 			instance = new PredictCache();
 		}
@@ -19,14 +19,14 @@ public class PredictCache {
 
 	public List<Pair<String, PredictResult>> cache = new LinkedList<Pair<String, PredictResult>>();
 
-	public void put(String prefix, PredictResult predictResult) {
+	public synchronized void put(String prefix, PredictResult predictResult) {
 		cache.add(new Pair<String, PredictResult>(prefix, predictResult));
 		if (cache.size() > 5) {
 			cache.remove(0);
 		}
 	}
 
-	public PredictResult get(String prefix) {
+	public synchronized PredictResult get(String prefix) {
 		for (Pair<String, PredictResult> pair : cache) {
 			PredictResult newPR = update(pair.getFirst(), prefix, pair.getSecond());
 			if (newPR != null) {

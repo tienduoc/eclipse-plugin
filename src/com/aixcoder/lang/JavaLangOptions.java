@@ -65,6 +65,7 @@ public class JavaLangOptions extends LangOptions {
 
 		addSpacingOption(">", SpacingKeyALL, true);
 		addSpacingOption(">", "(", false); // new ArrayList<Byte>()
+		addSpacingOption("?", ">", false);
 		addSpacingOption(SpacingKeyALL, ">", new BiFunction<ArrayList<String>, Integer, Boolean>() {
 			@Override
 			public Boolean apply(ArrayList<String> tokens, Integer nextI) {

@@ -23,7 +23,7 @@ public class ClientService {
 	static String endpoint = "";
 	static int port = 0;
 
-	public static void start() {
+	public synchronized static void start() {
 		if (started && Preference.getSocketEndpoint().equals(endpoint) && Preference.getSocketEndpointPort() == port)
 			return;
 		started = true;

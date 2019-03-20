@@ -17,7 +17,7 @@ public class AiXSortUIIJob extends AiXUIJob {
 
 	List<Pair<Double, String>> list;
 
-	void saveToCache(String prefix, List<Pair<Double, String>> l) {
+	synchronized void saveToCache(String prefix, List<Pair<Double, String>> l) {
 		for (Pair<String, List<Pair<Double, String>>> pair : listCache) {
 			if (prefix.equals(pair.first)) {
 				pair.second = l;
@@ -30,7 +30,7 @@ public class AiXSortUIIJob extends AiXUIJob {
 		}
 	}
 
-	List<Pair<Double, String>> getFromCache(String prefix) {
+	synchronized List<Pair<Double, String>> getFromCache(String prefix) {
 		for (Pair<String, List<Pair<Double, String>>> pair : listCache) {
 			if (prefix.equals(pair.first)) {
 				return pair.second;

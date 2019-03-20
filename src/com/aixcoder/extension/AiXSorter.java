@@ -3,6 +3,7 @@ package com.aixcoder.extension;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -30,7 +31,9 @@ public class AiXSorter implements ICompletionProposalSorter {
 		this.sorter = sorter;
 	}
 
-	Method getSetImageMethod(ICompletionProposal p, Class<?> clz) {
+	HashMap<String, Method> fImageMethodCache = new HashMap<String, Method>();
+
+	Method _getSetImageMethod(ICompletionProposal p, Class<?> clz) {
 		try {
 			Method fImageMethod = clz.getDeclaredMethod("setImage", Image.class);
 			fImageMethod.setAccessible(true);
@@ -48,7 +51,17 @@ public class AiXSorter implements ICompletionProposalSorter {
 		return null;
 	}
 
-	Field getFImageField(ICompletionProposal p, Class<?> clz) {
+	Method getSetImageMethod(ICompletionProposal p, Class<?> clz) {
+		String name = clz.getName();
+		if (!fImageMethodCache.containsKey(name)) {
+			fImageMethodCache.put(clz.getName(), _getSetImageMethod(p, clz));
+		}
+		return fImageMethodCache.get(clz.getName());
+	}
+
+	HashMap<String, Field> fImageFieldCache = new HashMap<String, Field>();
+
+	Field _getFImageField(ICompletionProposal p, Class<?> clz) {
 		try {
 			Field fImageField = clz.getDeclaredField("fImage");
 			fImageField.setAccessible(true);
@@ -64,6 +77,14 @@ public class AiXSorter implements ICompletionProposalSorter {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	Field getFImageField(ICompletionProposal p, Class<?> clz) {
+		String name = clz.getName();
+		if (!fImageFieldCache.containsKey(name)) {
+			fImageFieldCache.put(clz.getName(), _getFImageField(p, clz));
+		}
+		return fImageFieldCache.get(clz.getName());
 	}
 
 	double getScore(ICompletionProposal p, String s) {
