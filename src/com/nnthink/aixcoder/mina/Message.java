@@ -3,7 +3,9 @@ package com.nnthink.aixcoder.mina;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.aixcoder.lib.JSON;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 8213761673743652497L;
@@ -44,17 +46,18 @@ public class Message implements Serializable {
     }
 
     public String toJsonString() {
-    	JSON json = new JSON();
-    	json.put("type", type);
-    	json.put("data", data);
+    	JsonObject json = new JsonObject();
+    	json.addProperty("type", type);
+    	json.addProperty("data", data);
         return json.toString();
     }
 
     public static Message toMessage(String s) {
-    	JSON json = JSON.decode(s);
+    	JsonElement je = new Gson().fromJson(s, JsonElement.class);
+    	JsonObject jo = je.getAsJsonObject();
         Message m = new Message();
-        m.type = json.getInt("type");
-        m.data = json.getString("data");
+        m.type = jo.get("type").getAsInt();
+        m.data = jo.get("data").getAsString();
         return m;
     }
 }

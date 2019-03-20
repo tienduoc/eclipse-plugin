@@ -7,25 +7,29 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 
 import com.aixcoder.lib.HttpRequest;
-import com.aixcoder.lib.JSON;
 import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.Predict.PredictResult;
+import com.aixcoder.utils.shims.CollectionUtils;
 import com.aixcoder.utils.shims.Consumer;
 import com.aixcoder.utils.shims.DigestUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class API {
 	public static String[] getModels() {
 		String body;
 		try {
 			body = HttpHelper.get(Preference.getEndpoint() + "getmodels");
-			String[] models = JSON.getStringList(JSON.decode(body).getList());
+			JsonArray jo = new Gson().fromJson(body, JsonElement.class).getAsJsonArray();
+			String[] models = CollectionUtils.getStringList(jo);
 			return models;
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -33,11 +37,12 @@ public class API {
 		return null;
 	}
 
-	public static PredictResult predict(PredictContext predictContext, String remainingText) {
-		return predict(true, predictContext, remainingText);
+	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
+		return predict(true, predictContext, remainingText, UUID);
 	}
 
-	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext, final String remainingText) {
+	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
+			final String remainingText, final String UUID) {
 		try {
 			final String fileid = predictContext.filename;
 			final String uuid = Preference.getUUID();
@@ -51,10 +56,11 @@ public class API {
 				@Override
 				public void apply(HttpRequest httpRequest) {
 					// send request
-					httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("text", maskedText.substring(offset))
-							.form("uuid", uuid).form("project", proj).form("ext", Preference.getModel())
-							.form("fileid", fileid).form("remaining_text", maskedRemainingText)
-							.form("offset", String.valueOf(offset)).form("md5", md5);
+					httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("queryUUID", UUID)
+							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
+							.form("ext", Preference.getModel()).form("fileid", fileid)
+							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
+							.form("md5", md5);
 
 					String params = Preference.getParams();
 					for (String param : params.split("&")) {
@@ -74,18 +80,19 @@ public class API {
 			if (string.contains("Conflict")) {
 				CodeStore.getInstance().invalidateFile(proj, fileid);
 				if (allowRetry) {
-					return predict(false, predictContext, maskedRemainingText);
+					return predict(false, predictContext, maskedRemainingText, UUID);
 				}
 			} else {
 				System.out.println(string);
-				List<JSON> list = JSON.decode(string).getList();
+				JsonObject jo = new Gson().fromJson(string, JsonObject.class);
+				JsonArray list = jo.get("data").getAsJsonArray();
 				if (list.size() > 0) {
 					CodeStore.getInstance().saveLastSent(proj, fileid, maskedText);
 
-					JSON json = list.get(0);
-					String[] tokens = JSON.getStringList(json.getList("tokens"));
-					String current = json.getString("current");
-					String[] rCompletion = JSON.getStringList(json.getList("r_completion"));
+					JsonObject json = list.get(0).getAsJsonObject();
+					String[] tokens = CollectionUtils.getStringList(json.get("tokens").getAsJsonArray());
+					String current = json.get("current").getAsString();
+					String[] rCompletion = CollectionUtils.getStringList(json.get("r_completion").getAsJsonArray());
 					return new PredictResult(tokens, current, rCompletion);
 				}
 			}
@@ -103,8 +110,8 @@ public class API {
 			params.put("uuid", uuid);
 			params.put("ext", Preference.getModel());
 			String string = HttpHelper.get(Preference.getEndpoint() + "trivial_literals", params);
-			JSON json = JSON.decode(string);
-			String[] literals = JSON.getStringList(json.getList());
+			JsonArray jo = new Gson().fromJson(string, JsonArray.class);
+			String[] literals = CollectionUtils.getStringList(jo);
 			return literals;
 		} catch (URISyntaxException e) {
 			e.printStackTrace();

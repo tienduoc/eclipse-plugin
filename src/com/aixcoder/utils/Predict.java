@@ -23,7 +23,7 @@ public class Predict {
 		}
 	}
 
-	public static PredictResult predict(PredictContext predictContext, String remainingText) {
-		return API.predict(predictContext, remainingText);
+	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
+		return API.predict(predictContext, remainingText, UUID);
 	}
 }

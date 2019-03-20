@@ -1,6 +1,7 @@
 package com.aixcoder.extension;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,40 +25,53 @@ public class AiXFetchJob extends Job {
 	private ProposalFactory proposalFactory;
 	private PredictContext predictContext;
 	private String remainingText;
+	private static AiXFetchJob lastInstance;
 
 	public AiXFetchJob(PredictContext predictContext, String remainingText, ProposalFactory proposalFactory) {
-		super("aixcoder fetch");
+		super("aiXcoder fetch");
 		this.predictContext = predictContext;
 		this.remainingText = remainingText;
 		this.proposalFactory = proposalFactory;
+		AiXFetchJob.lastInstance = this;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
-		ITextViewer viewer = proposalFactory.context.getViewer();
-		if (predictResult == null) {
-			AiXSortUIIJob.lastPrefix = predictContext.prefix;
-			predictResult = Predict.predict(predictContext, remainingText);
-			if (predictResult != null) {
-				PredictCache.getInstance().put(predictContext.prefix, predictResult);
-			}
-		} else {
-			new AiXSortUIIJob(Display.getDefault(), viewer, null, predictContext.prefix).schedule();
-		}
-		if (predictResult != null) {
-			// TODO: format result
-			// CodeFormatter formatter = getCodeFormatter(context);
-			// String lineSeparator = prefix.charAt(prefix.length() - lastLine.length()) ==
-			// '\r' ? "\r\n" : "\n";
-			// step 4: add proposal to list
-			AiXUIJob job = new AiXInsertUIJob(Display.getDefault(), viewer, proposalFactory, predictResult,
-					predictContext);
-			job.schedule();
-			return Status.OK_STATUS;
-		} else {
+		if (lastInstance != this)
 			return Status.CANCEL_STATUS;
+		try {
+			PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
+			ITextViewer viewer = proposalFactory.context.getViewer();
+			if (predictResult == null) {
+				AiXSortUIIJob.lastPrefix = predictContext.prefix;
+				System.out.println("HTTP!!!");
+				String lastUUID = UUID.randomUUID().toString();
+				AiXSortUIIJob.lastUUID = lastUUID;
+				predictResult = Predict.predict(predictContext, remainingText, lastUUID);
+				if (predictResult != null) {
+					PredictCache.getInstance().put(predictContext.prefix, predictResult);
+				}
+			} else {
+				AiXSortUIIJob.lastUUID = null;
+				new AiXSortUIIJob(Display.getDefault(), viewer, null, predictContext.prefix, null).schedule();
+			}
+			if (predictResult != null) {
+				// TODO: format result
+				// CodeFormatter formatter = getCodeFormatter(context);
+				// String lineSeparator = prefix.charAt(prefix.length() - lastLine.length()) ==
+				// '\r' ? "\r\n" : "\n";
+				// step 4: add proposal to list
+				AiXUIJob job = new AiXInsertUIJob(Display.getDefault(), viewer, proposalFactory, predictResult,
+						predictContext);
+				job.schedule();
+				return Status.OK_STATUS;
+			} else {
+				return Status.CANCEL_STATUS;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return Status.CANCEL_STATUS;
 	}
 
 	static CodeFormatter formatter;

@@ -20,9 +20,11 @@ import io.netty.util.concurrent.GenericFutureListener;
 public class ClientService {
 	static EventLoopGroup workerGroup = new NioEventLoopGroup();
 	static boolean started = false;
+	static String endpoint = "";
+	static int port = 0;
 
 	public static void start() {
-		if (started)
+		if (started && Preference.getSocketEndpoint().equals(endpoint) && Preference.getSocketEndpointPort() == port)
 			return;
 		started = true;
 		Bootstrap b = new Bootstrap(); // (1)
@@ -41,6 +43,8 @@ public class ClientService {
 		ChannelFuture future = null;
 		try {
 			future = b.connect(Preference.getSocketEndpoint(), Preference.getSocketEndpointPort()).sync();
+			endpoint = Preference.getSocketEndpoint();
+			port = Preference.getSocketEndpointPort();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

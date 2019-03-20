@@ -2,6 +2,8 @@ package com.aixcoder.utils.shims;
 
 import java.util.List;
 
+import com.google.gson.JsonArray;
+
 public class CollectionUtils {
 	public static <T> void removeIf(List<T> list, Predicate<T> p) {
 		for (int i = 0; i < list.size(); i++) {
@@ -37,5 +39,14 @@ public class CollectionUtils {
 			sb.append(String.valueOf(t));
 		}
 		return sb.toString();
+	}
+
+	public static String[] getStringList(JsonArray ja) {
+		int size = ja.size();
+		String[] r = new String[size];
+		for (int i = 0; i < size; i++) {
+			r[i] = ja.get(i).getAsString();
+		}
+		return r;
 	}
 }

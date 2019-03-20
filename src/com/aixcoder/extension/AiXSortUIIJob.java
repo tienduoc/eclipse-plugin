@@ -13,6 +13,7 @@ public class AiXSortUIIJob extends AiXUIJob {
 
 	private static List<Pair<String, List<Pair<Double, String>>>> listCache = new LinkedList<Pair<String, List<Pair<Double, String>>>>();
 	public static String lastPrefix;
+	public static String lastUUID;
 
 	List<Pair<Double, String>> list;
 
@@ -38,14 +39,19 @@ public class AiXSortUIIJob extends AiXUIJob {
 		return null;
 	}
 
-	public AiXSortUIIJob(Display jobDisplay, ITextViewer viewer, List<Pair<Double, String>> list, String prefix) {
+	public AiXSortUIIJob(Display jobDisplay, ITextViewer viewer, List<Pair<Double, String>> list, String prefix, String uuid) {
 		super(jobDisplay, "aiXcoder async sorting", viewer);
 		if (prefix == null) {
 			prefix = lastPrefix;
 		}
 		if (list != null) {
-			this.list = list;
 			saveToCache(prefix, list);
+			if (lastUUID == null || lastUUID.equals(uuid)) {
+				System.out.println("sort !!");
+				this.list = list;
+			} else {
+				this.list = null;
+			}
 		} else {
 			this.list = getFromCache(prefix);
 		}
