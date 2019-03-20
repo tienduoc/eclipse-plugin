@@ -1,7 +1,11 @@
 package com.aixcoder.extension;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.browser.WebBrowserView;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.aixcoder.lib.Preference;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -13,6 +17,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+
+	public WebBrowserView webview;
 
 	/**
 	 * The constructor
@@ -31,6 +37,13 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		super.start(context);
 		plugin = this;
+		if (Preference.startSearchOnStartup()) {
+			webview = (WebBrowserView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+					.showView("org.eclipse.ui.browser.view");
+			webview.setBrowserViewName("aiXcoder Search");
+			webview.setBrowserViewTooltip("aiXcoder Search");
+			webview.setURL(Preference.getSearchEndpoint() + "?language=java&area=SpringBoot(Java)");
+		}
 	}
 
 	/*

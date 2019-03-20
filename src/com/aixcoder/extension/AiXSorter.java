@@ -10,6 +10,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.OverlayIcon;
 import com.aixcoder.utils.Pair;
@@ -87,21 +88,30 @@ public class AiXSorter implements ICompletionProposalSorter {
 		return fImageFieldCache.get(clz.getName());
 	}
 
+	static HashMap<Image, Image> cachedOverlays = new HashMap<Image, Image>();
+	static Image blankImage = new Image(Display.getDefault(), 16, 16);
+
 	double getScore(ICompletionProposal p, String s) {
 		if (list != null) {
 			for (Pair<Double, String> pair : list) {
 				if (s.equals(pair.second) || s.startsWith(pair.second + " ") || s.startsWith(pair.second + "(")) {
 					Image i = p.getImage();
-					if (i != null) {
+					if (i == null) {
+						i = blankImage;
+					}
+					if (!cachedOverlays.containsKey(i)) {
+						Image overlay;
 						OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(),
 								new Point(16, 16));
-						i = resultIcon.createImage();
+						overlay = resultIcon.createImage();
+						cachedOverlays.put(i, overlay);
 					}
+					Image overlay = cachedOverlays.get(i);
 					boolean imageSet = false;
 					Method setImageMethod = getSetImageMethod(p, p.getClass());
 					if (setImageMethod != null) {
 						try {
-							setImageMethod.invoke(p, i);
+							setImageMethod.invoke(p, overlay);
 							imageSet = true;
 						} catch (IllegalArgumentException e) {
 							e.printStackTrace();
@@ -116,7 +126,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 						imageSet = true;
 						if (fImageField != null) {
 							try {
-								fImageField.set(p, i);
+								fImageField.set(p, overlay);
 							} catch (IllegalArgumentException e) {
 								e.printStackTrace();
 							} catch (IllegalAccessException e) {

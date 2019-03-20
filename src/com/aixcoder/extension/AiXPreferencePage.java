@@ -6,6 +6,7 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -22,13 +23,17 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 
 	public void createFieldEditors() {
 		new AiXPreInitializer().initializeDefaultPreferences();
-		addField(new BooleanFieldEditor("ACTIVE", "&Enable aiXcoder", getFieldEditorParent()));
-		addField(new StringFieldEditor("ENDPOINT", "&Server URL", getFieldEditorParent()));
-		addField(new StringFieldEditor("SOCKET_ENDPOINT", "S&ocket Endpoint", getFieldEditorParent()));
+		Composite parent = getFieldEditorParent();
+		addField(new BooleanFieldEditor(Preference.ACTIVE, "&Enable aiXcoder", parent));
+		addField(new StringFieldEditor(Preference.ENDPOINT, "&Server URL", parent));
+		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, "Searc&h URL", parent));
+		addField(new StringFieldEditor(Preference.SOCKET_ENDPOINT, "S&ocket Endpoint", parent));
+		addField(new BooleanFieldEditor(Preference.SEARCH_ON_STARTUP, "Open Search View on Startup", parent));
+		addField(new BooleanFieldEditor(Preference.SEACH_ON_SELECT, "Search on Select", parent));
 
 		String[][] entryNamesAndValues = getModels();
-		addField(new ComboFieldEditor("MODEL", "&Model", entryNamesAndValues, getFieldEditorParent()));
-		addField(new StringFieldEditor("PARAMS", "Additional &Parameters", getFieldEditorParent()));
+		addField(new ComboFieldEditor(Preference.MODEL, "&Model", entryNamesAndValues, parent));
+		addField(new StringFieldEditor(Preference.PARAMS, "Additional &Parameters", parent));
 	}
 
 	private String[][] getModels() {

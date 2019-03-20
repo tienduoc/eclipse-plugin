@@ -10,42 +10,63 @@ import com.aixcoder.extension.AiXPreInitializer;
 
 public class Preference {
 
+	public static final String ACTIVE = "ACTIVE";
+	public static final String ENDPOINT = "ENDPOINT";
+	public static final String MODEL = "MODEL";
+	public static final String P_UUID = "UUID";
+	public static final String PARAMS = "PARAMS";
+	public static final String SOCKET_ENDPOINT = "SOCKET_ENDPOINT";
+	public static final String SEARCH_ENDPOINT = "SEARCH_ENDPOINT";
+	public static final String SEARCH_ON_STARTUP = "AUTO_OPEN_SEARCH";
+	public static final String SEACH_ON_SELECT = "SEACH_ON_SELECT";
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
 	
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
-		return preferenceManager.getBoolean("ACTIVE");
+		return preferenceManager.getBoolean(ACTIVE);
 	}
 
 	public static String getEndpoint() {
-		return preferenceManager.getString("ENDPOINT");
+		return preferenceManager.getString(ENDPOINT);
 	}
 	
 	public static String getModel() {
-		return preferenceManager.getString("MODEL");
+		return preferenceManager.getString(MODEL);
 	}
 	
 	public static String getUUID() {
-		if (preferenceManager.getString("UUID") == null || preferenceManager.getString("UUID").isEmpty()) {
+		if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
 			synchronized (id) {
-				preferenceManager.setValue("UUID", UUID.randomUUID().toString());
+				preferenceManager.setValue(P_UUID, UUID.randomUUID().toString());
 			}
 		}
-		return "eclipse-" + preferenceManager.getString("UUID");
+		return "eclipse-" + preferenceManager.getString(P_UUID);
 	}
 	
 	public static String getParams() {
-		return preferenceManager.getString("PARAMS");
+		return preferenceManager.getString(PARAMS);
 	}
 	
 	public static String getSocketEndpoint() {
-		String endpoint = preferenceManager.getString("SOCKET_ENDPOINT");
+		String endpoint = preferenceManager.getString(SOCKET_ENDPOINT);
 		return endpoint.substring(0, endpoint.lastIndexOf(":"));
 	}
 	
 	public static int getSocketEndpointPort() {
-		String endpoint = preferenceManager.getString("SOCKET_ENDPOINT");
+		String endpoint = preferenceManager.getString(SOCKET_ENDPOINT);
 		return Integer.parseInt(endpoint.substring(endpoint.lastIndexOf(":") + 1));
+	}
+	
+	public static String getSearchEndpoint() {
+		return preferenceManager.getString(SEARCH_ENDPOINT);
+	}
+	
+	public static boolean startSearchOnStartup() {
+		return preferenceManager.getBoolean(SEARCH_ON_STARTUP);
+	}
+	
+	public static boolean searchOnSelect() {
+		return preferenceManager.getBoolean(SEACH_ON_SELECT);
 	}
 }
