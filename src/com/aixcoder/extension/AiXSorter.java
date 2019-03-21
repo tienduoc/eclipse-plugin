@@ -62,6 +62,8 @@ public class AiXSorter implements ICompletionProposalSorter {
 
 	HashMap<String, Field> fImageFieldCache = new HashMap<String, Field>();
 
+	public ICompletionProposal longProposal;
+
 	Field _getFImageField(ICompletionProposal p, Class<?> clz) {
 		try {
 			Field fImageField = clz.getDeclaredField("fImage");
@@ -107,33 +109,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 						cachedOverlays.put(i, overlay);
 					}
 					Image overlay = cachedOverlays.get(i);
-					boolean imageSet = false;
-					Method setImageMethod = getSetImageMethod(p, p.getClass());
-					if (setImageMethod != null) {
-						try {
-							setImageMethod.invoke(p, overlay);
-							imageSet = true;
-						} catch (IllegalArgumentException e) {
-							e.printStackTrace();
-						} catch (IllegalAccessException e) {
-							e.printStackTrace();
-						} catch (InvocationTargetException e) {
-							e.printStackTrace();
-						}
-					}
-					if (!imageSet) {
-						Field fImageField = getFImageField(p, p.getClass());
-						imageSet = true;
-						if (fImageField != null) {
-							try {
-								fImageField.set(p, overlay);
-							} catch (IllegalArgumentException e) {
-								e.printStackTrace();
-							} catch (IllegalAccessException e) {
-								e.printStackTrace();
-							}
-						}
-					}
+					setImage(p, overlay);
 					return pair.first;
 				}
 			}
@@ -141,8 +117,42 @@ public class AiXSorter implements ICompletionProposalSorter {
 		return 0;
 	}
 
+	private void setImage(ICompletionProposal p, Image overlay) {
+		boolean imageSet = false;
+		Method setImageMethod = getSetImageMethod(p, p.getClass());
+		if (setImageMethod != null) {
+			try {
+				setImageMethod.invoke(p, overlay);
+				imageSet = true;
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		}
+		if (!imageSet) {
+			Field fImageField = getFImageField(p, p.getClass());
+			imageSet = true;
+			if (fImageField != null) {
+				try {
+					fImageField.set(p, overlay);
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	double getScore(ICompletionProposal p) {
-		if (p instanceof AiXCompletionProposal) {
+		if (longProposal == p) {
+			setImage(p, ProposalFactory.image);
+			return 1;
+		}
+		if (longProposal == null && p instanceof AiXCompletionProposal) {
 			return 1;
 		}
 		return getScore(p, p.getDisplayString());

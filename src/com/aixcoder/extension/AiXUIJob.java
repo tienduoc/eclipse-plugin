@@ -79,6 +79,17 @@ public abstract class AiXUIJob extends UIJob {
 
 				try {
 					computeProposals(fComputedProposal, fFilteredProposal, (AiXSorter) fSorter);
+
+					Field fIsFilterPendingField = completionProposalPopupClz.getDeclaredField("fIsFilterPending");
+					fIsFilterPendingField.setAccessible(true);
+					boolean fIsFilterPending = fIsFilterPendingField.getBoolean(fProposalPopup);
+					if (fIsFilterPending) {
+						Field fFilterRunnableField = completionProposalPopupClz.getDeclaredField("fFilterRunnable");
+						fFilterRunnableField.setAccessible(true);
+						Runnable fFilterRunnable = (Runnable) fFilterRunnableField.get(fProposalPopup);
+						fFilterRunnable.run();
+					}
+					
 					setProposalList(fProposalPopup, completionProposalPopupClz, "fFilteredProposals",
 							fFilteredProposal);
 
