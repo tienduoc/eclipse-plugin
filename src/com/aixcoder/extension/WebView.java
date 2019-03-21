@@ -108,7 +108,6 @@ public class WebView extends WebBrowserView {
 					long waitStart = Calendar.getInstance().getTimeInMillis();
 					while (!loaded && Calendar.getInstance().getTimeInMillis() - waitStart < 10 * 1000) {
 						try {
-							System.out.println("!loaded");
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
 						}
@@ -121,9 +120,7 @@ public class WebView extends WebBrowserView {
 								System.out.println("execute2");
 								try {
 									String w = (String) viewer.getBrowser().evaluate("window.doSearch.toString()");
-									System.out.println("execute2: " + w);
 								} catch (Exception e) {
-									e.printStackTrace();
 								}
 								viewer.getBrowser()
 										.execute("window.doSearch('" + q + "','java','" + "SpringBoot(Java)" + "')");
