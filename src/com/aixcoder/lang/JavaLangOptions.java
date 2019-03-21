@@ -44,6 +44,10 @@ public class JavaLangOptions extends LangOptions {
 				"&=", "^=", "|=", "<<", ">>", "^|", "->", "::" };
 	}
 
+	boolean isType(String s) {
+		return s != null && !s.isEmpty() && (Character.isUpperCase(s.charAt(0)) || keywords.contains(s));
+	}
+
 	private void initConfigurableOptions() {
 		addSpacingOptionAround("=", SpacingKeyALL, true);
 		addSpacingOptionAround("+=", SpacingKeyALL, true);
@@ -66,38 +70,36 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOption(">", SpacingKeyALL, true);
 		addSpacingOption(">", "(", false); // new ArrayList<Byte>()
 		addSpacingOption("?", ">", false);
+		addSpacingOption(">", ">", false);
 		addSpacingOption(SpacingKeyALL, ">", new BiFunction<ArrayList<String>, Integer, Boolean>() {
 			@Override
 			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
-				// > ***: has space if (1. is not closing bracket && 2. space around relational
-				// op)
-				int level = 1;
-				for (int i = nextI - 1; i >= 0; i--) {
-					if (!tokens.get(i).matches("[a-zA-Z0-9_$]+|[><,]")) {
-						break;
-					}
-					if (tokens.get(i).equals("<")) {
-						level--;
-						if (level == 0) {
-							return false;
-						}
-					} else if (tokens.get(i).equals(">")) {
-						level++;
-					}
-				}
+				if (nextI > 0 && isType(tokens.get(nextI - 1)))
+					return false;
+				if (nextI < tokens.size() - 1 && isType(tokens.get(nextI + 1)))
+					return false;
 				return true;
 			}
 		});
 		addSpacingOption("<", SpacingKeyALL, new BiFunction<ArrayList<String>, Integer, Boolean>() {
 			@Override
 			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
-				return nextI >= 2 && tokens.size() > nextI - 2 && tokens.get(nextI - 2).matches("[a-z0-9_$]+|[><,]");
+				nextI -= 1;
+				if (nextI > 0 && isType(tokens.get(nextI - 1)))
+					return false;
+				if (nextI < tokens.size() - 1 && isType(tokens.get(nextI + 1)))
+					return false;
+				return true;
 			}
 		});
 		addSpacingOption(SpacingKeyALL, "<", new BiFunction<ArrayList<String>, Integer, Boolean>() {
 			@Override
 			public Boolean apply(ArrayList<String> tokens, Integer nextI) {
-				return nextI >= 1 && tokens.size() > nextI - 1 && tokens.get(nextI - 1).matches("[a-z0-9_$]+|[><,]");
+				if (nextI > 0 && isType(tokens.get(nextI - 1)))
+					return false;
+				if (nextI < tokens.size() - 1 && isType(tokens.get(nextI + 1)))
+					return false;
+				return true;
 			}
 		});
 		addSpacingOptionAround(">=", SpacingKeyALL, true);
