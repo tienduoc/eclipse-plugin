@@ -127,7 +127,8 @@ public class TokenUtils {
 		int indent = utils.getIndentSize(line, line.length());
 		LangOptions langOptions = LangOptions.getInstance(lang);
 		for (int i = indexInTokens; i < tokens.size();) {
-			if (langOptions.hasSpaceBetween(allTokens, indexInAllTokens)) {
+			if (langOptions.hasSpaceBetween(allTokens, indexInAllTokens)
+					&& (builder.length() > 0 || !line.endsWith(" "))) {
 				builder.append(' ');
 			}
 			TokensUpdate update = renderToken(builder, tokens, i, indent, langOptions);

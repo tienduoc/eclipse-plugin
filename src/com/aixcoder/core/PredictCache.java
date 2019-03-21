@@ -3,6 +3,7 @@ package com.aixcoder.core;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.aixcoder.utils.Pair;
 import com.aixcoder.utils.Predict.PredictResult;
@@ -36,19 +37,26 @@ public class PredictCache {
 		return null;
 	}
 
+	private final static Pattern LTRIM = Pattern.compile("^\\s+");
+
+	public static String ltrim(String s) {
+		return LTRIM.matcher(s).replaceAll("");
+	}
+
 	public static PredictResult update(String prefix, String newPrefix, PredictResult second) {
 		if (newPrefix.startsWith(prefix)) {
-			String newString = newPrefix.substring(prefix.length()).trim();
+			String newString = newPrefix.substring(prefix.length());
 
 			int i = 0;
 			for (; i < second.tokens.length; i++) {
-				if (newString.startsWith(second.tokens[i])) {
-					newString = newString.substring(second.tokens[i].length()).trim();
+				String ltrimedNewString = ltrim(newString);
+				if (ltrimedNewString.startsWith(second.tokens[i])) {
+					newString = ltrimedNewString.substring(second.tokens[i].length());
 				} else {
 					break;
 				}
 			}
-			if (second.tokens.length > i && second.tokens[i].startsWith(newString)) {
+			if (second.tokens.length > i && second.tokens[i].startsWith(newString.trim())) {
 				if (i == 0) {
 					// cache : St [ring, s, =]
 					// newPrefix: Str
@@ -74,12 +82,22 @@ public class PredictCache {
 							newCurrent = second.current + newCurrent;
 						}
 						return new PredictResult(newTokens, newCurrent, second.rCompletions);
+					} else if (newString.trim().isEmpty()) {
+						// at start of next word
+						// cache : St [ring, s, =]
+						// newPrefix: String_
+						// newString: _
+						// => tokens: [s, =]
+						// => current: ""
+						String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
+						return new PredictResult(newTokens, "", second.rCompletions);
 					} else {
 						// cache : St [ring, str, =]
 						// newPrefix: String s
-						// newString: s
+						// newString: _s
 						// => tokens: [tr, =]
 						// => current: s
+						newString = newString.trim();
 						String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
 						newTokens[0] = newTokens[0].substring(newString.length());
 						return new PredictResult(newTokens, newString, second.rCompletions);
