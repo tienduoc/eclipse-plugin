@@ -38,8 +38,8 @@ public abstract class AiXUIJob extends UIJob {
 //		log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
 	}
 
-	public abstract void computeProposals(List<ICompletionProposal> fComputedProposal, AiXSorter fSorter)
-			throws AiXAbortInsertionException;
+	public abstract void computeProposals(List<ICompletionProposal> fComputedProposal,
+			List<ICompletionProposal> fFilteredProposals, AiXSorter fSorter) throws AiXAbortInsertionException;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -65,31 +65,22 @@ public abstract class AiXUIJob extends UIJob {
 			fProposalPopupField.setAccessible(true);
 			Object fProposalPopup = fProposalPopupField.get(fContentAssistant);
 			Class<?> completionProposalPopupClz = fProposalPopup.getClass();
-			Field fComputedProposalsField = completionProposalPopupClz.getDeclaredField("fComputedProposals");
-			fComputedProposalsField.setAccessible(true);
-			Object fComputedProposals = fComputedProposalsField.get(fProposalPopup);
-			List<ICompletionProposal> fComputedProposal;
-			if (fComputedProposals == null) {
-				if (fComputedProposalsField.getType().getSimpleName().equals("ICompletionProposal[]")) {
-					fComputedProposals = new ICompletionProposal[0];
-				} else {
-					fComputedProposals = new ArrayList<ICompletionProposal>();
-				}
-			}
-			if (fComputedProposals instanceof List) {
-				fComputedProposal = (List<ICompletionProposal>) fComputedProposals;
-			} else {
-				fComputedProposal = Arrays.asList((ICompletionProposal[]) fComputedProposals);
-			}
+			List<ICompletionProposal> fComputedProposal = getProposalList(fProposalPopup, completionProposalPopupClz,
+					"fComputedProposals");
+			List<ICompletionProposal> fFilteredProposal = getProposalList(fProposalPopup, completionProposalPopupClz,
+					"fFilteredProposals");
 			if (fComputedProposal == null) {
 				// 绯荤粺妗嗗凡缁忓叧闂紝鍘熷洜锛氱敤鎴峰湪aixcoder缃戠粶杩斿洖涔嬪墠灏辩户缁緭鍏ワ紝鐒跺悗绯荤粺妗嗛噷娌℃湁鍖归厤鐨勫�欓�変簡
 				// TODO: 鏄惁瑕侀噸鏂板脊鍑烘彁绀烘?
 			} else {
 				// insert aixcoder proposal
 				fComputedProposal = new ArrayList<ICompletionProposal>(fComputedProposal);
+				fFilteredProposal = new ArrayList<ICompletionProposal>(fFilteredProposal);
 
 				try {
-					computeProposals(fComputedProposal, (AiXSorter) fSorter);
+					computeProposals(fComputedProposal, fFilteredProposal, (AiXSorter) fSorter);
+					setProposalList(fProposalPopup, completionProposalPopupClz, "fFilteredProposals",
+							fFilteredProposal);
 
 					// call proposal table update function
 //					log("setProposals: " + fComputedProposal);
@@ -128,6 +119,41 @@ public abstract class AiXUIJob extends UIJob {
 			e.printStackTrace();
 			return Status.CANCEL_STATUS;
 		}
+	}
+
+	private void setProposalList(Object fProposalPopup, Class<?> completionProposalPopupClz, String fieldName,
+			List<ICompletionProposal> fFilteredProposal)
+			throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+		Field fComputedProposalsField = completionProposalPopupClz.getDeclaredField(fieldName);
+		fComputedProposalsField.setAccessible(true);
+		Object fFilteredProposalObj;
+		if (fComputedProposalsField.getType().getSimpleName().equals("ICompletionProposal[]")) {
+			fFilteredProposalObj = fFilteredProposal.toArray(new ICompletionProposal[0]);
+		} else {
+			fFilteredProposalObj = fFilteredProposal;
+		}
+		fComputedProposalsField.set(fProposalPopup, fFilteredProposalObj);
+	}
+
+	private List<ICompletionProposal> getProposalList(Object fProposalPopup, Class<?> completionProposalPopupClz,
+			String fieldName) throws NoSuchFieldException, IllegalAccessException {
+		Field fComputedProposalsField = completionProposalPopupClz.getDeclaredField(fieldName);
+		fComputedProposalsField.setAccessible(true);
+		Object fComputedProposals = fComputedProposalsField.get(fProposalPopup);
+		List<ICompletionProposal> fComputedProposal;
+		if (fComputedProposals == null) {
+			if (fComputedProposalsField.getType().getSimpleName().equals("ICompletionProposal[]")) {
+				fComputedProposals = new ICompletionProposal[0];
+			} else {
+				fComputedProposals = new ArrayList<ICompletionProposal>();
+			}
+		}
+		if (fComputedProposals instanceof List) {
+			fComputedProposal = (List<ICompletionProposal>) fComputedProposals;
+		} else {
+			fComputedProposal = Arrays.asList((ICompletionProposal[]) fComputedProposals);
+		}
+		return fComputedProposal;
 	}
 
 }

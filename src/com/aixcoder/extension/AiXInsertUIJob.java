@@ -31,7 +31,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 	}
 
 	@Override
-	public void computeProposals(List<ICompletionProposal> fComputedProposal, AiXSorter fSorter) throws AiXAbortInsertionException {
+	public void computeProposals(List<ICompletionProposal> fComputedProposal, List<ICompletionProposal> fFilteredProposals, AiXSorter fSorter) throws AiXAbortInsertionException {
 		try {
 			// insert aixcoder proposal
 			Point selection = viewer.getSelectedRange();
@@ -59,6 +59,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 				ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
 						rendered.insert, predictResult.current, predictResult.rCompletions);
 
+				fFilteredProposals.add(0, proposal);
 				fComputedProposal.add(0, proposal);
 			}
 		} catch (AiXAbortInsertionException e) {

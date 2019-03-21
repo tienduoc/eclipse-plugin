@@ -22,6 +22,7 @@ public class AiXSortUIIJob extends AiXUIJob {
 			if (prefix.equals(pair.first)) {
 				pair.second = l;
 				return;
+
 			}
 		}
 		listCache.add(new Pair<String, List<Pair<Double, String>>>(prefix, l));
@@ -32,14 +33,18 @@ public class AiXSortUIIJob extends AiXUIJob {
 
 	synchronized List<Pair<Double, String>> getFromCache(String prefix) {
 		for (Pair<String, List<Pair<Double, String>>> pair : listCache) {
-			if (prefix.equals(pair.first)) {
-				return pair.second;
+			if (prefix.startsWith(pair.first)) {
+				String diff = prefix.substring(pair.first.length());
+				if (diff.matches("[a-zA-Z0-9_$]*")) {
+					return pair.second;
+				}
 			}
 		}
 		return null;
 	}
 
-	public AiXSortUIIJob(Display jobDisplay, ITextViewer viewer, List<Pair<Double, String>> list, String prefix, String uuid) {
+	public AiXSortUIIJob(Display jobDisplay, ITextViewer viewer, List<Pair<Double, String>> list, String prefix,
+			String uuid) {
 		super(jobDisplay, "aiXcoder async sorting", viewer);
 		if (prefix == null) {
 			prefix = lastPrefix;
@@ -58,10 +63,10 @@ public class AiXSortUIIJob extends AiXUIJob {
 	}
 
 	@Override
-	public void computeProposals(List<ICompletionProposal> fComputedProposal, AiXSorter fSorter)
-			throws AiXAbortInsertionException {
+	public void computeProposals(List<ICompletionProposal> fComputedProposal,
+			List<ICompletionProposal> fFilteredProposal, AiXSorter fSorter) throws AiXAbortInsertionException {
 		try {
-			System.out.println(list);
+			System.out.println("AiXSortUIIJob:" + list);
 			fSorter.list = list;
 		} catch (Exception e) {
 			e.printStackTrace();

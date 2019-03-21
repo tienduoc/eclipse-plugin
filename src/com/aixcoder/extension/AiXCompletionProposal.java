@@ -145,4 +145,9 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 //		return "long long result " + Math.random();
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		return "AiXCompletionProposal: " + fReplacementString;
+	}
 }
