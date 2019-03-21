@@ -28,7 +28,7 @@ public class AiXFetchJob extends Job {
 	private static AiXFetchJob lastInstance;
 
 	public AiXFetchJob(PredictContext predictContext, String remainingText, ProposalFactory proposalFactory) {
-		super("aiXcoder fetch");
+		super("aiXcoder Fetch");
 		this.predictContext = predictContext;
 		this.remainingText = remainingText;
 		this.proposalFactory = proposalFactory;

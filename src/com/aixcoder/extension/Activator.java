@@ -18,7 +18,7 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 
-	public WebBrowserView webview;
+	public WebView webview;
 
 	/**
 	 * The constructor
@@ -37,13 +37,6 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		super.start(context);
 		plugin = this;
-		if (Preference.startSearchOnStartup()) {
-			webview = (WebBrowserView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-					.showView("org.eclipse.ui.browser.view");
-			webview.setBrowserViewName("aiXcoder Search");
-			webview.setBrowserViewTooltip("aiXcoder Search");
-			webview.setURL(Preference.getSearchEndpoint() + "?language=java&area=SpringBoot(Java)");
-		}
 	}
 
 	/*

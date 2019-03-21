@@ -29,4 +29,67 @@
           class="com.aixcoder.extension.AiXPreInitializer">
     </initializer>
  </extension>
+ <extension
+       point="org.eclipse.ui.views">
+    <category
+          id="aiXcoder"
+          name="aiXcoder">
+    </category>
+    <view
+          category="aiXcoder"
+          class="com.aixcoder.extension.WebView"
+          icon="icons/aix_log.png"
+          id="com.aixcoder.extension.WebView"
+          inject="true"
+          name="aiXcoder Search View">
+    </view>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaPerspective">
+       <view
+             id="com.aixcoder.extension.WebView"
+             ratio="0.5"
+             relationship="right"
+             relative="org.eclipse.ui.views.ContentOutline">
+       </view>
+    </perspectiveExtension>
+ </extension>
+ <extension
+       point="org.eclipse.ui.commands">
+    <category
+          id="aiXcoder.commands.category"
+          name="aiXcoder">
+    </category>
+    <command
+          categoryId="aiXcoder.commands.category"
+          id="aiXcoder.commands.searchCommand"
+          name="aiXcoder Search">
+    </command>
+ </extension>
+ <extension
+       point="org.eclipse.ui.handlers">
+    <handler
+          class="com.aixcoder.extension.SearchHandler"
+          commandId="aiXcoder.commands.searchCommand">
+    </handler>
+ </extension>
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="popup:org.eclipse.ui.popup.any">
+          <command
+                commandId="aiXcoder.commands.searchCommand"
+                icon="icons/aix_log.png"
+                id="aiXcoder.popup.searchCommand">
+				<visibleWhen>
+       <with variable="selection">
+          <instanceof value="org.eclipse.jface.text.ITextSelection"/>
+       </with>
+    </visibleWhen>
+          </command>
+    </menuContribution>
+ </extension>>
 </plugin>

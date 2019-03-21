@@ -28,8 +28,6 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(new StringFieldEditor(Preference.ENDPOINT, "&Server URL", parent));
 		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, "Searc&h URL", parent));
 		addField(new StringFieldEditor(Preference.SOCKET_ENDPOINT, "S&ocket Endpoint", parent));
-		addField(new BooleanFieldEditor(Preference.SEARCH_ON_STARTUP, "Open Search View on Startup", parent));
-		addField(new BooleanFieldEditor(Preference.SEACH_ON_SELECT, "Search on Select", parent));
 
 		String[][] entryNamesAndValues = getModels();
 		addField(new ComboFieldEditor(Preference.MODEL, "&Model", entryNamesAndValues, parent));

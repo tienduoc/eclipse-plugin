@@ -17,8 +17,6 @@ public class Preference {
 	public static final String PARAMS = "PARAMS";
 	public static final String SOCKET_ENDPOINT = "SOCKET_ENDPOINT";
 	public static final String SEARCH_ENDPOINT = "SEARCH_ENDPOINT";
-	public static final String SEARCH_ON_STARTUP = "AUTO_OPEN_SEARCH";
-	public static final String SEACH_ON_SELECT = "SEACH_ON_SELECT";
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
 	
@@ -59,14 +57,7 @@ public class Preference {
 	}
 	
 	public static String getSearchEndpoint() {
+		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getString(SEARCH_ENDPOINT);
-	}
-	
-	public static boolean startSearchOnStartup() {
-		return preferenceManager.getBoolean(SEARCH_ON_STARTUP);
-	}
-	
-	public static boolean searchOnSelect() {
-		return preferenceManager.getBoolean(SEACH_ON_SELECT);
 	}
 }
