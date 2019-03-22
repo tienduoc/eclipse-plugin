@@ -94,7 +94,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 	static Image blankImage = new Image(Display.getDefault(), 16, 16);
 
 	double getScore(ICompletionProposal p, String s) {
-		if (list != null) {
+		if (list != null && !(p instanceof AiXCompletionProposal)) {
 			for (Pair<Double, String> pair : list) {
 				if (s.equals(pair.second) || s.startsWith(pair.second + " ") || s.startsWith(pair.second + "(")) {
 					Image i = p.getImage();
@@ -152,8 +152,8 @@ public class AiXSorter implements ICompletionProposalSorter {
 			setImage(p, ProposalFactory.image);
 			return 1;
 		}
-		if (longProposal == null && p instanceof AiXCompletionProposal) {
-			return 1;
+		if (p instanceof AiXCompletionProposal) {
+			return longProposal == null ? 1 : 0;
 		}
 		return getScore(p, p.getDisplayString());
 	}

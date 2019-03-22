@@ -65,7 +65,7 @@ public class WebView extends WebBrowserView {
 
 		setBrowserViewName("aiXcoder Search");
 		setBrowserViewTooltip("aiXcoder Search");
-		setURL(Preference.getSearchEndpoint() + "?language=java&area=SpringBoot(Java)");
+		setURL(Preference.getSearchEndpoint() + "?language=java&area=java(Java)");
 		viewer.getBrowser().addProgressListener(new ProgressListener() {
 
 			@Override
@@ -99,7 +99,7 @@ public class WebView extends WebBrowserView {
 			}
 		}
 		if (loaded) {
-			viewer.getBrowser().execute("window.doSearch('" + q + "','java','" + "SpringBoot(Java)" + "')");
+			viewer.getBrowser().execute("window.doSearch('" + q + "','java','" + "java(Java)" + "')");
 		} else {
 			new Job("aiXcoder Search Loading") {
 
@@ -123,7 +123,7 @@ public class WebView extends WebBrowserView {
 								} catch (Exception e) {
 								}
 								viewer.getBrowser()
-										.execute("window.doSearch('" + q + "','java','" + "SpringBoot(Java)" + "')");
+										.execute("window.doSearch('" + q + "','java','" + "java(Java)" + "')");
 								loaded = true;
 							} catch (Exception e) {
 								e.printStackTrace();
