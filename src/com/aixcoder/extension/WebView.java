@@ -117,9 +117,8 @@ public class WebView extends WebBrowserView {
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {
 							try {
-								System.out.println("execute2");
 								try {
-									String w = (String) viewer.getBrowser().evaluate("window.doSearch.toString()");
+									viewer.getBrowser().evaluate("window.doSearch.toString()");
 								} catch (Exception e) {
 								}
 								viewer.getBrowser()
