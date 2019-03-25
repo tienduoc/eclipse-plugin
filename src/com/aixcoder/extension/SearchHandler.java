@@ -9,6 +9,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+@SuppressWarnings("restriction")
 public class SearchHandler extends AbstractHandler {
 
 	@Override

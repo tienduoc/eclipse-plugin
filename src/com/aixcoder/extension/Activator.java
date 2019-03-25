@@ -1,11 +1,7 @@
 package com.aixcoder.extension;
 
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.browser.WebBrowserView;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-
-import com.aixcoder.lib.Preference;
 
 /**
  * The activator class controls the plug-in life cycle

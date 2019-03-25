@@ -150,6 +150,7 @@ public abstract class AiXUIJob extends UIJob {
 		fComputedProposalsField.set(fProposalPopup, fFilteredProposalObj);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<ICompletionProposal> getProposalList(Object fProposalPopup, Class<?> completionProposalPopupClz,
 			String fieldName) throws NoSuchFieldException, IllegalAccessException {
 		Field fComputedProposalsField = completionProposalPopupClz.getDeclaredField(fieldName);
