@@ -101,7 +101,7 @@ public class WebView extends WebBrowserView {
 		if (loaded) {
 			viewer.getBrowser().execute("window.doSearch('" + q + "','java','" + "java(Java)" + "')");
 		} else {
-			new Job("aiXcoder Search Loading") {
+			Job job = new Job("aiXcoder Search Loading") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -112,7 +112,7 @@ public class WebView extends WebBrowserView {
 						} catch (InterruptedException e) {
 						}
 					}
-					new UIJob(Display.getDefault(), "aiXcoder Search") {
+					UIJob uijob = new UIJob(Display.getDefault(), "aiXcoder Search") {
 
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -129,10 +129,14 @@ public class WebView extends WebBrowserView {
 							}
 							return Status.OK_STATUS;
 						}
-					}.schedule();
+					};
+					uijob.setPriority(Job.SHORT);
+					uijob.schedule();
 					return Status.OK_STATUS;
 				}
-			}.schedule();
+			};
+			job.setPriority(Job.SHORT);
+			job.schedule();
 		}
 	}
 
