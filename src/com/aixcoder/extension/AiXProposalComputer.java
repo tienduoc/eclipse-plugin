@@ -1,6 +1,7 @@
 package com.aixcoder.extension;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -26,10 +27,12 @@ import com.aixcoder.utils.zipfile.ProjectScan;
  */
 @SuppressWarnings("restriction")
 public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
+	static long t;
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 		if (Preference.isActive()) {
+			t = Calendar.getInstance().getTimeInMillis();
 			ProposalFactory proposalFactory = new ProposalFactory(context);
 			try {
 				// step 1: get text before cursor

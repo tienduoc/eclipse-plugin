@@ -1,5 +1,6 @@
 package com.aixcoder.extension;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class AiXFetchJob extends Job {
 	private PredictContext predictContext;
 	private String remainingText;
 	private static AiXFetchJob lastInstance;
+	long t = Calendar.getInstance().getTimeInMillis();
 
 	public AiXFetchJob(PredictContext predictContext, String remainingText, ProposalFactory proposalFactory) {
 		super("aiXcoder Fetch");
@@ -33,10 +35,12 @@ public class AiXFetchJob extends Job {
 		this.remainingText = remainingText;
 		this.proposalFactory = proposalFactory;
 		AiXFetchJob.lastInstance = this;
+		setPriority(INTERACTIVE);
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		System.out.println("AiXFetchJob schedule took " + (Calendar.getInstance().getTimeInMillis()- t) + "ms");
 		if (lastInstance != this)
 			return Status.CANCEL_STATUS;
 		try {

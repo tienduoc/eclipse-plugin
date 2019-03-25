@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.zip.DeflaterOutputStream;
 
@@ -24,6 +25,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class API {
+	public static long timestamp;
+
 	public static String[] getModels() {
 		String body;
 		try {
@@ -38,7 +41,10 @@ public class API {
 	}
 
 	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
-		return predict(true, predictContext, remainingText, UUID);
+		timestamp = Calendar.getInstance().getTimeInMillis();
+		PredictResult r = predict(true, predictContext, remainingText, UUID);
+		System.out.println("API.predict took " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
+		return r;
 	}
 
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
@@ -95,6 +101,12 @@ public class API {
 					String[] rCompletion = CollectionUtils.getStringList(json.get("r_completion").getAsJsonArray());
 					return new PredictResult(tokens, current, rCompletion);
 				}
+			}
+		} catch (HttpRequest.HttpRequestException e) {
+			if (e.getMessage().contains("Read timed out")) {
+				System.out.println("time out");
+			} else {
+				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

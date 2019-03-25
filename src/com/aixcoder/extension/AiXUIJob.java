@@ -25,6 +25,7 @@ import org.eclipse.ui.progress.UIJob;
 public abstract class AiXUIJob extends UIJob {
 
 	protected ITextViewer viewer;
+	long t = Calendar.getInstance().getTimeInMillis();
 
 	void log(String s) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
@@ -34,6 +35,7 @@ public abstract class AiXUIJob extends UIJob {
 	public AiXUIJob(Display jobDisplay, String name, ITextViewer viewer) {
 		super(jobDisplay, name);
 		this.viewer = viewer;
+		setPriority(INTERACTIVE);
 //		log("AiXUIJob constructor " + name);
 //		log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
 	}
@@ -41,9 +43,9 @@ public abstract class AiXUIJob extends UIJob {
 	public abstract void computeProposals(List<ICompletionProposal> fComputedProposal,
 			List<ICompletionProposal> fFilteredProposals, AiXSorter fSorter) throws AiXAbortInsertionException;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public IStatus runInUIThread(IProgressMonitor monitor) {
+		System.out.println(getName() + " schedule took " + (Calendar.getInstance().getTimeInMillis()- t) + "ms");
 		try {
 			Field fContentAssistantField = SourceViewer.class.getDeclaredField("fContentAssistant");
 			fContentAssistantField.setAccessible(true);
@@ -89,7 +91,7 @@ public abstract class AiXUIJob extends UIJob {
 						Runnable fFilterRunnable = (Runnable) fFilterRunnableField.get(fProposalPopup);
 						fFilterRunnable.run();
 					}
-					
+
 					setProposalList(fProposalPopup, completionProposalPopupClz, "fFilteredProposals",
 							fFilteredProposal);
 
@@ -125,6 +127,8 @@ public abstract class AiXUIJob extends UIJob {
 				} catch (AiXAbortInsertionException e) {
 				}
 			}
+			System.out.println(this.getName() + " took "
+					+ (Calendar.getInstance().getTimeInMillis() - AiXProposalComputer.t) + "ms");
 			return Status.OK_STATUS;
 		} catch (Exception e) {
 			e.printStackTrace();

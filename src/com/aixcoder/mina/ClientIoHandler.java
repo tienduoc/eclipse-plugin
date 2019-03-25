@@ -2,11 +2,13 @@ package com.aixcoder.mina;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.swt.widgets.Display;
 
+import com.aixcoder.core.API;
 import com.aixcoder.extension.AiXSortUIIJob;
 import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.Pair;
@@ -44,6 +46,7 @@ public class ClientIoHandler extends SimpleChannelInboundHandler<Message> {
 
 	public void sort(Message message) {
 		try {
+			System.out.println("API: sort took " + (Calendar.getInstance().getTimeInMillis() - API.timestamp) + "ms");
 			String data = message.getData();
 			JsonObject json = new Gson().fromJson(data, JsonObject.class);
 			String uuid = json.get("queryUUID").getAsString();
