@@ -112,8 +112,8 @@ public class ProjectScanThread extends Thread {
 				return;
 			}
 			path = path.substring(projectPath.length());
-			data[i] = path;
-			data[i + 1] = text;
+			data[i * 2] = path;
+			data[i * 2 + 1] = text;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
