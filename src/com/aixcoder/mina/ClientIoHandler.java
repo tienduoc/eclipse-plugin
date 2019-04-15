@@ -9,7 +9,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.API;
-import com.aixcoder.extension.AiXSortUIIJob;
+import com.aixcoder.extension.jobs.AiXSortUIIJob;
 import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.Pair;
 import com.google.gson.Gson;

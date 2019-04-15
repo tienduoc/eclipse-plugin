@@ -1,4 +1,4 @@
-package com.aixcoder.extension;
+package com.aixcoder.extension.jobs;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +7,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.widgets.Display;
 
+import com.aixcoder.extension.AiXAbortInsertionException;
+import com.aixcoder.extension.AiXSorter;
+import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.utils.Pair;
 
 public class AiXSortUIIJob extends AiXUIJob {

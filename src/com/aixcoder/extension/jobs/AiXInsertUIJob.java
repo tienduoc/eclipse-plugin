@@ -1,4 +1,4 @@
-package com.aixcoder.extension;
+package com.aixcoder.extension.jobs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,10 @@ import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.PredictCache;
 import com.aixcoder.core.PredictContext;
+import com.aixcoder.extension.AiXAbortInsertionException;
+import com.aixcoder.extension.AiXSorter;
+import com.aixcoder.extension.AiXUIJob;
+import com.aixcoder.extension.ProposalFactory;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.RenderedInfo;
 import com.aixcoder.utils.TokenUtils;
@@ -70,6 +74,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 				}
 				fFilteredProposals.add(0, proposal);
 				fComputedProposal.add(0, proposal);
+				new AiXReportJob("show").schedule();
 			}
 		} catch (AiXAbortInsertionException e) {
 			throw e;

@@ -5,7 +5,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Image;
 
 public class ProposalFactory {
-	ContentAssistInvocationContext context;
+	public ContentAssistInvocationContext context;
 	static final Image image = Activator
 			.imageDescriptorFromPlugin(Activator.getDefault().getBundle().getSymbolicName(), "icons/aix_log.png").createImage();
 

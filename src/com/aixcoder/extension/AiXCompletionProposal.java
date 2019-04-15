@@ -10,6 +10,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.aixcoder.extension.jobs.AiXReportJob;
 import com.aixcoder.utils.shims.CollectionUtils;
 
 /**
@@ -96,6 +97,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 			if (fRCompletion != null) {
 				document.replace(fReplacementOffset + fReplacementString.length(), 0, CollectionUtils.join("", fRCompletion));
 			}
+			new AiXReportJob("use").schedule();
 		} catch (BadLocationException x) {
 			// ignore
 		}

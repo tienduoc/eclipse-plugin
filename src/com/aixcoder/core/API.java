@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 
 import com.aixcoder.lib.HttpRequest;
@@ -47,6 +48,17 @@ public class API {
 		return r;
 	}
 
+	public static void report(String type) {
+		final String uuid = Preference.getUUID();
+		Map<String, String> m = new HashMap<String, String>();
+		m.put("uuid", uuid);
+		try {
+			HttpHelper.get(Preference.getEndpoint() + "user/predict/" + type, m);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID) {
 		try {

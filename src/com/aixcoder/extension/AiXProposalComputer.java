@@ -17,6 +17,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
 import com.aixcoder.core.PredictContext;
+import com.aixcoder.extension.jobs.AiXFetchJob;
 import com.aixcoder.lib.Preference;
 import com.aixcoder.mina.ClientIoHandler;
 import com.aixcoder.mina.ClientService;

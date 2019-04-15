@@ -27,7 +27,7 @@ public abstract class AiXUIJob extends UIJob {
 	protected ITextViewer viewer;
 	long t = Calendar.getInstance().getTimeInMillis();
 
-	void log(String s) {
+	protected void log(String s) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		System.out.println(timeStamp + " " + this + " " + s);
 	}
