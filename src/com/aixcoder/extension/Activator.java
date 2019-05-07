@@ -1,7 +1,15 @@
 package com.aixcoder.extension;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
+
+import com.aixcoder.core.API;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -33,6 +41,14 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		super.start(context);
 		plugin = this;
+		new Job("aiXcoder check update") {
+			
+			@Override
+			public IStatus run(IProgressMonitor monitor) {
+				API.checkUpdate(Platform.getBundle(PLUGIN_ID).getVersion());
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 	}
 
 	/*

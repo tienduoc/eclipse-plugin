@@ -19,8 +19,6 @@ import org.eclipse.ui.IEditorPart;
 import com.aixcoder.core.PredictContext;
 import com.aixcoder.extension.jobs.AiXFetchJob;
 import com.aixcoder.lib.Preference;
-import com.aixcoder.mina.ClientIoHandler;
-import com.aixcoder.mina.ClientService;
 import com.aixcoder.utils.zipfile.ProjectScan;
 
 /**
@@ -49,9 +47,6 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 						project = resource.getProject();
 					}
 				}
-
-				ClientService.start();
-				ClientIoHandler.viewer = context.getViewer();
 				ProjectScan.getInstance(project).start();
 
 				IDocument document = context.getDocument();

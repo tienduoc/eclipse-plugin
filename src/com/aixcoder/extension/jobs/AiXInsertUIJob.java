@@ -72,8 +72,11 @@ public class AiXInsertUIJob extends AiXUIJob {
 						break;
 					}
 				}
-				fFilteredProposals.add(0, proposal);
-				fComputedProposal.add(0, proposal);
+				fSorter.list = predictResult.sortResults;
+				if (predictResult.sortResults.length == 0 || !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?")) {
+					fFilteredProposals.add(0, proposal);
+					fComputedProposal.add(0, proposal);	
+				}
 				new AiXReportJob("show").schedule();
 			}
 		} catch (AiXAbortInsertionException e) {

@@ -49,19 +49,14 @@ public class AiXFetchJob extends Job {
 			PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
 			ITextViewer viewer = proposalFactory.context.getViewer();
 			if (predictResult == null) {
-				AiXSortUIIJob.lastPrefix = predictContext.prefix;
 				System.out.println("HTTP!!!");
 				String lastUUID = UUID.randomUUID().toString();
-				AiXSortUIIJob.lastUUID = lastUUID;
 				predictResult = Predict.predict(predictContext, remainingText, lastUUID);
 				if (predictResult != null) {
 					PredictCache.getInstance().put(predictContext.prefix, predictResult);
 				} else {
 					new AiXReportJob("nul").schedule();
 				}
-			} else {
-				AiXSortUIIJob.lastUUID = null;
-				new AiXSortUIIJob(Display.getDefault(), viewer, null, predictContext.prefix, null).schedule();
 			}
 			if (predictResult != null) {
 				// TODO: format result

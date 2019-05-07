@@ -11,15 +11,15 @@ import com.aixcoder.lang.LangOptions;
  */
 public class DataMasking {
 	/**
-	 * 不需要脱隐的简单字符串，lazy loading
+	 * 不需要脱敏的简单字符串，lazy loading
 	 */
 	static Set<String> trivialLiterals;
 
 	/**
-	 * 字符串脱隐，将除trivialLiterals里的简单字符串以外的其它字符串变成空字符串
+	 * 字符串脱敏，将除trivialLiterals里的简单字符串以外的其它字符串变成空字符串
 	 *
 	 * @param s 原始字符串
-	 * @return 脱隐后字符串
+	 * @return 脱敏后字符串
 	 */
 	public static String mask(String s) {
 		if (trivialLiterals == null) {

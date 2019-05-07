@@ -1,7 +1,9 @@
 package com.aixcoder.core;
 
+import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -9,7 +11,15 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.zip.DeflaterOutputStream;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.progress.UIJob;
+import org.osgi.framework.Version;
 
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.Preference;
@@ -17,6 +27,7 @@ import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.Predict.PredictResult;
+import com.aixcoder.utils.Predict.SortResult;
 import com.aixcoder.utils.shims.CollectionUtils;
 import com.aixcoder.utils.shims.Consumer;
 import com.aixcoder.utils.shims.DigestUtils;
@@ -31,6 +42,7 @@ public class API {
 	public static String[] getModels() {
 		String body;
 		try {
+			if (Preference.getEndpoint().isEmpty()) return null;
 			body = HttpHelper.get(Preference.getEndpoint() + "getmodels");
 			JsonArray jo = new Gson().fromJson(body, JsonElement.class).getAsJsonArray();
 			String[] models = CollectionUtils.getStringList(jo);
@@ -58,7 +70,7 @@ public class API {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID) {
 		try {
@@ -78,7 +90,7 @@ public class API {
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
 							.form("ext", Preference.getModel()).form("fileid", fileid)
 							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
-							.form("md5", md5);
+							.form("md5", md5).form("sort", 1);
 
 					String params = Preference.getParams();
 					for (String param : params.split("&")) {
@@ -111,7 +123,15 @@ public class API {
 					String[] tokens = CollectionUtils.getStringList(json.get("tokens").getAsJsonArray());
 					String current = json.get("current").getAsString();
 					String[] rCompletion = CollectionUtils.getStringList(json.get("r_completion").getAsJsonArray());
-					return new PredictResult(tokens, current, rCompletion);
+					JsonArray sortList = json.getAsJsonArray("sort");
+					SortResult[] sortResults = new SortResult[sortList.size()];
+					for (int i = 0; i < sortResults.length; i++) {
+						JsonArray asJsonArray = sortList.get(i).getAsJsonArray();
+						double prob = asJsonArray.get(0).getAsDouble();
+						String word = asJsonArray.get(1).getAsString();
+						sortResults[i] = new SortResult(prob, word);
+					}
+					return new PredictResult(tokens, current, rCompletion, sortResults);
 				}
 			}
 		} catch (HttpRequest.HttpRequestException e) {
@@ -124,7 +144,7 @@ public class API {
 			e.printStackTrace();
 			return null;
 		}
-		return new PredictResult(new String[0], "", null);
+		return new PredictResult(new String[0], "", null, new SortResult[0]);
 	}
 
 	public static String[] getTrivialLiterals() {
@@ -144,6 +164,8 @@ public class API {
 	}
 
 	public static void zipFile(String project, String[] data) {
+		if (data.length == 0)
+			return;
 		try {
 			final String uuid = Preference.getUUID();
 			HashMap<String, String> params = new HashMap<String, String>();
@@ -172,6 +194,71 @@ public class API {
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static int versionCompare(String str1, String str2) {
+		Scanner s1 = new Scanner(str1);
+		Scanner s2 = new Scanner(str2);
+		s1.useDelimiter("\\.");
+		s2.useDelimiter("\\.");
+
+		while (s1.hasNextInt() && s2.hasNextInt()) {
+			int v1 = s1.nextInt();
+			int v2 = s2.nextInt();
+			if (v1 < v2) {
+				return -1;
+			} else if (v1 > v2) {
+				return 1;
+			}
+		}
+
+		if (s1.hasNextInt() && s1.nextInt() != 0)
+			return 1; // str1 has an additional lower-level version number
+		if (s2.hasNextInt() && s2.nextInt() != 0)
+			return -1; // str2 has an additional lower-level version
+
+		s1.close();
+		s2.close();
+		return 0;
+	}
+
+	public static void checkUpdate(Version version) {
+		try {
+			String updateJson = HttpHelper
+					.get("https://www.aixcoder.com/download/installtool/aixcoderinstaller_aixcoder.json");
+			JsonObject updateObj = new Gson().fromJson(updateJson, JsonObject.class);
+			String OS = System.getProperty("os.name").toLowerCase();
+			if (OS.contains("win")) {
+				updateObj = updateObj.getAsJsonObject("win");
+			} else {
+				updateObj = updateObj.getAsJsonObject("mac");
+			}
+			final String newVersion = updateObj.getAsJsonObject("eclipse").get("version").getAsString();
+			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
+				// new version available
+				new UIJob("Prompt aiXcoder update") {
+					
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						boolean update = MessageDialog.openQuestion(null, "New version available", String.format("A new version of aiXcoder %s is available, update now?", newVersion));
+						if (update) {
+							try {
+								Desktop.getDesktop().browse(new URI("https://www.aixcoder.com/download/installtool"));
+							} catch (IOException e) {
+								e.printStackTrace();
+								return Status.CANCEL_STATUS;
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+								return Status.CANCEL_STATUS;
+							}
+						}
+						return Status.OK_STATUS;
+					}
+				};
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

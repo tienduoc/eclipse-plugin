@@ -15,7 +15,6 @@ public class Preference {
 	public static final String MODEL = "MODEL";
 	public static final String P_UUID = "UUID";
 	public static final String PARAMS = "PARAMS";
-	public static final String SOCKET_ENDPOINT = "SOCKET_ENDPOINT";
 	public static final String SEARCH_ENDPOINT = "SEARCH_ENDPOINT";
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
@@ -45,17 +44,6 @@ public class Preference {
 	public static String getParams() {
 		return preferenceManager.getString(PARAMS);
 	}
-	
-	public static String getSocketEndpoint() {
-		String endpoint = preferenceManager.getString(SOCKET_ENDPOINT);
-		return endpoint.substring(0, endpoint.lastIndexOf(":"));
-	}
-	
-	public static int getSocketEndpointPort() {
-		String endpoint = preferenceManager.getString(SOCKET_ENDPOINT);
-		return Integer.parseInt(endpoint.substring(endpoint.lastIndexOf(":") + 1));
-	}
-	
 	public static String getSearchEndpoint() {
 		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getString(SEARCH_ENDPOINT);

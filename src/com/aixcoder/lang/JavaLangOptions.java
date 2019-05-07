@@ -250,40 +250,28 @@ public class JavaLangOptions extends LangOptions {
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 			stringBuilder.append(c);
-			if (c == '"') {
-				i++;
-				int strStart = i;
-				for (; i < s.length(); i++) {
-					if (s.charAt(i) == '"')
-						break;
-					if (s.charAt(i) == '\\') {
-						i++;
-					}
-				}
-				String strContent = s.substring(strStart, i);
-				if (trivialLiterals.contains(strContent)) {
-					stringBuilder.append(strContent);
-				}
-				stringBuilder.append("\"");
-
-			} else if (c == '\'') {
-				i++;
-				int strStart = i;
-				for (; i < s.length(); i++) {
-					stringBuilder.append(s.charAt(i));
-					if (s.charAt(i) == '\'')
-						break;
-					if (s.charAt(i) == '\\') {
-						i++;
-					}
-				}
-				String strContent = s.substring(strStart, i);
-				if (trivialLiterals.contains(strContent)) {
-					stringBuilder.append(strContent);
-				}
-				stringBuilder.append("'");
+			if (c == '"' || c == '\'') {
+				i = skipString(s, trivialLiterals, stringBuilder, i, c);
 			}
 		}
 		return stringBuilder.toString();
+	}
+
+	private int skipString(String s, Set<String> trivialLiterals, StringBuilder stringBuilder, int i, char c) {
+		i++;
+		int strStart = i;
+		for (; i < s.length(); i++) {
+			if (s.charAt(i) == c)
+				break;
+			if (s.charAt(i) == '\\') {
+				i++;
+			}
+		}
+		String strContent = s.substring(strStart, i);
+		if (trivialLiterals.contains(strContent)) {
+			stringBuilder.append(strContent);
+		}
+		stringBuilder.append(c);
+		return i;
 	}
 }

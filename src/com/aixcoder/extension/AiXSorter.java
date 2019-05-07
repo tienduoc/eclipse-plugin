@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
@@ -13,7 +12,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.OverlayIcon;
-import com.aixcoder.utils.Pair;
+import com.aixcoder.utils.Predict.SortResult;
 
 /**
  * Sort instances of {@link AiXCompletionProposal} to the top. p1 < p2 means p1
@@ -26,7 +25,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 			.createImage();
 
 	private ICompletionProposalSorter sorter;
-	public List<Pair<Double, String>> list;
+	public SortResult[] list;
 
 	public AiXSorter(ICompletionProposalSorter sorter) {
 		this.sorter = sorter;
@@ -95,8 +94,8 @@ public class AiXSorter implements ICompletionProposalSorter {
 
 	double getScore(ICompletionProposal p, String s) {
 		if (list != null && !(p instanceof AiXCompletionProposal)) {
-			for (Pair<Double, String> pair : list) {
-				if (s.equals(pair.second) || s.startsWith(pair.second + " ") || s.startsWith(pair.second + "(")) {
+			for (SortResult pair : list) {
+				if (s.equals(pair.word) || s.startsWith(pair.word + " ") || s.startsWith(pair.word + "(")) {
 					Image i = p.getImage();
 					if (i == null) {
 						i = blankImage;
@@ -110,7 +109,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 					}
 					Image overlay = cachedOverlays.get(i);
 					setImage(p, overlay);
-					return pair.first;
+					return pair.prob;
 				}
 			}
 		}
