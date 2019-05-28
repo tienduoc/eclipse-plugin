@@ -6,12 +6,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import com.aixcoder.core.API;
+import com.aixcoder.core.ReportType;
 
 public class AiXReportJob extends Job {
 
-	private String type;
+	private ReportType type;
 
-	public AiXReportJob(String type) {
+	public AiXReportJob(ReportType type) {
 		super("AiX Report " + type);
 		this.type = type;
 	}

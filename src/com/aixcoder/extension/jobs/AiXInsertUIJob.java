@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.PredictCache;
 import com.aixcoder.core.PredictContext;
+import com.aixcoder.core.ReportType;
 import com.aixcoder.extension.AiXAbortInsertionException;
 import com.aixcoder.extension.AiXSorter;
 import com.aixcoder.extension.AiXUIJob;
@@ -77,12 +78,14 @@ public class AiXInsertUIJob extends AiXUIJob {
 					fFilteredProposals.add(0, proposal);
 					fComputedProposal.add(0, proposal);	
 				}
-				new AiXReportJob("show").schedule();
+				new AiXReportJob(ReportType.SHOW).schedule();
 			}
 		} catch (AiXAbortInsertionException e) {
+			new AiXReportJob(ReportType.INTERRUPT).schedule();
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
+			new AiXReportJob(ReportType.ERROR).schedule();
 			throw new AiXAbortInsertionException(e);
 		}
 	}

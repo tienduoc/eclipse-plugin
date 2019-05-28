@@ -16,13 +16,16 @@ import java.util.zip.DeflaterOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.Version;
 
+import com.aixcoder.extension.Activator;
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.Preference;
+import com.aixcoder.lib.HttpRequest.HttpRequestException;
 import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
@@ -42,7 +45,8 @@ public class API {
 	public static String[] getModels() {
 		String body;
 		try {
-			if (Preference.getEndpoint().isEmpty()) return null;
+			if (Preference.getEndpoint().isEmpty())
+				return null;
 			body = HttpHelper.get(Preference.getEndpoint() + "getmodels");
 			JsonArray jo = new Gson().fromJson(body, JsonElement.class).getAsJsonArray();
 			String[] models = CollectionUtils.getStringList(jo);
@@ -60,14 +64,24 @@ public class API {
 		return r;
 	}
 
-	public static void report(String type) {
-		final String uuid = Preference.getUUID();
-		Map<String, String> m = new HashMap<String, String>();
-		m.put("uuid", uuid);
-		try {
-			HttpHelper.get(Preference.getEndpoint() + "user/predict/" + type, m);
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+	public static void report(ReportType type) {
+		if (Preference.allowTelemetry()) {
+			System.out.println("API.report " + type.name());
+			final String uuid = Preference.getUUID();
+			Map<String, String> m = new HashMap<String, String>();
+			m.put("type", String.valueOf(type.getValue()));
+			m.put("area", Preference.getModel());
+			m.put("plugin_version", Platform.getBundle(Activator.PLUGIN_ID).getVersion().toString());
+			m.put("ide_version", Platform.getBundle("org.eclipse.platform").getVersion().toString());
+			m.put("ide_type", "eclipse");
+			m.put("uuid", uuid);
+			try {
+				HttpHelper.post(Preference.getEndpoint() + "user/predict/userUseInfo", m);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			} catch (HttpRequestException e ) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -198,30 +212,37 @@ public class API {
 		}
 	}
 
-	public static int versionCompare(String str1, String str2) {
-		Scanner s1 = new Scanner(str1);
-		Scanner s2 = new Scanner(str2);
+	static int versionCompare(Scanner s1, Scanner s2) {
 		s1.useDelimiter("\\.");
 		s2.useDelimiter("\\.");
-
+		int result = -2;
 		while (s1.hasNextInt() && s2.hasNextInt()) {
 			int v1 = s1.nextInt();
 			int v2 = s2.nextInt();
 			if (v1 < v2) {
-				return -1;
+				return result;
 			} else if (v1 > v2) {
-				return 1;
+				return result;
 			}
 		}
 
-		if (s1.hasNextInt() && s1.nextInt() != 0)
+		if (s1.hasNextInt() && s1.nextInt() != 0) {
 			return 1; // str1 has an additional lower-level version number
-		if (s2.hasNextInt() && s2.nextInt() != 0)
+		}
+		if (s2.hasNextInt() && s2.nextInt() != 0) {
 			return -1; // str2 has an additional lower-level version
+		}
 
+		return 0;
+	}
+
+	public static int versionCompare(String str1, String str2) {
+		Scanner s1 = new Scanner(str1);
+		Scanner s2 = new Scanner(str2);
+		int r = versionCompare(s1, s2);
 		s1.close();
 		s2.close();
-		return 0;
+		return r;
 	}
 
 	public static void checkUpdate(Version version) {
@@ -239,10 +260,11 @@ public class API {
 			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
 				// new version available
 				new UIJob("Prompt aiXcoder update") {
-					
+
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean update = MessageDialog.openQuestion(null, "New version available", String.format("A new version of aiXcoder %s is available, update now?", newVersion));
+						boolean update = MessageDialog.openQuestion(null, "New version available",
+								String.format("A new version of aiXcoder %s is available, update now?", newVersion));
 						if (update) {
 							try {
 								Desktop.getDesktop().browse(new URI("https://www.aixcoder.com/download/installtool"));

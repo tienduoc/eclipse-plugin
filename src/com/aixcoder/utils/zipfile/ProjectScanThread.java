@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.aixcoder.core.API;
+import com.aixcoder.lib.HttpRequest.HttpRequestException;
 
 public class ProjectScanThread extends Thread {
 	private final HashMap<String, Long> lastChecked = new HashMap<String, Long>();
@@ -99,6 +100,8 @@ public class ProjectScanThread extends Thread {
 				Thread.sleep(10 * 60 * 1000);
 			} catch (InterruptedException e) {
 				break;
+			} catch (HttpRequestException e) {
+				e.printStackTrace();
 			}
 		}
 	}

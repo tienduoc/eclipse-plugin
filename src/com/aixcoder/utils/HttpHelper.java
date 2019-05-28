@@ -95,7 +95,9 @@ public class HttpHelper {
 			}
 		}
 		httpRequest.connectTimeout(TIME_OUT).readTimeout(TIME_OUT).useCaches(false);
-		prepare.apply(httpRequest);
+		if (prepare != null) {
+			prepare.apply(httpRequest);
+		}
 		try {
 			String r = httpRequest.body();
 			return r;
@@ -113,8 +115,17 @@ public class HttpHelper {
 		return requestRaw(method, url, null, prepare);
 	}
 
+	public static String post(String url) throws URISyntaxException {
+		return request(HTTPMethod.POST, url, null, null);
+	}
+
 	public static String post(String url, Consumer<HttpRequest> prepare) throws URISyntaxException {
 		return request(HTTPMethod.POST, url, null, prepare);
+	}
+
+	public static String post(String url, Map<String, String> params)
+			throws URISyntaxException {
+		return request(HTTPMethod.POST, url, params, null);
 	}
 
 	public static String post(String url, Map<String, String> params, Consumer<HttpRequest> prepare)

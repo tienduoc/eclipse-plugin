@@ -2,12 +2,14 @@ package com.aixcoder.core;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageDataProvider;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.internal.util.Util;
 
 /**
  * An OverlayIcon consists of a main icon and an overlay icon
  */
+@SuppressWarnings("restriction")
 public class OverlayIcon extends CompositeImageDescriptor {
 
     // the size of the OverlayIcon
@@ -32,11 +34,13 @@ public class OverlayIcon extends CompositeImageDescriptor {
 
     @Override
 	protected void drawCompositeImage(int width, int height) {
-        ImageData bg = fBase;
-        if (fBase == null) {
-			bg = DEFAULT_IMAGE_DATA;
-		}
-        drawImage(bg, 0, 0);
+        final ImageData bg = fBase != null ? fBase : DEFAULT_IMAGE_DATA;
+        drawImage(new ImageDataProvider() {
+			@Override
+			public ImageData getImageData(int zoom) {
+				return bg;
+			}
+		}, 0, 0);
 
         if (fOverlay != null) {
 			drawTopRight(fOverlay);
@@ -52,9 +56,14 @@ public class OverlayIcon extends CompositeImageDescriptor {
 			return;
 		}
         int x = getSize().x;
-        ImageData id = overlay;
+        final ImageData id = overlay;
         x -= id.width;
-        drawImage(id, x, getSize().y - id.height);
+        drawImage(new ImageDataProvider() {
+			@Override
+			public ImageData getImageData(int zoom) {
+				return id;
+			}
+		}, x, getSize().y - id.height);
     }
 
     @Override
