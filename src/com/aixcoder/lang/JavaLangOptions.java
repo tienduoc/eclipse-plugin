@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
+import com.aixcoder.lib.Preference;
+import com.aixcoder.utils.Pair;
+import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.BiFunction;
 
 public class JavaLangOptions extends LangOptions {
@@ -273,5 +282,77 @@ public class JavaLangOptions extends LangOptions {
 		}
 		stringBuilder.append(c);
 		return i;
+	}
+
+	Pattern packagePattern = Pattern.compile("^\\s*package\\s.*$");
+	Pattern importPattern = Pattern.compile("^\\s*import\\s+(.*)$");
+
+	private int prepareImports(ArrayList<Pair<String, Integer>> imports, String[] lines, int importStart) {
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (importStart == -1 && packagePattern.matcher(line).matches()) {
+				importStart = i;
+				for (i++; i < lines.length; i++) {
+					line = lines[i];
+					if (!line.trim().isEmpty()) {
+						break;
+					}
+					importStart = i;
+				}
+			}
+			Matcher m = importPattern.matcher(line);
+			if (m.matches()) {
+				imports.add(new Pair<String, Integer>(m.group(1), i));
+			}
+		}
+		return importStart;
+	}
+
+	private void rescueImport(Rescue rescue, int importStart, ArrayList<Pair<String, Integer>> imports,
+			IDocument document) {
+		try {
+			int prevImportStart = importStart;
+			for (int i = 0; i < imports.size(); i++) {
+				String importContent = imports.get(i).first;
+				int compareResult = importContent.compareTo(rescue.value);
+				if (compareResult > 0) {
+					// stop here
+					imports.add(i, new Pair<String, Integer>(rescue.value, prevImportStart + 1));
+					int offset = document.getLineInformation(prevImportStart + 1).getOffset();
+					document.replace(offset, 0, String.format("import %s;\n", rescue.value));
+					for (i += 1; i < imports.size(); i++) {
+						imports.get(i).second++;
+					}
+					return;
+				}
+			}
+			imports.add(new Pair<String, Integer>(rescue.value, prevImportStart + 1));
+			int offset = document.getLineInformation(prevImportStart + 1).getOffset();
+			document.replace(offset, 0, String.format("import %s;\n", rescue.value));
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void rescue(IDocument document, Rescue[] rescues) {
+		ArrayList<Pair<String, Integer>> imports = null;
+		String text = document.get();
+		String[] lines = text.split("\r?\n");
+		int importStart = -1;
+
+		for (Rescue rescue : rescues) {
+			if (rescue.type.equals("import")) {
+				if (Preference.getAutoImport()) {
+					if (imports == null) {
+						imports = new ArrayList<Pair<String, Integer>>();
+						importStart = prepareImports(imports, lines, importStart);
+					}
+					rescueImport(rescue, importStart, imports, document);
+				}
+			} else {
+				System.out.println(String.format("Unknown rescue type %s with value=%s", rescue.type, rescue.value));
+			}
+		}
 	}
 }

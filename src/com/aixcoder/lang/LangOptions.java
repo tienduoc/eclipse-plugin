@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jface.text.IDocument;
+
+import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.BiFunction;
 import com.aixcoder.utils.shims.Supplier;
 
@@ -187,4 +190,7 @@ public abstract class LangOptions {
 	public abstract String[] getMultiCharacterSymbolList();
 
 	public abstract String datamask(String s, Set<String> trivialLiterals);
+
+	public void rescue(IDocument document, Rescue[] rescues) {
+	};
 }

@@ -16,6 +16,7 @@ public class Preference {
 	public static final String P_UUID = "UUID";
 	public static final String PARAMS = "PARAMS";
 	public static final String SEARCH_ENDPOINT = "SEARCH_ENDPOINT";
+	public static final String AUTO_IMPORT = "AUTO_IMPORT";
 	public static final String ALLOW_TELEMETRY = "ALLOW_TELEMETRY";
 	public static final String ASKED_TELEMETRY = "ASKED_TELEMETRY";
 
@@ -51,6 +52,11 @@ public class Preference {
 	public static String getSearchEndpoint() {
 		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getString(SEARCH_ENDPOINT);
+	}
+
+	public static boolean getAutoImport() {
+		new AiXPreInitializer().initializeDefaultPreferences();
+		return preferenceManager.getBoolean(AUTO_IMPORT);
 	}
 
 	public static boolean allowTelemetry() {

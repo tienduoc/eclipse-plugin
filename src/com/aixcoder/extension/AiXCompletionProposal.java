@@ -12,6 +12,8 @@ import org.eclipse.swt.graphics.Point;
 
 import com.aixcoder.core.ReportType;
 import com.aixcoder.extension.jobs.AiXReportJob;
+import com.aixcoder.lang.LangOptions;
+import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.CollectionUtils;
 
 /**
@@ -36,6 +38,8 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	/** The context information of this proposal. */
 	private IContextInformation fContextInformation;
 	private String[] fRCompletion;
+	private Rescue[] fRescues;
+	private LangOptions fLangOptions;
 
 	/**
 	 * Creates a new completion proposal based on the provided information. The
@@ -50,7 +54,8 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	 */
 	public AiXCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
 			int cursorPosition) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null, null);
+		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null, null,
+				null, null);
 	}
 
 	/**
@@ -72,7 +77,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	 */
 	public AiXCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
 			int cursorPosition, Image image, String displayString, IContextInformation contextInformation,
-			String additionalProposalInfo, String[] rCompletion) {
+			String additionalProposalInfo, String[] rCompletion, Rescue[] rescues, LangOptions langOptions) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -89,6 +94,8 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		}
 		fContextInformation = contextInformation;
 		fRCompletion = rCompletion;
+		fRescues = rescues;
+		fLangOptions = langOptions;
 	}
 
 	@Override
@@ -96,7 +103,11 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		try {
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
 			if (fRCompletion != null) {
-				document.replace(fReplacementOffset + fReplacementString.length(), 0, CollectionUtils.join("", fRCompletion));
+				document.replace(fReplacementOffset + fReplacementString.length(), 0,
+						CollectionUtils.join("", fRCompletion));
+			}
+			if (fRescues != null && fRescues.length > 0) {
+				fLangOptions.rescue(document, fRescues);
 			}
 			new AiXReportJob(ReportType.USE).schedule();
 		} catch (BadLocationException x) {
@@ -148,7 +159,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 //		return "long long result " + Math.random();
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "AiXCompletionProposal: " + fReplacementString;

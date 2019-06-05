@@ -27,8 +27,10 @@ import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.Preference;
 import com.aixcoder.lib.HttpRequest.HttpRequestException;
 import com.aixcoder.utils.CodeStore;
+import com.aixcoder.utils.CompletionOptions;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
 import com.aixcoder.utils.shims.CollectionUtils;
@@ -79,10 +81,25 @@ public class API {
 				HttpHelper.post(Preference.getEndpoint() + "user/predict/userUseInfo", m);
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
-			} catch (HttpRequestException e ) {
+			} catch (HttpRequestException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private static Rescue[] readRescues(JsonArray jsonRescues) {
+		if (jsonRescues != null && jsonRescues.size() > 0) {
+			Rescue[] rescues = new Rescue[jsonRescues.size()];
+			for (int rescue_i = 0; rescue_i < jsonRescues.size(); rescue_i++) {
+				JsonObject jsonRescue = jsonRescues.get(rescue_i).getAsJsonObject();
+				Rescue rescue = new Rescue();
+				rescue.type = jsonRescue.get("type").getAsString();
+				rescue.value = jsonRescue.get("value").getAsString();
+				rescues[rescue_i] = rescue;
+			}
+			return rescues;
+		}
+		return null;
 	}
 
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
@@ -134,18 +151,41 @@ public class API {
 					CodeStore.getInstance().saveLastSent(proj, fileid, maskedText);
 
 					JsonObject json = list.get(0).getAsJsonObject();
-					String[] tokens = CollectionUtils.getStringList(json.get("tokens").getAsJsonArray());
-					String current = json.get("current").getAsString();
-					String[] rCompletion = CollectionUtils.getStringList(json.get("r_completion").getAsJsonArray());
+
+					JsonElement jsonTokens = json.get("tokens");
+					String[] tokens = CollectionUtils
+							.getStringList(jsonTokens != null ? jsonTokens.getAsJsonArray() : null);
+
+					JsonElement jsonCurrent = json.get("current");
+					String current = jsonCurrent != null ? jsonCurrent.getAsString() : "";
+
+					JsonElement jsonRCompletion = json.get("r_completion");
+					String[] rCompletion = CollectionUtils
+							.getStringList(jsonRCompletion != null ? jsonRCompletion.getAsJsonArray() : null);
+
 					JsonArray sortList = json.getAsJsonArray("sort");
-					SortResult[] sortResults = new SortResult[sortList.size()];
+					SortResult[] sortResults = new SortResult[sortList != null ? sortList.size() : 0];
 					for (int i = 0; i < sortResults.length; i++) {
 						JsonArray asJsonArray = sortList.get(i).getAsJsonArray();
 						double prob = asJsonArray.get(0).getAsDouble();
 						String word = asJsonArray.get(1).getAsString();
-						sortResults[i] = new SortResult(prob, word);
+						CompletionOptions options = null;
+						if (asJsonArray.size() >= 3) {
+							options = new CompletionOptions();
+							JsonObject jsonOptions = asJsonArray.get(2).getAsJsonObject();
+							if (jsonOptions.get("forced") != null && jsonOptions.get("forced").getAsBoolean()) {
+								options.forced = true;
+							}
+							if (jsonOptions.get("rescues") != null) {
+								JsonArray rescues = jsonOptions.get("rescues").getAsJsonArray();
+								options.rescues = readRescues(rescues);
+							}
+						}
+						sortResults[i] = new SortResult(prob, word, options);
 					}
-					return new PredictResult(tokens, current, rCompletion, sortResults);
+					JsonElement jsonRescues = json.get("rescues");
+					Rescue[] rescues = readRescues(jsonRescues != null ? jsonRescues.getAsJsonArray() : null);
+					return new PredictResult(tokens, current, rCompletion, sortResults, rescues);
 				}
 			}
 		} catch (HttpRequest.HttpRequestException e) {
@@ -158,7 +198,7 @@ public class API {
 			e.printStackTrace();
 			return null;
 		}
-		return new PredictResult(new String[0], "", null, new SortResult[0]);
+		return new PredictResult(new String[0], "", null, new SortResult[0], null);
 	}
 
 	public static String[] getTrivialLiterals() {

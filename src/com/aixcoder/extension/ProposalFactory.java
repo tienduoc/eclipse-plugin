@@ -4,6 +4,9 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Image;
 
+import com.aixcoder.lang.LangOptions;
+import com.aixcoder.utils.Rescue;
+
 public class ProposalFactory {
 	public ContentAssistInvocationContext context;
 	static final Image image = Activator
@@ -14,8 +17,8 @@ public class ProposalFactory {
 		this.context = context;
 	}
 
-	public ICompletionProposal createProposal(int invocationOffset, String display, String insert, String current, String[] rCompletion) {
+	public ICompletionProposal createProposal(int invocationOffset, String display, String insert, String current, String[] rCompletion, Rescue[] rescues, LangOptions langOptions) {
 		return new AiXCompletionProposal(current + insert, invocationOffset - current.length(), current.length(), current.length() + insert.length(), image,
-				display, null, "additionalProposalInfo", rCompletion);
+				display, null, "additionalProposalInfo", rCompletion, rescues, langOptions);
 	}
 }

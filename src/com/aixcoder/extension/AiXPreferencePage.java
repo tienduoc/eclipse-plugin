@@ -28,6 +28,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(new StringFieldEditor(Preference.ENDPOINT, "&Server URL", parent));
 		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, "Searc&h URL", parent));
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, "Allow &Telemetry", parent));
+		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, "Auto &Import Classes", parent));
 
 		String[][] entryNamesAndValues = getModels();
 		addField(new ComboFieldEditor(Preference.MODEL, "&Model", entryNamesAndValues, parent));

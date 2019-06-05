@@ -42,6 +42,8 @@ public class CollectionUtils {
 	}
 
 	public static String[] getStringList(JsonArray ja) {
+		if (ja == null)
+			return new String[0];
 		int size = ja.size();
 		String[] r = new String[size];
 		for (int i = 0; i < size; i++) {

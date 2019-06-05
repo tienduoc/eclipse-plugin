@@ -17,6 +17,7 @@ import com.aixcoder.extension.AiXAbortInsertionException;
 import com.aixcoder.extension.AiXSorter;
 import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.extension.ProposalFactory;
+import com.aixcoder.lang.LangOptions;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.RenderedInfo;
 import com.aixcoder.utils.TokenUtils;
@@ -61,9 +62,10 @@ public class AiXInsertUIJob extends AiXUIJob {
 				throw new AiXAbortInsertionException();
 			} else {
 				ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
-				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current);
+				LangOptions langOptions = LangOptions.getInstance("java");
+				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current, langOptions);
 				ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
-						rendered.insert, predictResult.current, predictResult.rCompletions);
+						rendered.insert, predictResult.current, predictResult.rCompletions, predictResult.rescues, langOptions);
 
 				fSorter.longProposal = null;
 				String longDisplay = proposal.getDisplayString().trim();
