@@ -79,8 +79,8 @@ public class AiXInsertUIJob extends AiXUIJob {
 					}
 				}
 				fSorter.list = predictResult.sortResults;
-				if (predictResult.sortResults == null || predictResult.sortResults.length == 0
-						|| !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?")) {
+				if (fSorter.longProposal == null && (predictResult.sortResults == null || predictResult.sortResults.length == 0
+						|| !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?"))) {
 					fFilteredProposals.add(0, proposal);
 					fComputedProposal.add(0, proposal);
 				}

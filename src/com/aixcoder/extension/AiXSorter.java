@@ -155,7 +155,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 	}
 
 	double getScore(ICompletionProposal p) {
-		if (longProposal == p) {
+		if (longProposal == p && p instanceof AiXCompletionProposal) {
 			setImage(p, ProposalFactory.image);
 			return 1;
 		}

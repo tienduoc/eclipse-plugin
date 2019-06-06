@@ -17,6 +17,7 @@ public class Preference {
 	public static final String PARAMS = "PARAMS";
 	public static final String SEARCH_ENDPOINT = "SEARCH_ENDPOINT";
 	public static final String AUTO_IMPORT = "AUTO_IMPORT";
+	public static final String SORT_ONLY = "SORT_ONLY";
 	public static final String ALLOW_TELEMETRY = "ALLOW_TELEMETRY";
 	public static final String ASKED_TELEMETRY = "ASKED_TELEMETRY";
 
@@ -57,6 +58,11 @@ public class Preference {
 	public static boolean getAutoImport() {
 		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getBoolean(AUTO_IMPORT);
+	}
+	
+	public static boolean sortOnly() {
+		new AiXPreInitializer().initializeDefaultPreferences();
+		return preferenceManager.getBoolean(SORT_ONLY);
 	}
 
 	public static boolean allowTelemetry() {

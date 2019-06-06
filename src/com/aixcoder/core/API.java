@@ -122,6 +122,9 @@ public class API {
 							.form("ext", Preference.getModel()).form("fileid", fileid)
 							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
 							.form("md5", md5).form("sort", 1);
+					if (Preference.sortOnly()) {
+						httpRequest.form("ngen", 1);
+					}
 
 					String params = Preference.getParams();
 					for (String param : params.split("&")) {
