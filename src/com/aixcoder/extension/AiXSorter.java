@@ -93,7 +93,8 @@ public class AiXSorter implements ICompletionProposalSorter {
 	static Image blankImage = new Image(Display.getDefault(), 16, 16);
 
 	double getScore(ICompletionProposal p, String s) {
-		if (list != null && !(p instanceof AiXCompletionProposal)) {
+		if (list != null && !(p instanceof AiXCompletionProposal) && !(p.getClass().getName()
+				.equals("org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal"))) {
 			if (p instanceof AiXForcedSortCompletionProposal) {
 				addImageOverlay(p);
 				return ((AiXForcedSortCompletionProposal) p).getScore();

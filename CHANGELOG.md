@@ -10,5 +10,6 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ### Changed
 - Use new telemetry API.
+- No longer sort template completions to top.
 
 ### Fixed
