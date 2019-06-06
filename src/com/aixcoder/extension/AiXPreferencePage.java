@@ -1,6 +1,7 @@
 package com.aixcoder.extension;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
+
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -13,6 +14,11 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.aixcoder.core.API;
 import com.aixcoder.core.PredictCache;
 import com.aixcoder.lib.Preference;
+import com.aixcoder.i18n.EN;
+import com.aixcoder.i18n.Localization;
+import com.aixcoder.i18n.ZH;
+
+import static com.aixcoder.i18n.Localization.R;
 
 public class AiXPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private IPropertyChangeListener onPropertyChange;
@@ -24,16 +30,18 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 	public void createFieldEditors() {
 		new AiXPreInitializer().initializeDefaultPreferences();
 		Composite parent = getFieldEditorParent();
-		addField(new BooleanFieldEditor(Preference.ACTIVE, "&Enable aiXcoder", parent));
-		addField(new StringFieldEditor(Preference.ENDPOINT, "&Server URL", parent));
-		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, "Searc&h URL", parent));
-		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, "Auto &Import Classes", parent));
-		addField(new BooleanFieldEditor(Preference.SORT_ONLY, "Sort only (will decrease delay)", parent));
-		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, "Allow &Telemetry", parent));
+		addField(new BooleanFieldEditor(Preference.ACTIVE, R(Localization.enableAiXCoder), parent));
+		addField(new StringFieldEditor(Preference.ENDPOINT, R(Localization.serverURL), parent));
+		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, R(Localization.searchURL), parent));
+		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
+		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
+		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
+		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),
+				new String[][] { { "English", EN.id }, { "简体中文(Chinese Simplified)", ZH.id } }, parent));
 
 		String[][] entryNamesAndValues = getModels();
-		addField(new ComboFieldEditor(Preference.MODEL, "&Model", entryNamesAndValues, parent));
-		addField(new StringFieldEditor(Preference.PARAMS, "Additional &Parameters", parent));
+		addField(new ComboFieldEditor(Preference.MODEL, R(Localization.model), entryNamesAndValues, parent));
+		addField(new StringFieldEditor(Preference.PARAMS, R(Localization.additionalParameters), parent));
 	}
 
 	private String[][] getModels() {
@@ -62,8 +70,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 			}
 		};
 		getPreferenceStore().addPropertyChangeListener(onPropertyChange);
-		setDescription(
-				"AiXcoder is an AI-powered code completion service. Visit https://aixcoder.com for more information.");
+		setDescription(R(Localization.description));
 	}
 
 	public void dispose() {

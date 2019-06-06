@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import com.aixcoder.i18n.EN;
 import com.aixcoder.lib.Preference;
 
 public class AiXPreInitializer extends AbstractPreferenceInitializer {
@@ -22,6 +23,7 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 			scopedPreferenceStore.setDefault(Preference.ALLOW_TELEMETRY, true);
 			scopedPreferenceStore.setDefault("INITIALIZED", true);
 			scopedPreferenceStore.setDefault(Preference.PARAMS, "");
+			scopedPreferenceStore.setDefault(Preference.LANGUAGE, EN.id);
 			Preference.getUUID();
 			try {
 				scopedPreferenceStore.save();

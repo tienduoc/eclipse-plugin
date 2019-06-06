@@ -96,7 +96,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 		if (list != null && !(p instanceof AiXCompletionProposal)) {
 			if (p instanceof AiXForcedSortCompletionProposal) {
 				addImageOverlay(p);
-				return ((AiXForcedSortCompletionProposal)p).getScore();
+				return ((AiXForcedSortCompletionProposal) p).getScore();
 			}
 			for (SortResult pair : list) {
 				if (s.equals(pair.word) || s.startsWith(pair.word + " ") || s.startsWith(pair.word + "(")) {
@@ -115,8 +115,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 		}
 		if (!cachedOverlays.containsKey(i)) {
 			Image overlay;
-			OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(),
-					new Point(16, 16));
+			OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(), new Point(16, 16));
 			overlay = resultIcon.createImage();
 			cachedOverlays.put(i, overlay);
 		}
