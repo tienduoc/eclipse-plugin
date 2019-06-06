@@ -63,7 +63,7 @@ public class Preference {
 		new AiXPreInitializer().initializeDefaultPreferences();
 		return preferenceManager.getBoolean(ALLOW_TELEMETRY);
 	}
-	
+
 	public static boolean askedTelemetry() {
 		return preferenceManager.getBoolean(ASKED_TELEMETRY);
 	}

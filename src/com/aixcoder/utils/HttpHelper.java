@@ -123,8 +123,7 @@ public class HttpHelper {
 		return request(HTTPMethod.POST, url, null, prepare);
 	}
 
-	public static String post(String url, Map<String, String> params)
-			throws URISyntaxException {
+	public static String post(String url, Map<String, String> params) throws URISyntaxException {
 		return request(HTTPMethod.POST, url, params, null);
 	}
 

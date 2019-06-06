@@ -27,6 +27,7 @@ import com.aixcoder.utils.zipfile.ProjectScan;
 @SuppressWarnings("restriction")
 public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 	static long t;
+
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {

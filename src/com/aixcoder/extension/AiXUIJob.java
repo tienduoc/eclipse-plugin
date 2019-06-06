@@ -45,7 +45,7 @@ public abstract class AiXUIJob extends UIJob {
 
 	@Override
 	public IStatus runInUIThread(IProgressMonitor monitor) {
-		System.out.println(getName() + " schedule took " + (Calendar.getInstance().getTimeInMillis()- t) + "ms");
+		System.out.println(getName() + " schedule took " + (Calendar.getInstance().getTimeInMillis() - t) + "ms");
 		try {
 			Field fContentAssistantField = SourceViewer.class.getDeclaredField("fContentAssistant");
 			fContentAssistantField.setAccessible(true);

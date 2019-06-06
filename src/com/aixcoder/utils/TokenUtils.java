@@ -83,7 +83,8 @@ public class TokenUtils {
 		return r;
 	}
 
-	public static RenderedInfo renderTokens(String lang, String line, List<String> tokens, String current_yu, LangOptions langOptions) {
+	public static RenderedInfo renderTokens(String lang, String line, List<String> tokens, String current_yu,
+			LangOptions langOptions) {
 		CodeUtils utils = CodeUtils.getInstance(lang);
 		// 将<BREAK>标签移除,不做字符前后的空格处理
 		if (tokens == null || tokens.isEmpty()) {

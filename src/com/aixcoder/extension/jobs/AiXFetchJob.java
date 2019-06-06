@@ -43,7 +43,7 @@ public class AiXFetchJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		System.out.println("AiXFetchJob schedule took " + (Calendar.getInstance().getTimeInMillis()- t) + "ms");
+		System.out.println("AiXFetchJob schedule took " + (Calendar.getInstance().getTimeInMillis() - t) + "ms");
 		if (lastInstance != this)
 			return Status.CANCEL_STATUS;
 		try {

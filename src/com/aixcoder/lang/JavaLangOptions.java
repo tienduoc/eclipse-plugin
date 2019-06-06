@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 
 import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.Pair;

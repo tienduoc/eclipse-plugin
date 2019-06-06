@@ -19,6 +19,7 @@ import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.extension.ProposalFactory;
 import com.aixcoder.lang.LangOptions;
 import com.aixcoder.utils.Predict.PredictResult;
+import com.aixcoder.utils.Predict.SortResult;
 import com.aixcoder.utils.RenderedInfo;
 import com.aixcoder.utils.TokenUtils;
 
@@ -63,9 +64,11 @@ public class AiXInsertUIJob extends AiXUIJob {
 			} else {
 				ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
 				LangOptions langOptions = LangOptions.getInstance("java");
-				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current, langOptions);
+				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current,
+						langOptions);
 				ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
-						rendered.insert, predictResult.current, predictResult.rCompletions, predictResult.rescues, langOptions);
+						rendered.insert, predictResult.current, predictResult.rCompletions, predictResult.rescues,
+						langOptions);
 
 				fSorter.longProposal = null;
 				String longDisplay = proposal.getDisplayString().trim();
@@ -76,10 +79,33 @@ public class AiXInsertUIJob extends AiXUIJob {
 					}
 				}
 				fSorter.list = predictResult.sortResults;
-				if (predictResult.sortResults.length == 0 || !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?")) {
+				if (predictResult.sortResults == null || predictResult.sortResults.length == 0
+						|| !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?")) {
 					fFilteredProposals.add(0, proposal);
-					fComputedProposal.add(0, proposal);	
+					fComputedProposal.add(0, proposal);
 				}
+				if (predictResult.sortResults != null) {
+					for (SortResult sortResult : predictResult.sortResults) {
+						if (sortResult.options != null && sortResult.options.forced) {
+							boolean matched = false;
+							for (ICompletionProposal p : fComputedProposal) {
+								String s = p.getDisplayString();
+								if (s.equals(sortResult.word) || s.startsWith(sortResult.word + " ")
+										|| s.startsWith(sortResult.word + "(")) {
+									matched = true;
+									break;
+								}
+							}
+							if (!matched) {
+								ICompletionProposal forcedProposal = proposalFactory.createForcedSortProposal(
+										selection.x, sortResult.word, predictResult.current, sortResult.prob);
+								fFilteredProposals.add(0, forcedProposal);
+								fComputedProposal.add(0, forcedProposal);
+							}
+						}
+					}
+				}
+
 				new AiXReportJob(ReportType.SHOW).schedule();
 			}
 		} catch (AiXAbortInsertionException e) {

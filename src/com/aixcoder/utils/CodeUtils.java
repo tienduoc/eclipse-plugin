@@ -95,7 +95,8 @@ public class CodeUtils {
 			return CollectionUtils.join("", Collections.nCopies(size, " "));
 		} else {
 			int tabSize = LangOptions.getInstance(lang).getTabSize();
-			return CollectionUtils.join("", Collections.nCopies(size / tabSize, "\t")) + getIndentString(size % tabSize, true);
+			return CollectionUtils.join("", Collections.nCopies(size / tabSize, "\t"))
+					+ getIndentString(size % tabSize, true);
 		}
 	}
 }

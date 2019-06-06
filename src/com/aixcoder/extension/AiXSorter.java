@@ -94,26 +94,34 @@ public class AiXSorter implements ICompletionProposalSorter {
 
 	double getScore(ICompletionProposal p, String s) {
 		if (list != null && !(p instanceof AiXCompletionProposal)) {
+			if (p instanceof AiXForcedSortCompletionProposal) {
+				addImageOverlay(p);
+				return ((AiXForcedSortCompletionProposal)p).getScore();
+			}
 			for (SortResult pair : list) {
 				if (s.equals(pair.word) || s.startsWith(pair.word + " ") || s.startsWith(pair.word + "(")) {
-					Image i = p.getImage();
-					if (i == null) {
-						i = blankImage;
-					}
-					if (!cachedOverlays.containsKey(i)) {
-						Image overlay;
-						OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(),
-								new Point(16, 16));
-						overlay = resultIcon.createImage();
-						cachedOverlays.put(i, overlay);
-					}
-					Image overlay = cachedOverlays.get(i);
-					setImage(p, overlay);
+					addImageOverlay(p);
 					return pair.prob;
 				}
 			}
 		}
 		return 0;
+	}
+
+	private void addImageOverlay(ICompletionProposal p) {
+		Image i = p.getImage();
+		if (i == null) {
+			i = blankImage;
+		}
+		if (!cachedOverlays.containsKey(i)) {
+			Image overlay;
+			OverlayIcon resultIcon = new OverlayIcon(i.getImageData(), image.getImageData(),
+					new Point(16, 16));
+			overlay = resultIcon.createImage();
+			cachedOverlays.put(i, overlay);
+		}
+		Image overlay = cachedOverlays.get(i);
+		setImage(p, overlay);
 	}
 
 	private void setImage(ICompletionProposal p, Image overlay) {
