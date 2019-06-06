@@ -20,6 +20,8 @@ public class ZH extends Localization {
 	}
 
 	public static String R(String input) {
-		return m.getOrDefault(input, input);
+		if (m.containsKey(input))
+			return m.get(input);
+		return input;
 	}
 }
