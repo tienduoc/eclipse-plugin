@@ -60,8 +60,8 @@ public class Activator extends AbstractUIPlugin {
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					MessageDialog dialog = new MessageDialog(null, "aiXcoder user statistics collection", null,
 							"Are you willing to send anonymous usage data to improve user experience? You can later change it in settings page.",
-							MessageDialog.QUESTION, 0,
-							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL });
+							MessageDialog.QUESTION,
+							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 					int choice = dialog.open();
 					if (choice == 0 || choice == 1) {
 						Preference.preferenceManager.setValue(Preference.ALLOW_TELEMETRY, choice == 0);
