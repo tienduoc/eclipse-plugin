@@ -3,6 +3,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ## [1.0.4] - %DATE%
 ### Added
+- Warns you when endpoint is empty.
 
 ### Changed
 

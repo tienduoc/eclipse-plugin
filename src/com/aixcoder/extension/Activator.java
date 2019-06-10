@@ -76,6 +76,15 @@ public class Activator extends AbstractUIPlugin {
 				}
 			}.schedule();
 		}
+		if (Preference.getEndpoint().isEmpty()) {
+			new UIJob("Prompt aiXcoder endpoint empty") {
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					MessageDialog.openInformation(null, "aiXcoder endpoint is empty!", "The endpoint of aiXcoder is not set. Please set it manually in Window->Preferences->AiXCoder Preferences. Our public endpoint is https://api.aixcoder.com/");
+					return Status.OK_STATUS;
+				}
+			}.schedule();
+		}
 	}
 
 	/*
