@@ -15,7 +15,7 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 		ScopedPreferenceStore scopedPreferenceStore = Preference.preferenceManager;
 		if (!scopedPreferenceStore.getBoolean("INITIALIZED")) {
 			scopedPreferenceStore.setDefault(Preference.ACTIVE, true);
-			scopedPreferenceStore.setDefault(Preference.ENDPOINT, "https://api.aixcoder.com/");
+			scopedPreferenceStore.setDefault(Preference.ENDPOINT, "");
 			scopedPreferenceStore.setDefault(Preference.SEARCH_ENDPOINT, "https://search.aixcoder.com/");
 			scopedPreferenceStore.setDefault(Preference.MODEL, "java(Java)");
 			scopedPreferenceStore.setDefault(Preference.AUTO_IMPORT, true);
