@@ -19,6 +19,7 @@ public class Preference {
 	public static final String AUTO_IMPORT = "AUTO_IMPORT";
 	public static final String SORT_ONLY = "SORT_ONLY";
 	public static final String LANGUAGE = "LANGUAGE";
+	public static final String ASKED_LANGUAGE = "ASKED_LANGUAGE";
 	public static final String ALLOW_TELEMETRY = "ALLOW_TELEMETRY";
 	public static final String ASKED_TELEMETRY = "ASKED_TELEMETRY";
 
@@ -77,5 +78,9 @@ public class Preference {
 
 	public static String getLanguage() {
 		return preferenceManager.getString(LANGUAGE);
+	}
+
+	public static boolean askedLanguage() {
+		return preferenceManager.getBoolean(ASKED_LANGUAGE);
 	}
 }

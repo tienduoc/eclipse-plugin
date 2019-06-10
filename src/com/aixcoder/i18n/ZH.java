@@ -16,7 +16,11 @@ public class ZH extends Localization {
 		m.put(language, "语言🌏（需要重新打开设置页面）(&l)");
 		m.put(model, "模型(&m)");
 		m.put(additionalParameters, "额外参数(&p)");
-		m.put(description, "AiXcoder是一个AI驱动的代码补全服务。访问 https://aixcoder.com 获得更多信息。");
+		m.put(description, "AiXCoder是一个AI驱动的代码补全服务。访问 https://aixcoder.com 获得更多信息。");;
+		m.put(telemetryTitle, "AiXCoder用户使用信息收集");
+		m.put(telemetryQuestion, "您愿意发送匿名的使用数据以提高未来的用户体验吗？您可以稍后在设置页里修改这个设置。");
+		m.put(endpointEmptyTitle, "AiXCoder预测服务器地址为空!");
+		m.put(endpointEmptyWarning, "AiXCoder预测服务器地址未被设置。 请在Window->Preferences->AiXCoder Preferences设置页面中手动设置。我们的公用地址是 https://api.aixcoder.com/");
 	}
 
 	public static String R(String input) {
