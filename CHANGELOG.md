@@ -5,6 +5,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 ### Added
 - Warns you when endpoint is empty.
 - Localized first-time install orientation.
+- Added a configuration to set the prefered position of long results.
 
 ### Changed
 

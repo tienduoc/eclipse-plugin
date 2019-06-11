@@ -22,6 +22,7 @@ public class Preference {
 	public static final String ASKED_LANGUAGE = "ASKED_LANGUAGE";
 	public static final String ALLOW_TELEMETRY = "ALLOW_TELEMETRY";
 	public static final String ASKED_TELEMETRY = "ASKED_TELEMETRY";
+	public static final String LONG_RESULT_RANK = "LONG_RESULT_RANK";
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
@@ -82,5 +83,9 @@ public class Preference {
 
 	public static boolean askedLanguage() {
 		return preferenceManager.getBoolean(ASKED_LANGUAGE);
+	}
+
+	public static int getLongResultRank() {
+		return preferenceManager.getInt(LONG_RESULT_RANK);
 	}
 }

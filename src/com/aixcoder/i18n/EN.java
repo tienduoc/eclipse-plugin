@@ -22,6 +22,7 @@ public class EN extends Localization {
 		m.put(telemetryQuestion, "Are you willing to send anonymous usage data to improve user experience? You can later change it in preferences page.");
 		m.put(endpointEmptyTitle, "aiXcoder endpoint is empty!");
 		m.put(endpointEmptyWarning, "The endpoint of aiXcoder is not set. Please set it manually in Window->Preferences->AiXCoder Preferences. Our public endpoint is https://api.aixcoder.com/");
+		m.put(longResultRank, "The preferred position of the long result");
 	}
 
 	public static String R(String input) {

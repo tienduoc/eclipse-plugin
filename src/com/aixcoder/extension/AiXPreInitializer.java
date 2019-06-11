@@ -24,6 +24,7 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 			scopedPreferenceStore.setDefault("INITIALIZED", true);
 			scopedPreferenceStore.setDefault(Preference.PARAMS, "");
 			scopedPreferenceStore.setDefault(Preference.LANGUAGE, EN.id);
+			scopedPreferenceStore.setDefault(Preference.LONG_RESULT_RANK, 1);
 			Preference.getUUID();
 			try {
 				scopedPreferenceStore.save();

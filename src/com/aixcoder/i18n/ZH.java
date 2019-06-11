@@ -35,6 +35,8 @@ public class ZH extends Localization {
 		m.put(endpointEmptyTitle, "AiXCoder\u9884\u6d4b\u670d\u52a1\u5668\u5730\u5740\u4e3a\u7a7a!");
 //		m.put(endpointEmptyWarning, "AiXCoder预测服务器地址未被设置。 请在Window->Preferences->AiXCoder Preferences设置页面中手动设置。我们的公用地址是 https://api.aixcoder.com/");
 		m.put(endpointEmptyWarning, "AiXCoder\u9884\u6d4b\u670d\u52a1\u5668\u5730\u5740\u672a\u88ab\u8bbe\u7f6e\u3002\u0020\u0020\u8bf7\u5728Window->Preferences->AiXCoder Preferences\u8bbe\u7f6e\u9875\u9762\u4e2d\u624b\u52a8\u8bbe\u7f6e\u3002\u6211\u4eec\u7684\u516c\u7528\u5730\u5740\u662f https://api.aixcoder.com/");
+//		m.put(longResultRank, "长推荐结果排序位置");
+		m.put(longResultRank, "\u957f\u63a8\u8350\u7ed3\u679c\u6392\u5e8f\u4f4d\u7f6e");
 	}
 
 	public static String R(String input) {
