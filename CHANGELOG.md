@@ -8,6 +8,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 - Added a configuration to set the prefered position of long results.
 
 ### Changed
+- Removed the useless preferences in community version.
 
 ### Fixed
 - Fixed an issue on Eclipse version < 3.11 when starts up.
