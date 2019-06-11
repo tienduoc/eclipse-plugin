@@ -1,7 +1,8 @@
 package com.aixcoder.extension;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
+import static com.aixcoder.i18n.Localization.R;
 
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -12,14 +13,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.aixcoder.core.API;
 import com.aixcoder.core.PredictCache;
-import com.aixcoder.lib.Preference;
 import com.aixcoder.i18n.EN;
 import com.aixcoder.i18n.Localization;
 import com.aixcoder.i18n.ZH;
-
-import static com.aixcoder.i18n.Localization.R;
+import com.aixcoder.lib.Preference;
 
 public class AiXPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private IPropertyChangeListener onPropertyChange;
@@ -32,8 +30,6 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		new AiXPreInitializer().initializeDefaultPreferences();
 		Composite parent = getFieldEditorParent();
 		addField(new BooleanFieldEditor(Preference.ACTIVE, R(Localization.enableAiXCoder), parent));
-		addField(new StringFieldEditor(Preference.ENDPOINT, R(Localization.serverURL), parent));
-		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, R(Localization.searchURL), parent));
 		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
 		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
 		IntegerFieldEditor longResultRank = new IntegerFieldEditor(Preference.LONG_RESULT_RANK, R(Localization.longResultRank), parent);
@@ -41,25 +37,8 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(longResultRank);
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
 		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),
-				new String[][] { { "English", EN.id }, { "简体中文(Chinese Simplified)", ZH.id } }, parent));
-
-		String[][] entryNamesAndValues = getModels();
-		addField(new ComboFieldEditor(Preference.MODEL, R(Localization.model), entryNamesAndValues, parent));
+				new String[][] { { EN.display, EN.id }, { ZH.display, ZH.id } }, parent));
 		addField(new StringFieldEditor(Preference.PARAMS, R(Localization.additionalParameters), parent));
-	}
-
-	private String[][] getModels() {
-		String[][] entryNamesAndValues;
-		try {
-			String[] models = API.getModels();
-			entryNamesAndValues = new String[models.length][2];
-			for (int i = 0; i < models.length; i++) {
-				entryNamesAndValues[i] = new String[] { models[i], models[i] };
-			}
-		} catch (Exception e) {
-			entryNamesAndValues = new String[0][2];
-		}
-		return entryNamesAndValues;
 	}
 
 	@Override

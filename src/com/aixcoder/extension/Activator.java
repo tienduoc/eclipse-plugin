@@ -57,7 +57,7 @@ public class Activator extends AbstractUIPlugin {
 					if (!Preference.askedLanguage()) {
 						MessageDialog dialog = new MessageDialog(null, "Language?", null,
 								"Which language do you prefer aiXcoder using? You can change it later in preferences page.",
-								MessageDialog.QUESTION, new String[] { "English", "简体中文(Chinese Simplified)" }, -1);
+								MessageDialog.QUESTION, new String[] { EN.display, ZH.display }, -1);
 						int choice = dialog.open();
 						String[] values = new String[] { EN.id, ZH.id };
 						if (choice == 0 || choice == 1) {
