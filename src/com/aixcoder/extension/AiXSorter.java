@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
@@ -12,7 +13,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.OverlayIcon;
-import com.aixcoder.utils.Predict.SortResult;
+import com.aixcoder.lib.Preference;
 
 /**
  * Sort instances of {@link AiXCompletionProposal} to the top. p1 < p2 means p1
@@ -25,7 +26,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 			.createImage();
 
 	private ICompletionProposalSorter sorter;
-	public SortResult[] list;
+	public Map<ICompletionProposal, Double> scoreMap;
 
 	public AiXSorter(ICompletionProposalSorter sorter) {
 		this.sorter = sorter;
@@ -93,17 +94,15 @@ public class AiXSorter implements ICompletionProposalSorter {
 	static Image blankImage = new Image(Display.getDefault(), 16, 16);
 
 	double getScore(ICompletionProposal p, String s) {
-		if (list != null && !(p instanceof AiXCompletionProposal) && !(p.getClass().getName()
+		if (scoreMap != null && !(p instanceof AiXCompletionProposal) && !(p.getClass().getName()
 				.equals("org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal"))) {
 			if (p instanceof AiXForcedSortCompletionProposal) {
 				addImageOverlay(p);
 				return ((AiXForcedSortCompletionProposal) p).getScore();
 			}
-			for (SortResult pair : list) {
-				if (s.equals(pair.word) || s.startsWith(pair.word + " ") || s.startsWith(pair.word + "(")) {
-					addImageOverlay(p);
-					return pair.prob;
-				}
+			if (scoreMap.containsKey(p)) {
+				addImageOverlay(p);
+				return scoreMap.get(p);
 			}
 		}
 		return 0;
@@ -154,13 +153,29 @@ public class AiXSorter implements ICompletionProposalSorter {
 		}
 	}
 
+	double longResultScore = -1;
+
+	double getLongResultScore() {
+		if (longResultScore < 0) {
+			if (scoreMap == null) {
+				longResultScore = 1;
+			} else {
+				int rank = Preference.getLongResultRank();
+				System.out.println("rank=" + rank);
+				longResultScore = scoreMap.size() + 1 - rank + 0.1;
+			}
+		}
+		System.out.println("longResultScore=" + longResultScore);
+		return longResultScore;
+	}
+
 	double getScore(ICompletionProposal p) {
 		if (longProposal == p && p instanceof AiXCompletionProposal) {
 			setImage(p, ProposalFactory.image);
-			return 1;
+			return getLongResultScore();
 		}
 		if (p instanceof AiXCompletionProposal) {
-			return longProposal == null ? 1 : 0;
+			return longProposal == null ? getLongResultScore() : 0;
 		}
 		return getScore(p, p.getDisplayString());
 	}
@@ -176,5 +191,4 @@ public class AiXSorter implements ICompletionProposalSorter {
 			return 1;
 		}
 	}
-
 }

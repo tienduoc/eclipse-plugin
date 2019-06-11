@@ -1,19 +1,21 @@
 package com.aixcoder.extension;
 
+import static com.aixcoder.i18n.Localization.R;
+
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
 
-import com.aixcoder.core.API;
+import com.aixcoder.i18n.EN;
+import com.aixcoder.i18n.Localization;
+import com.aixcoder.i18n.ZH;
 import com.aixcoder.lib.Preference;
 
 /**
@@ -46,31 +48,48 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		super.start(context);
 		plugin = this;
-		new Job("aiXcoder check update") {
-
-			@Override
-			public IStatus run(IProgressMonitor monitor) {
-				API.checkUpdate(Platform.getBundle(PLUGIN_ID).getVersion());
-				return Status.OK_STATUS;
-			}
-		}.schedule();
-		if (!Preference.askedTelemetry()) {
-			new UIJob("Prompt aiXcoder telemetry") {
+		new AiXPreInitializer().initializeDefaultPreferences();
+		if (!Preference.askedLanguage() || !Preference.askedTelemetry() || Preference.getEndpoint().isEmpty()) {
+			new UIJob("Prompt aiXcoder initialize") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					MessageDialog dialog = new MessageDialog(null, "aiXcoder user statistics collection", null,
-							"Are you willing to send anonymous usage data to improve user experience? You can later change it in settings page.",
-							MessageDialog.QUESTION, 0,
-							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL });
-					int choice = dialog.open();
-					if (choice == 0 || choice == 1) {
-						Preference.preferenceManager.setValue(Preference.ALLOW_TELEMETRY, choice == 0);
-						Preference.preferenceManager.setValue(Preference.ASKED_TELEMETRY, true);
-						try {
-							Preference.preferenceManager.save();
-						} catch (IOException e) {
-							e.printStackTrace();
+					// Ask language
+					if (!Preference.askedLanguage()) {
+						MessageDialog dialog = new MessageDialog(null, "Language?", null,
+								"Which language do you prefer aiXcoder using? You can change it later in preferences page.",
+								MessageDialog.QUESTION, new String[] { "English", "简体中文(Chinese Simplified)" }, -1);
+						int choice = dialog.open();
+						String[] values = new String[] { EN.id, ZH.id };
+						if (choice == 0 || choice == 1) {
+							Preference.preferenceManager.setValue(Preference.LANGUAGE, values[choice]);
+							Preference.preferenceManager.setValue(Preference.ASKED_LANGUAGE, true);
+							try {
+								Preference.preferenceManager.save();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
+					}
+					// Ask telemetry
+					if (!Preference.askedTelemetry()) {
+						MessageDialog dialog = new MessageDialog(null, R(Localization.telemetryTitle), null,
+								R(Localization.telemetryQuestion), MessageDialog.QUESTION,
+								new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+						int choice = dialog.open();
+						if (choice == 0 || choice == 1) {
+							Preference.preferenceManager.setValue(Preference.ALLOW_TELEMETRY, choice == 0);
+							Preference.preferenceManager.setValue(Preference.ASKED_TELEMETRY, true);
+							try {
+								Preference.preferenceManager.save();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					// Warns empty endpoint
+					if (Preference.getEndpoint().isEmpty()) {
+						MessageDialog.openInformation(null, R(Localization.endpointEmptyTitle),
+								R(Localization.endpointEmptyWarning));
 					}
 					return Status.OK_STATUS;
 				}

@@ -1,12 +1,17 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.0.4] - %DATE%
+## [1.0.4] - 2019-06-11
 ### Added
+- Warns you when endpoint is empty.
+- Localized first-time install orientation.
+- Added a configuration to set the prefered position of long results.
 
 ### Changed
 
 ### Fixed
+- Fixed an issue on Eclipse version < 3.11 when starts up.
+- Fixed localization showing as corrupted on earlier version of Eclipse.
 
 
 ## [1.0.3] - 2019-06-06

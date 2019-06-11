@@ -4,6 +4,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -35,6 +36,9 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, R(Localization.searchURL), parent));
 		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
 		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
+		IntegerFieldEditor longResultRank = new IntegerFieldEditor(Preference.LONG_RESULT_RANK, R(Localization.longResultRank), parent);
+		longResultRank.setValidRange(1, 5);
+		addField(longResultRank);
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
 		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),
 				new String[][] { { "English", EN.id }, { "简体中文(Chinese Simplified)", ZH.id } }, parent));

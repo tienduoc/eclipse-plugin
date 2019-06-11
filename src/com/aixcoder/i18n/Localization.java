@@ -13,6 +13,11 @@ public class Localization {
 	public static final String model = "model";
 	public static final String additionalParameters = "additionalParameters";
 	public static final String description = "description";
+	public static final String telemetryTitle = "telemetryTitle";
+	public static final String telemetryQuestion = "telemetryQuestion";
+	public static final String endpointEmptyTitle = "endpointEmptyTitle";
+	public static final String endpointEmptyWarning = "endpointEmptyWarning";
+	public static final String longResultRank = "longResultRank";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {
