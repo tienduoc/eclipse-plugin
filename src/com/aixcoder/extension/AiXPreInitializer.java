@@ -20,7 +20,7 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 			scopedPreferenceStore.setDefault(Preference.MODEL, "java(Java)");
 			scopedPreferenceStore.setDefault(Preference.AUTO_IMPORT, true);
 			scopedPreferenceStore.setDefault(Preference.SORT_ONLY, false);
-			scopedPreferenceStore.setDefault(Preference.ALLOW_TELEMETRY, true);
+			scopedPreferenceStore.setDefault(Preference.ALLOW_TELEMETRY, false);
 			scopedPreferenceStore.setDefault("INITIALIZED", true);
 			scopedPreferenceStore.setDefault(Preference.PARAMS, "");
 			scopedPreferenceStore.setDefault(Preference.LANGUAGE, EN.id);
