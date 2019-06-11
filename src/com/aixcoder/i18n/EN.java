@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class EN extends Localization {
 	public static final String id = "en-us";
+	public static final String display = "English";
 	static Map<String, String> m = new HashMap<String, String>();
 	static {
 		m.put(enableAiXCoder, "&Enable aiXcoder");

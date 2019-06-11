@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class ZH extends Localization {
 	public static final String id = "zh-cn";
+	public static final String display = "\u7b80\u4f53\u4e2d\u6587(Chinese Simplified)";
 	static Map<String, String> m = new HashMap<String, String>();
 	static {
 //		m.put(enableAiXCoder, "启用aiXcoder(&e)");

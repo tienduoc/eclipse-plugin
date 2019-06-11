@@ -41,7 +41,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		addField(longResultRank);
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
 		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),
-				new String[][] { { "English", EN.id }, { "简体中文(Chinese Simplified)", ZH.id } }, parent));
+				new String[][] { { EN.display, EN.id }, { ZH.display, ZH.id } }, parent));
 
 		String[][] entryNamesAndValues = getModels();
 		addField(new ComboFieldEditor(Preference.MODEL, R(Localization.model), entryNamesAndValues, parent));
