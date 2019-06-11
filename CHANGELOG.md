@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.0.4] - %DATE%
+## [1.0.4] - 2019-06-11
 ### Added
 - Warns you when endpoint is empty.
 - Localized first-time install orientation.
