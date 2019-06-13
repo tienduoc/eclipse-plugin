@@ -7,6 +7,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 ### Changed
 
 ### Fixed
+- Fixed globe emoji 🌏 displaying.
 
 ## [1.0.4] - 2019-06-11
 ### Added

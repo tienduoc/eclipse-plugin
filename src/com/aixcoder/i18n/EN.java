@@ -14,7 +14,8 @@ public class EN extends Localization {
 		m.put(autoImportClasses, "Auto &Import Classes");
 		m.put(sortOnly, "S&ort only (will decrease delay)");
 		m.put(allowTelemetry, "Allow &Telemetry");
-		m.put(language, "&Language 🌏 (need to restart preference window)");
+//		m.put(language, "&Language 🌏 (need to restart preference window)");
+		m.put(language, "&Language \ud83c\udf0f (need to restart preference window)");
 		m.put(model, "&Model");
 		m.put(additionalParameters, "Additional &Parameters");
 		m.put(description,
