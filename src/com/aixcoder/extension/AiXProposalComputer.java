@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -41,6 +42,13 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 						.getActiveEditor();
 				IEditorInput input = editor.getEditorInput();
 				IFile file = (IFile) input.getAdapter(IFile.class);
+				String filePath;
+				if (file == null) {
+					IFileStore f = input.getAdapter(IFileStore.class);
+					filePath = f.toURI().getPath();
+				} else {
+					filePath = file.getFullPath().toString();
+				}
 				IProject project = (IProject) input.getAdapter(IProject.class);
 				if (project == null) {
 					IResource resource = (IResource) input.getAdapter(IResource.class);
@@ -48,7 +56,9 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 						project = resource.getProject();
 					}
 				}
-				ProjectScan.getInstance(project).start();
+				if (project != null) {
+					ProjectScan.getInstance(project).start();
+				}
 
 				IDocument document = context.getDocument();
 				String prefix = document.get(0, offset);
@@ -58,8 +68,9 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 //				System.out.println("==============");
 				// step 2: send request
 				// Eclipse's way of using its thread pool
-				new AiXFetchJob(new PredictContext(prefix, project.getName(), file.getFullPath().toString()),
-						remainingText, proposalFactory).schedule();
+				String projName = project == null ? "tmp" : project.getName();
+				new AiXFetchJob(new PredictContext(prefix, projName, filePath), remainingText,
+						proposalFactory).schedule();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

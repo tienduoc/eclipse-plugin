@@ -13,6 +13,7 @@ public class ProjectScan {
 	}
 
 	public static ProjectScan getInstance(IProject project) {
+		if (project == null) return null;
 		if (instance == null) {
 			instance = new ProjectScan(project);
 		}
@@ -24,7 +25,7 @@ public class ProjectScan {
 	}
 
 	public void start() {
-		if (t == null) {
+		if (proj != null && t == null) {
 			t = new ProjectScanThread(proj.getName(), proj.getLocation().toOSString());
 			t.start();
 		}
