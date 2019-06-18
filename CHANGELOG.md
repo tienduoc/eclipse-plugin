@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.0.5] - %DATE%
+### Added
+
+### Changed
+
+### Fixed
+- Fixed globe emoji 🌏 displaying.
+- Removed extranoues space before right parenthesis.
+
 ## [1.0.4] - 2019-06-11
 ### Added
 - Warns you when endpoint is empty.

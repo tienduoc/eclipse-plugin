@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,15 +22,15 @@ import org.osgi.framework.Version;
 
 import com.aixcoder.extension.Activator;
 import com.aixcoder.lib.HttpRequest;
-import com.aixcoder.lib.Preference;
 import com.aixcoder.lib.HttpRequest.HttpRequestException;
+import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.CompletionOptions;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
-import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
+import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.CollectionUtils;
 import com.aixcoder.utils.shims.Consumer;
 import com.aixcoder.utils.shims.DigestUtils;
@@ -232,16 +230,12 @@ public class API {
 
 			ByteArrayOutputStream wr = new ByteArrayOutputStream();
 			DeflaterOutputStream zipOut = new DeflaterOutputStream(wr);
-			for (String fileId : data) {
-				byte[] bytes = fileId.getBytes(Charset.forName("UTF-8"));
-				byte[] sizeBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(bytes.length).array();
-				zipOut.write(sizeBytes);
-				zipOut.write(bytes);
-			}
+			String str = new Gson().toJson(data);
+			zipOut.write(Charset.forName("utf-8").encode(str).array());
 			zipOut.close();
 			wr.close();
 			final byte[] arr = wr.toByteArray();
-			HttpHelper.post(Preference.getEndpoint() + "zipfile", params, new Consumer<HttpRequest>() {
+			HttpHelper.post(Preference.getEndpoint() + "zipfile2", params, new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest t) {
 					t.connectTimeout(60 * 1000).readTimeout(60 * 1000);

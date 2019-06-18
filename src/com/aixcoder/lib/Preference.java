@@ -43,7 +43,9 @@ public class Preference {
 	public static String getUUID() {
 		if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
 			synchronized (id) {
-				preferenceManager.setValue(P_UUID, UUID.randomUUID().toString());
+				if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
+					preferenceManager.setValue(P_UUID, UUID.randomUUID().toString());
+				}
 			}
 		}
 		return "eclipse-" + preferenceManager.getString(P_UUID);

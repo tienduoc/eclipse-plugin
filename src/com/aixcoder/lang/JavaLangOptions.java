@@ -180,6 +180,7 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOption(SpacingKeyALL, ";", false);
 
 		addSpacingOption("(", SpacingKeyALL, false);
+		addSpacingOption(SpacingKeyALL, ")", false);
 		addSpacingOption(SpacingKeyALL, "[", false);
 		addSpacingOption("[", SpacingKeyALL, false);
 		addSpacingOption(SpacingKeyALL, "]", false);
