@@ -5,10 +5,12 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 ### Added
 
 ### Changed
+- Limit sort results with the same word to the most probable single result.
 
 ### Fixed
 - Fixed globe emoji 🌏 displaying.
 - Removed extranoues space before right parenthesis.
+- AiXCoder is properly displayed instead of obselete "AiXSorter".
 
 ## [1.0.4] - 2019-06-11
 ### Added

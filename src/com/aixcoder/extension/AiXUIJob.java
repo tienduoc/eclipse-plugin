@@ -41,7 +41,7 @@ public abstract class AiXUIJob extends UIJob {
 	}
 
 	public abstract void computeProposals(List<ICompletionProposal> fComputedProposal,
-			List<ICompletionProposal> fFilteredProposals, AiXSorter fSorter) throws AiXAbortInsertionException;
+			List<ICompletionProposal> fFilteredProposals, AiXCoder fSorter) throws AiXAbortInsertionException;
 
 	@Override
 	public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -56,8 +56,8 @@ public abstract class AiXUIJob extends UIJob {
 			Field fSorterField = ContentAssistant.class.getDeclaredField("fSorter");
 			fSorterField.setAccessible(true);
 			ICompletionProposalSorter fSorter = (ICompletionProposalSorter) fSorterField.get(fContentAssistant);
-			if (!(fSorter instanceof AiXSorter)) {
-				fSorter = new AiXSorter(fSorter);
+			if (!(fSorter instanceof AiXCoder)) {
+				fSorter = new AiXCoder(fSorter);
 				fContentAssistant.setSorter(fSorter);
 			}
 
@@ -80,7 +80,7 @@ public abstract class AiXUIJob extends UIJob {
 				fFilteredProposal = new ArrayList<ICompletionProposal>(fFilteredProposal);
 
 				try {
-					computeProposals(fComputedProposal, fFilteredProposal, (AiXSorter) fSorter);
+					computeProposals(fComputedProposal, fFilteredProposal, (AiXCoder) fSorter);
 
 					Field fIsFilterPendingField = completionProposalPopupClz.getDeclaredField("fIsFilterPending");
 					fIsFilterPendingField.setAccessible(true);

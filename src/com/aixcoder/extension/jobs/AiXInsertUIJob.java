@@ -1,6 +1,8 @@
 package com.aixcoder.extension.jobs;
 
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +21,7 @@ import com.aixcoder.core.PredictCache;
 import com.aixcoder.core.PredictContext;
 import com.aixcoder.core.ReportType;
 import com.aixcoder.extension.AiXAbortInsertionException;
-import com.aixcoder.extension.AiXSorter;
+import com.aixcoder.extension.AiXCoder;
 import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.extension.ProposalFactory;
 import com.aixcoder.lang.LangOptions;
@@ -44,7 +46,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 
 	@Override
 	public void computeProposals(List<ICompletionProposal> fComputedProposal,
-			List<ICompletionProposal> fFilteredProposals, AiXSorter fSorter) throws AiXAbortInsertionException {
+			List<ICompletionProposal> fFilteredProposals, AiXCoder fSorter) throws AiXAbortInsertionException {
 		try {
 			// insert aixcoder proposal
 			Point selection = viewer.getSelectedRange();
@@ -85,6 +87,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 				}
 				if (predictResult.sortResults != null) {
 					Map<ICompletionProposal, Double> scoreMap = new HashMap<ICompletionProposal, Double>();
+					Map<SortResult, Set<ICompletionProposal>> sortResultMap = new HashMap<SortResult, Set<ICompletionProposal>>();
 					for (SortResult sortResult : predictResult.sortResults) {
 						boolean matched = false;
 						for (ICompletionProposal p : fComputedProposal) {
@@ -93,7 +96,10 @@ public class AiXInsertUIJob extends AiXUIJob {
 									|| s.startsWith(sortResult.word + "(")) {
 								matched = true;
 								scoreMap.put(p, sortResult.prob);
-								break;
+								if (!sortResultMap.containsKey(sortResult)) {
+									sortResultMap.put(sortResult, new HashSet<ICompletionProposal>());
+								}
+								sortResultMap.get(sortResult).add(p);
 							}
 						}
 						if (sortResult.options != null && sortResult.options.forced && !matched) {
@@ -102,12 +108,54 @@ public class AiXInsertUIJob extends AiXUIJob {
 							fFilteredProposals.add(0, forcedProposal);
 							fComputedProposal.add(0, forcedProposal);
 							scoreMap.put(forcedProposal, sortResult.prob);
+							if (!sortResultMap.containsKey(sortResult)) {
+								sortResultMap.put(sortResult, new HashSet<ICompletionProposal>());
+							}
+							sortResultMap.get(sortResult).add(forcedProposal);
 						}
 					}
-					ArrayList<Entry<ICompletionProposal, Double>> sortedResults = new ArrayList<Entry<ICompletionProposal, Double>>(scoreMap.entrySet());
+					for (Entry<SortResult, Set<ICompletionProposal>> e : sortResultMap.entrySet()) {
+						SortResult sortResult = e.getKey();
+						if (e.getValue().size() > 1 && sortResult.options != null && sortResult.options.filters != null
+								&& sortResult.options.filters.length > 0) {
+							String[] filters = sortResult.options.filters;
+							ICompletionProposal best = null;
+							int bestRank = 999;
+							for (ICompletionProposal p : e.getValue()) {
+								String s = p.getDisplayString();
+								if (s.contains(" - ")) {
+									int rank = 0;
+									for (String filter : filters) {
+										if (filter.endsWith("." + sortResult.word)) {
+											filter = filter.substring(0,
+													filter.length() - sortResult.word.length() - 1);
+										}
+										if (s.contains(filter)) {
+											break;
+										}
+										rank++;
+									}
+									if (rank < bestRank) {
+										bestRank = rank;
+										best = p;
+									}
+								}
+							}
+							if (best != null) {
+								for (ICompletionProposal p : e.getValue()) {
+									if (p != best) {
+										scoreMap.remove(p);
+									}
+								}
+							}
+						}
+					}
+					ArrayList<Entry<ICompletionProposal, Double>> sortedResults = new ArrayList<Entry<ICompletionProposal, Double>>(
+							scoreMap.entrySet());
 					Collections.sort(sortedResults, new Comparator<Entry<ICompletionProposal, Double>>() {
 						@Override
-						public int compare(Entry<ICompletionProposal, Double> o1, Entry<ICompletionProposal, Double> o2) {
+						public int compare(Entry<ICompletionProposal, Double> o1,
+								Entry<ICompletionProposal, Double> o2) {
 							return (int) Math.signum(o2.getValue() - o1.getValue());
 						}
 					});
