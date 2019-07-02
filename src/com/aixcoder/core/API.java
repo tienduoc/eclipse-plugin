@@ -181,6 +181,10 @@ public class API {
 								JsonArray rescues = jsonOptions.get("rescues").getAsJsonArray();
 								options.rescues = readRescues(rescues);
 							}
+							if (jsonOptions.get("filters") != null) {
+								JsonArray filters = jsonOptions.get("filters").getAsJsonArray();
+								options.filters = CollectionUtils.getStringList(filters);
+							}
 						}
 						sortResults[i] = new SortResult(prob, word, options);
 					}

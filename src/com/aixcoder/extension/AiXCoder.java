@@ -19,7 +19,7 @@ import com.aixcoder.lib.Preference;
  * Sort instances of {@link AiXCompletionProposal} to the top. p1 < p2 means p1
  * is before p2.
  */
-public class AiXSorter implements ICompletionProposalSorter {
+public class AiXCoder implements ICompletionProposalSorter {
 
 	static final Image image = Activator
 			.imageDescriptorFromPlugin(Activator.getDefault().getBundle().getSymbolicName(), "icons/aix_sort.png")
@@ -28,7 +28,7 @@ public class AiXSorter implements ICompletionProposalSorter {
 	private ICompletionProposalSorter sorter;
 	public Map<ICompletionProposal, Double> scoreMap;
 
-	public AiXSorter(ICompletionProposalSorter sorter) {
+	public AiXCoder(ICompletionProposalSorter sorter) {
 		this.sorter = sorter;
 	}
 
