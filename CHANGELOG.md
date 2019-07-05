@@ -1,7 +1,14 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.0.5] - %DATE%
+## [1.0.6] - %DATE%
+### Added
+
+### Changed
+
+### Fixed
+
+## [1.0.5] - 2019-07-02
 ### Added
 
 ### Changed
@@ -11,6 +18,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 - Fixed globe emoji 🌏 displaying.
 - Removed extranoues space before right parenthesis.
 - AiXCoder is properly displayed instead of obselete "AiXSorter".
+- Fixed a compability issue on Eclipse Oxygen or lower.
 
 ## [1.0.4] - 2019-06-11
 ### Added

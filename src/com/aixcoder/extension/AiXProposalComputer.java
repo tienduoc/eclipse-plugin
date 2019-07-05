@@ -3,8 +3,8 @@ package com.aixcoder.extension;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -44,8 +44,7 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				IFile file = (IFile) input.getAdapter(IFile.class);
 				String filePath;
 				if (file == null) {
-					IFileStore f = input.getAdapter(IFileStore.class);
-					filePath = f.toURI().getPath();
+					filePath = "tmp-" + new Random().nextInt() + ".java";
 				} else {
 					filePath = file.getFullPath().toString();
 				}
@@ -69,8 +68,8 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				// step 2: send request
 				// Eclipse's way of using its thread pool
 				String projName = project == null ? "tmp" : project.getName();
-				new AiXFetchJob(new PredictContext(prefix, projName, filePath), remainingText,
-						proposalFactory).schedule();
+				new AiXFetchJob(new PredictContext(prefix, projName, filePath), remainingText, proposalFactory)
+						.schedule();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
