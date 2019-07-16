@@ -284,8 +284,8 @@ public class JavaLangOptions extends LangOptions {
 		return i;
 	}
 
-	Pattern packagePattern = Pattern.compile("^\\s*package\\s.*$");
-	Pattern importPattern = Pattern.compile("^\\s*import\\s+(.*)$");
+	Pattern packagePattern = Pattern.compile("^\\s*package\\s.*?\\s*;?$");
+	Pattern importPattern = Pattern.compile("^\\s*import\\s+(.*?)\\s*;?$");
 
 	private int prepareImports(ArrayList<Pair<String, Integer>> imports, String[] lines, int importStart) {
 		for (int i = 0; i < lines.length; i++) {
@@ -315,6 +315,12 @@ public class JavaLangOptions extends LangOptions {
 			for (int i = 0; i < imports.size(); i++) {
 				String importContent = imports.get(i).first;
 				int compareResult = importContent.compareTo(rescue.value);
+				if (compareResult == 0) return; // duplicate, skip
+			}
+			for (int i = 0; i < imports.size(); i++) {
+				String importContent = imports.get(i).first;
+				int compareResult = importContent.compareTo(rescue.value);
+				if (compareResult == 0) return; // duplicate, skip
 				if (compareResult > 0) {
 					// stop here
 					imports.add(i, new Pair<String, Integer>(rescue.value, prevImportStart + 1));
