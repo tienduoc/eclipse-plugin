@@ -20,25 +20,33 @@ public class Predict {
 
 	}
 
-	public static class PredictResult {
-		public String[] tokens;
+	public static class LongPredictResult {
 		public String current;
-		public String[] rCompletions;
-		public SortResult[] sortResults;
+		public String[] tokens;
 		public Rescue[] rescues;
-
-		public PredictResult(String[] tokens, String current, String[] rCompletions, SortResult[] sortResults,
-				Rescue[] rescues) {
+		public String[] rCompletions;
+		
+		public LongPredictResult(String[] tokens, String current, Rescue[] rescues, String[] rCompletions) {
 			super();
 			this.tokens = tokens;
 			this.current = current;
-			this.rCompletions = rCompletions;
-			this.sortResults = sortResults;
 			this.rescues = rescues;
+			this.rCompletions = rCompletions;
+		}
+	}
+	
+	public static class PredictResult {
+		public SortResult[] sortResults;
+		public LongPredictResult[] longPredicts;
+
+		public PredictResult(LongPredictResult[] longPredicts, SortResult[] sortResults) {
+			super();
+			this.longPredicts = longPredicts;
+			this.sortResults = sortResults;
 		}
 
 		public String toString() {
-			return "PredictResult: (" + current + ")[" + CollectionUtils.join(" ", tokens) + "]";
+			return "PredictResult: " + CollectionUtils.join(" ", longPredicts) + "]";
 		}
 	}
 

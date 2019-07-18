@@ -28,6 +28,7 @@ import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.CompletionOptions;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.Predict;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
 import com.aixcoder.utils.Rescue;
@@ -111,6 +112,7 @@ public class API {
 			final String maskedRemainingText = DataMasking.mask(remainingText);
 			final int offset = CodeStore.getInstance().getDiffPosition(fileid, maskedText);
 			final String md5 = DigestUtils.getMD5(maskedText);
+			final int longResultCuts = Preference.getLongResultCuts();
 			String string = HttpHelper.post(Preference.getEndpoint() + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
@@ -119,7 +121,7 @@ public class API {
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
 							.form("ext", Preference.getModel()).form("fileid", fileid)
 							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
-							.form("md5", md5).form("sort", 1);
+							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts);
 					if (Preference.sortOnly()) {
 						httpRequest.form("ngen", 1);
 					}
@@ -146,12 +148,20 @@ public class API {
 				}
 			} else {
 				System.out.println(string);
-				JsonObject jo = new Gson().fromJson(string, JsonObject.class);
-				JsonArray list = jo.get("data").getAsJsonArray();
+				JsonArray list;
+				try {
+					JsonObject jo = new Gson().fromJson(string, JsonObject.class);
+					list = jo.get("data").getAsJsonArray();
+				} catch (com.google.gson.JsonSyntaxException e) {
+					list = new Gson().fromJson(string, JsonArray.class);
+				}
 				if (list.size() > 0) {
 					CodeStore.getInstance().saveLastSent(proj, fileid, maskedText);
-
-					JsonObject json = list.get(0).getAsJsonObject();
+				}
+				Predict.LongPredictResult[] longPredicts = new Predict.LongPredictResult[list.size()];
+				SortResult[] sortResults = null;
+				for (int j = 0; j < list.size(); j++) {
+					JsonObject json = list.get(j).getAsJsonObject();
 
 					JsonElement jsonTokens = json.get("tokens");
 					String[] tokens = CollectionUtils
@@ -165,33 +175,36 @@ public class API {
 							.getStringList(jsonRCompletion != null ? jsonRCompletion.getAsJsonArray() : null);
 
 					JsonArray sortList = json.getAsJsonArray("sort");
-					SortResult[] sortResults = new SortResult[sortList != null ? sortList.size() : 0];
-					for (int i = 0; i < sortResults.length; i++) {
-						JsonArray asJsonArray = sortList.get(i).getAsJsonArray();
-						double prob = asJsonArray.get(0).getAsDouble();
-						String word = asJsonArray.get(1).getAsString();
-						CompletionOptions options = null;
-						if (asJsonArray.size() >= 3) {
-							options = new CompletionOptions();
-							JsonObject jsonOptions = asJsonArray.get(2).getAsJsonObject();
-							if (jsonOptions.get("forced") != null && jsonOptions.get("forced").getAsBoolean()) {
-								options.forced = true;
+					if (sortList != null && sortList.size() > 0) {
+						sortResults = new SortResult[sortList != null ? sortList.size() : 0];
+						for (int i = 0; i < sortResults.length; i++) {
+							JsonArray asJsonArray = sortList.get(i).getAsJsonArray();
+							double prob = asJsonArray.get(0).getAsDouble();
+							String word = asJsonArray.get(1).getAsString();
+							CompletionOptions options = null;
+							if (asJsonArray.size() >= 3) {
+								options = new CompletionOptions();
+								JsonObject jsonOptions = asJsonArray.get(2).getAsJsonObject();
+								if (jsonOptions.get("forced") != null && jsonOptions.get("forced").getAsBoolean()) {
+									options.forced = true;
+								}
+								if (jsonOptions.get("rescues") != null) {
+									JsonArray rescues = jsonOptions.get("rescues").getAsJsonArray();
+									options.rescues = readRescues(rescues);
+								}
+								if (jsonOptions.get("filters") != null) {
+									JsonArray filters = jsonOptions.get("filters").getAsJsonArray();
+									options.filters = CollectionUtils.getStringList(filters);
+								}
 							}
-							if (jsonOptions.get("rescues") != null) {
-								JsonArray rescues = jsonOptions.get("rescues").getAsJsonArray();
-								options.rescues = readRescues(rescues);
-							}
-							if (jsonOptions.get("filters") != null) {
-								JsonArray filters = jsonOptions.get("filters").getAsJsonArray();
-								options.filters = CollectionUtils.getStringList(filters);
-							}
+							sortResults[i] = new SortResult(prob, word, options);
 						}
-						sortResults[i] = new SortResult(prob, word, options);
 					}
 					JsonElement jsonRescues = json.get("rescues");
 					Rescue[] rescues = readRescues(jsonRescues != null ? jsonRescues.getAsJsonArray() : null);
-					return new PredictResult(tokens, current, rCompletion, sortResults, rescues);
+					longPredicts[j] = new Predict.LongPredictResult(tokens, current, rescues, rCompletion);
 				}
+				return new PredictResult(longPredicts, sortResults);
 			}
 		} catch (HttpRequest.HttpRequestException e) {
 			if (e.getMessage().contains("Read timed out")) {
@@ -203,7 +216,7 @@ public class API {
 			e.printStackTrace();
 			return null;
 		}
-		return new PredictResult(new String[0], "", null, new SortResult[0], null);
+		return new PredictResult(new Predict.LongPredictResult[0], new SortResult[0]);
 	}
 
 	public static String[] getTrivialLiterals() {

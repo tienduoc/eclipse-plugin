@@ -25,6 +25,17 @@ public class EN extends Localization {
 		m.put(endpointEmptyTitle, "aiXcoder endpoint is empty!");
 		m.put(endpointEmptyWarning, "The endpoint of aiXcoder is not set. Please set it manually in Window->Preferences->AiXCoder Preferences. Our public endpoint is https://api.aixcoder.com/");
 		m.put(longResultRank, "The preferred position of the long result");
+		m.put(longResultCut, "Number of shorter results");
+		m.put(longResultCutAuto, "Auto");
+		m.put(longResultCut0, "0-None");
+		m.put(longResultCut1, "1");
+		m.put(longResultCut2, "2");
+		m.put(longResultCut3, "3");
+		m.put(longResultCut4, "4");
+		m.put(longResultCut5, "5");
+		m.put(longResultCutSort, "The order of shorter results");
+		m.put(longResultCutS2L, "short to long");
+		m.put(longResultCutL2S, "long to short");
 	}
 
 	public static String R(String input) {

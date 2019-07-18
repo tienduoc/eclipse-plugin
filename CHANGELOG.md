@@ -3,6 +3,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ## [1.0.7] - 2019-07-18
 ### 新增
+- 提供多个不同长度的结果，这个行为可以在设置页面中设置开关及出现的结果的数量和顺序。
 
 ### 改动
 - 现在会在设置页面中正确显示补全提供器的名称了

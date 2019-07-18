@@ -38,6 +38,23 @@ public class ZH extends Localization {
 		m.put(endpointEmptyWarning, "AiXCoder\u9884\u6d4b\u670d\u52a1\u5668\u5730\u5740\u672a\u88ab\u8bbe\u7f6e\u3002\u0020\u0020\u8bf7\u5728Window->Preferences->AiXCoder Preferences\u8bbe\u7f6e\u9875\u9762\u4e2d\u624b\u52a8\u8bbe\u7f6e\u3002\u6211\u4eec\u7684\u516c\u7528\u5730\u5740\u662f https://api.aixcoder.com/");
 //		m.put(longResultRank, "长推荐结果排序位置");
 		m.put(longResultRank, "\u957f\u63a8\u8350\u7ed3\u679c\u6392\u5e8f\u4f4d\u7f6e");
+//		m.put(longResultCut, "更短的结果的数量");
+		m.put(longResultCut, "\u66f4\u77ed\u7684\u7ed3\u679c\u7684\u6570\u91cf");
+//		m.put(longResultCutAuto, "自动");
+		m.put(longResultCutAuto, "\u81ea\u52a8");
+//		m.put(longResultCut0, "0-无");
+		m.put(longResultCut0, "0-\u65e0");
+		m.put(longResultCut1, "1");
+		m.put(longResultCut2, "2");
+		m.put(longResultCut3, "3");
+		m.put(longResultCut4, "4");
+		m.put(longResultCut5, "5");
+//		m.put(longResultCutSort, "更短结果的顺序");
+		m.put(longResultCutSort, "\u66f4\u77ed\u7ed3\u679c\u7684\u987a\u5e8f");
+//		m.put(longResultCutS2L, "从短到长");
+		m.put(longResultCutS2L, "\u4ece\u77ed\u5230\u957f");
+//		m.put(longResultCutL2S, "从长到短");
+		m.put(longResultCutL2S, "\u4ece\u957f\u5230\u77ed");
 	}
 
 	public static String R(String input) {

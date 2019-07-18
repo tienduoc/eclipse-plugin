@@ -7,6 +7,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.aixcoder.extension.Activator;
 import com.aixcoder.extension.AiXPreInitializer;
+import com.aixcoder.i18n.Localization;
 
 public class Preference {
 
@@ -23,6 +24,8 @@ public class Preference {
 	public static final String ALLOW_TELEMETRY = "ALLOW_TELEMETRY";
 	public static final String ASKED_TELEMETRY = "ASKED_TELEMETRY";
 	public static final String LONG_RESULT_RANK = "LONG_RESULT_RANK";
+	public static final String LONG_RESULT_CUT = "LONG_RESULT_CUT";
+	public static final String LONG_RESULT_CUT_SORT = "LONG_RESULT_CUT_SORT";
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
@@ -89,5 +92,35 @@ public class Preference {
 
 	public static int getLongResultRank() {
 		return preferenceManager.getInt(LONG_RESULT_RANK);
+	}
+
+	/**
+	 * -1 : auto
+	 * 
+	 * @return
+	 */
+	public static int getLongResultCuts() {
+		new AiXPreInitializer().initializeDefaultPreferences();
+		String cuts = preferenceManager.getString(LONG_RESULT_CUT);
+		if (cuts.equals(Localization.longResultCutAuto)) {
+			return -1;
+		} else if (cuts.equals(Localization.longResultCut0)) {
+			return 0;
+		} else if (cuts.equals(Localization.longResultCut1)) {
+			return 1;
+		} else if (cuts.equals(Localization.longResultCut2)) {
+			return 2;
+		} else if (cuts.equals(Localization.longResultCut3)) {
+			return 3;
+		} else if (cuts.equals(Localization.longResultCut4)) {
+			return 4;
+		} else if (cuts.equals(Localization.longResultCut5)) {
+			return 5;
+		}
+		return -1;
+	}
+
+	public static String getLongResultCutsOrder() {
+		return preferenceManager.getString(LONG_RESULT_CUT_SORT);
 	}
 }

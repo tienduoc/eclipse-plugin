@@ -18,6 +18,17 @@ public class Localization {
 	public static final String endpointEmptyTitle = "endpointEmptyTitle";
 	public static final String endpointEmptyWarning = "endpointEmptyWarning";
 	public static final String longResultRank = "longResultRank";
+	public static final String longResultCut = "longResultCut";
+	public static final String longResultCutAuto = "longResultCutAuto";
+	public static final String longResultCut0 = "longResultCut0";
+	public static final String longResultCut1 = "longResultCut1";
+	public static final String longResultCut2 = "longResultCut2";
+	public static final String longResultCut3 = "longResultCut3";
+	public static final String longResultCut4 = "longResultCut4";
+	public static final String longResultCut5 = "longResultCut5";
+	public static final String longResultCutSort = "longResultCutSort";
+	public static final String longResultCutS2L = "longResultCutS2L";
+	public static final String longResultCutL2S = "longResultCutL2S";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {
