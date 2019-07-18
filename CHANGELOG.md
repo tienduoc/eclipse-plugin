@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.0.7] - 2019-07-18
+### 新增
+
+### 改动
+- 现在会在设置页面中正确显示补全提供器的名称了
+
+### 修复
+
+
 ## [1.0.7] - 2019-07-16
 ### 新增
 
