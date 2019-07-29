@@ -25,6 +25,7 @@ import com.aixcoder.extension.AiXCoder;
 import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.extension.ProposalFactory;
 import com.aixcoder.lang.LangOptions;
+import com.aixcoder.utils.Predict;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
 import com.aixcoder.utils.RenderedInfo;
@@ -69,20 +70,37 @@ public class AiXInsertUIJob extends AiXUIJob {
 				} // else 预测结果为空
 				throw new AiXAbortInsertionException();
 			} else {
-				ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(predictResult.tokens));
-				LangOptions langOptions = LangOptions.getInstance("java");
-				RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, predictResult.current,
-						langOptions);
-				ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
-						rendered.insert, predictResult.current, predictResult.rCompletions, predictResult.rescues,
-						langOptions);
+				ArrayList<ICompletionProposal> longPredicts = new ArrayList<ICompletionProposal>(
+						predictResult.longPredicts.length);
+				String current = null;
+				for (Predict.LongPredictResult longPredict : predictResult.longPredicts) {
+					if (current == null) {
+						current = longPredict.current;
+					}
+					ArrayList<String> tokens = new ArrayList<String>(Arrays.asList(longPredict.tokens));
+					LangOptions langOptions = LangOptions.getInstance("java");
+					RenderedInfo rendered = TokenUtils.renderTokens("java", lastLine, tokens, longPredict.current,
+							langOptions);
+					ICompletionProposal proposal = proposalFactory.createProposal(selection.x, rendered.display,
+							rendered.insert, longPredict.current, longPredict.rCompletions, longPredict.rescues,
+							langOptions);
+					longPredicts.add(proposal);
+				}
 
-				fSorter.longProposal = null;
-				String longDisplay = proposal.getDisplayString().trim();
-				for (ICompletionProposal p : fFilteredProposals) {
-					if (p.getDisplayString().startsWith(longDisplay)) {
-						fSorter.longProposal = p;
-						break;
+				fSorter.longProposal = new ArrayList<ICompletionProposal>();
+				for (ICompletionProposal proposal : longPredicts) {
+					String longDisplay = proposal.getDisplayString().trim();
+					boolean dup = false;
+					for (ICompletionProposal p : fFilteredProposals) {
+						if (p.getDisplayString().startsWith(longDisplay)) {
+							fSorter.longProposal.add(p);
+							dup = true;
+							break;
+						}
+					}
+					if (!dup) {
+						fFilteredProposals.add(0, proposal);
+						fComputedProposal.add(0, proposal);
 					}
 				}
 				if (predictResult.sortResults != null) {
@@ -104,7 +122,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 						}
 						if (sortResult.options != null && sortResult.options.forced && !matched) {
 							ICompletionProposal forcedProposal = proposalFactory.createForcedSortProposal(selection.x,
-									sortResult.word, predictResult.current, sortResult.prob);
+									sortResult.word, current, sortResult.prob);
 							fFilteredProposals.add(0, forcedProposal);
 							fComputedProposal.add(0, forcedProposal);
 							scoreMap.put(forcedProposal, sortResult.prob);
@@ -163,12 +181,6 @@ public class AiXInsertUIJob extends AiXUIJob {
 						sortedResults.get(i).setValue((double) (sortedResults.size() - i));
 					}
 					fSorter.scoreMap = scoreMap;
-				}
-				if (fSorter.longProposal == null
-						&& (predictResult.sortResults == null || predictResult.sortResults.length == 0
-								|| !rendered.display.matches("[a-zA-Z0-9_$]+(\\()?"))) {
-					fFilteredProposals.add(0, proposal);
-					fComputedProposal.add(0, proposal);
 				}
 
 				new AiXReportJob(ReportType.SHOW).schedule();

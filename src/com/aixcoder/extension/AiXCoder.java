@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -13,6 +14,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.OverlayIcon;
+import com.aixcoder.i18n.Localization;
 import com.aixcoder.lib.Preference;
 
 /**
@@ -62,7 +64,7 @@ public class AiXCoder implements ICompletionProposalSorter {
 
 	HashMap<String, Field> fImageFieldCache = new HashMap<String, Field>();
 
-	public ICompletionProposal longProposal;
+	public List<ICompletionProposal> longProposal;
 
 	Field _getFImageField(ICompletionProposal p, Class<?> clz) {
 		try {
@@ -155,7 +157,7 @@ public class AiXCoder implements ICompletionProposalSorter {
 
 	double longResultScore = -1;
 
-	double getLongResultScore() {
+	double getLongResultScore(AiXCompletionProposal p) {
 		if (longResultScore < 0) {
 			if (scoreMap == null) {
 				longResultScore = 1;
@@ -165,17 +167,21 @@ public class AiXCoder implements ICompletionProposalSorter {
 				longResultScore = scoreMap.size() + 1 - rank + 0.1;
 			}
 		}
-		System.out.println("longResultScore=" + longResultScore);
-		return longResultScore;
+		double plongResultScore = longResultScore +  p.getDisplayString().length() / 100.0 * (Preference.getLongResultCutsOrder().equals(Localization.longResultCutS2L) ? -1 : 1);
+//		System.out.println("longResultScore=" + plongResultScore);
+		return plongResultScore;
 	}
 
 	double getScore(ICompletionProposal p) {
-		if (longProposal == p && p instanceof AiXCompletionProposal) {
-			setImage(p, ProposalFactory.image);
-			return getLongResultScore();
-		}
 		if (p instanceof AiXCompletionProposal) {
-			return longProposal == null ? getLongResultScore() : 0;
+			if (longProposal == null) {
+				return getLongResultScore((AiXCompletionProposal)p);
+			}
+			if (longProposal.contains(p)) {
+				setImage(p, ProposalFactory.image);
+				return 0;
+			}
+			return getLongResultScore((AiXCompletionProposal)p);
 		}
 		return getScore(p, p.getDisplayString());
 	}

@@ -1,7 +1,33 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.0.5] - %DATE%
+## [1.0.7] - 2019-07-18
+### 新增
+- 提供多个不同长度的结果，这个行为可以在设置页面中设置开关及出现的结果的数量和顺序。
+
+### 改动
+- 现在会在设置页面中正确显示补全提供器的名称了
+
+### 修复
+
+
+## [1.0.7] - 2019-07-16
+### 新增
+
+### 改动
+
+### 修复
+- 修复了相同的import重复出现的问题。
+
+## [1.0.6] - 2019-07-11
+### Added
+
+### Changed
+
+### Fixed
+- Fixed a compatibility issue on Eclipse 2019-06
+
+## [1.0.5] - 2019-07-02
 ### Added
 
 ### Changed
@@ -9,14 +35,15 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ### Fixed
 - Fixed globe emoji 🌏 displaying.
-- Removed extranoues space before right parenthesis.
-- AiXCoder is properly displayed instead of obselete "AiXSorter".
+- Removed extraneous space before right parenthesis.
+- AiXCoder is properly displayed instead of obsolete "AiXSorter".
+- Fixed a compatibility issue on Eclipse Oxygen or lower.
 
 ## [1.0.4] - 2019-06-11
 ### Added
 - Warns you when endpoint is empty.
 - Localized first-time install orientation.
-- Added a configuration to set the prefered position of long results.
+- Added a configuration to set the preferred position of long results.
 
 ### Changed
 - Removed the useless preferences in community version.

@@ -8,7 +8,7 @@
 	</extension>
 	<extension point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 	   id="WordCompletionProposalComputer"
-	   name="Word Completion Proposal Computer">
+	   name="aiXcoder smart completion">
 	   <javaCompletionProposalComputer
 	  class="com.aixcoder.extension.AiXProposalComputer"
 	  activate="true"
