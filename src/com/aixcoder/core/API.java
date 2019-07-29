@@ -121,7 +121,8 @@ public class API {
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
 							.form("ext", Preference.getModel()).form("fileid", fileid)
 							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
-							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts);
+							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts)
+							.header("uuid", uuid).header("ext", Preference.getModel());
 					if (Preference.sortOnly()) {
 						httpRequest.form("ngen", 1);
 					}
