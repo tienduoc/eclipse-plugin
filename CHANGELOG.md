@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.0.9] - 2019-07-29
+### 新增
+
+### 改动
+
+### 修复
+- 修复了一个阻碍使用的严重问题。
+
 ## [1.0.8] - 2019-07-29
 ### 新增
 - 新接口提升负载均衡速度。
