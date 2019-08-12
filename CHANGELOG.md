@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.0.10] - 2019-08-12
+### 新增
+
+### 改动
+
+### 修复
+- 修复了在某些情况下会出现AiX Report EMPTY错误的问题。
+
 ## [1.0.9] - 2019-07-29
 ### 新增
 

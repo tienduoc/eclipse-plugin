@@ -55,8 +55,6 @@ public class AiXFetchJob extends Job {
 				predictResult = Predict.predict(predictContext, remainingText, lastUUID);
 				if (predictResult != null) {
 					PredictCache.getInstance().put(predictContext.prefix, predictResult);
-				} else {
-					new AiXReportJob(ReportType.EMPTY).schedule();
 				}
 			}
 			if (predictResult != null) {

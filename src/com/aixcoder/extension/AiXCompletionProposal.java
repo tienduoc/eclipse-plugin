@@ -92,7 +92,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 			if (fRescues != null && fRescues.length > 0) {
 				fLangOptions.rescue(document, fRescues);
 			}
-			new AiXReportJob(ReportType.USE).schedule();
+			new AiXReportJob(ReportType.LONG_USE, fDisplayString.split("\\b").length, fDisplayString.length()).schedule();
 		} catch (BadLocationException x) {
 			// ignore
 		}

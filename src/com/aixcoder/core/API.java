@@ -65,7 +65,7 @@ public class API {
 		return r;
 	}
 
-	public static void report(ReportType type) {
+	public static void report(ReportType type, int tokenNum, int charNum) {
 		if (Preference.allowTelemetry()) {
 			System.out.println("API.report " + type.name());
 			final String uuid = Preference.getUUID();
@@ -76,6 +76,8 @@ public class API {
 			m.put("ide_version", Platform.getBundle("org.eclipse.platform").getVersion().toString());
 			m.put("ide_type", "eclipse");
 			m.put("uuid", uuid);
+			m.put("token_num", String.valueOf(tokenNum));
+			m.put("char_num", String.valueOf(charNum));
 			try {
 				HttpHelper.post(Preference.getEndpoint() + "user/predict/userUseInfo", m);
 			} catch (URISyntaxException e) {

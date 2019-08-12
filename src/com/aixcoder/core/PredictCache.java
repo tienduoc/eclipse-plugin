@@ -59,6 +59,7 @@ public class PredictCache {
 					second = predict;
 				}
 			}
+			if (second == null) return null;
 			SortResult[] sortResults = pr.sortResults;
 			for (; i < second.tokens.length; i++) {
 				String ltrimedNewString = ltrim(newString);

@@ -183,14 +183,12 @@ public class AiXInsertUIJob extends AiXUIJob {
 					fSorter.scoreMap = scoreMap;
 				}
 
-				new AiXReportJob(ReportType.SHOW).schedule();
+				new AiXReportJob(ReportType.LONG_SHOW, 0, 0).schedule();
 			}
 		} catch (AiXAbortInsertionException e) {
-			new AiXReportJob(ReportType.INTERRUPT).schedule();
 			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
-			new AiXReportJob(ReportType.ERROR).schedule();
 			throw new AiXAbortInsertionException(e);
 		}
 	}
