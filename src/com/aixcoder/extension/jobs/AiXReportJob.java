@@ -11,15 +11,19 @@ import com.aixcoder.core.ReportType;
 public class AiXReportJob extends Job {
 
 	private ReportType type;
+	private int tokenNum;
+	private int charNum;
 
-	public AiXReportJob(ReportType type) {
+	public AiXReportJob(ReportType type, int tokenNum, int charNum) {
 		super("AiX Report " + type);
 		this.type = type;
+		this.tokenNum = tokenNum;
+		this.charNum = charNum;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		API.report(type);
+		API.report(type, tokenNum, charNum);
 		return Status.OK_STATUS;
 	}
 
