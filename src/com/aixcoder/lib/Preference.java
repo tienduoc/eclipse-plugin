@@ -47,11 +47,18 @@ public class Preference {
 		if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
 			synchronized (id) {
 				if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
-					preferenceManager.setValue(P_UUID, UUID.randomUUID().toString());
+					preferenceManager.setValue(P_UUID, "eclipse-" + UUID.randomUUID().toString());
 				}
 			}
 		}
-		return "eclipse-" + preferenceManager.getString(P_UUID);
+        String corpUser = System.getProperty("user.name");
+        System.out.println("Enterprise User: " + corpUser);
+        String uuid = preferenceManager.getString(P_UUID);
+        if (corpUser != null && uuid.indexOf(corpUser + "=>") < 0) {
+            uuid = corpUser + "=>" + uuid;
+			preferenceManager.setValue(P_UUID, uuid);
+        }
+		return preferenceManager.getString(P_UUID);
 	}
 
 	public static String getParams() {
