@@ -3,7 +3,7 @@ Automatic-Module-Name: aixcoder
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: aiXcoder;singleton:=true
-Bundle-Version: 1.0.10.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: com.aixcoder.extension.Activator
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
@@ -20,3 +20,13 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/gson-2.8.5.jar
+Export-Package: com.aixcoder.core,
+ com.aixcoder.extension,
+ com.aixcoder.extension.jobs,
+ com.aixcoder.i18n,
+ com.aixcoder.lang,
+ com.aixcoder.lib,
+ com.aixcoder.lint,
+ com.aixcoder.utils,
+ com.aixcoder.utils.shims,
+ com.aixcoder.utils.zipfile

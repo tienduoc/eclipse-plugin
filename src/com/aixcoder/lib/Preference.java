@@ -52,7 +52,6 @@ public class Preference {
 			}
 		}
         String corpUser = System.getProperty("user.name");
-        System.out.println("Enterprise User: " + corpUser);
         String uuid = preferenceManager.getString(P_UUID);
         if (corpUser != null && uuid.indexOf(corpUser + "=>") < 0) {
             uuid = corpUser + "=>" + uuid;

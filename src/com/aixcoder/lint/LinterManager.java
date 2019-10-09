@@ -1,6 +1,7 @@
 package com.aixcoder.lint;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class LinterManager {
@@ -20,18 +21,38 @@ public class LinterManager {
 			linters.add(new AiXLinter());
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
 	}
 
-	public ArrayList<LintResult> lint(String projectPath, String filePath) {
-		ArrayList<LintResult> results = new ArrayList<LintResult>();
-		for (Linter linter: linters) {
+	public ArrayList<LintResult> lint(final String projectPath, final String filePath) {
+		final ArrayList<LintResult> results = new ArrayList<LintResult>();
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		long _s = System.currentTimeMillis();
+		for (final Linter linter : linters) {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						results.addAll(linter.lint(projectPath, filePath));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			threads.add(t);
+			t.start();
+		}
+		for (Thread t : threads) {
 			try {
-				results.addAll(linter.lint(projectPath, filePath));
-			} catch (Exception e) {
+				t.join(5000);
+				t.interrupt();
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("lint time took: " + (System.currentTimeMillis() - _s));
 		return results;
 	}
 }

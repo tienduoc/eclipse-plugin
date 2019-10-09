@@ -1,9 +1,12 @@
 package com.aixcoder.lint;
 
+import java.nio.file.Paths;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
@@ -16,25 +19,25 @@ public class P3CLinter extends Linter {
 	private OutputStreamWriter os;
 	private Process p;
 
-	public P3CLinter() throws IOException {
+	public P3CLinter() throws IOException, URISyntaxException {
 		startProcess();
 	}
 
-	private void startProcess() throws IOException {
-		ProcessBuilder pb = new ProcessBuilder("java", "-jar", "D:\\workspace-2019-06\\Tensorflow-AutoComplete\\codestyleworker.jar");
+	private void startProcess() throws IOException, URISyntaxException {
+		String javaHome = System.getProperty("java.home");
+		String javaExecPath = Paths.get(javaHome, "bin", "java.exe").toAbsolutePath().toString();
+		String jarPath = new File(P3CLinter.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+				.getParent();
+		jarPath = Paths.get(jarPath, "codestyleworker.jar").toAbsolutePath().toString();
+		System.out.println("jarPath=" + jarPath);
+		ProcessBuilder pb = new ProcessBuilder(javaExecPath, "-jar", jarPath);
 		p = pb.start();
 		is = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		os = new OutputStreamWriter(p.getOutputStream());
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		p.destroy();
-	}
-
-	@Override
-	public ArrayList<LintResult> lint(String projectPath, String filePath) throws IOException {
+	public ArrayList<LintResult> lint(String projectPath, String filePath) throws IOException, URISyntaxException {
 		if (p == null || !p.isAlive()) {
 			startProcess();
 		}
@@ -55,7 +58,8 @@ public class P3CLinter extends Linter {
 			int endColumn = j.get("endColumn").getAsInt();
 //			int beginOffset = j.get("beginOffset").getAsInt();
 //			int endOffset = j.get("endOffset").getAsInt();
-			results.add(new LintResult(badDetail, locfile, Severity.WARNING, beginLine, beginColumn, endLine, endColumn + 1));
+			results.add(new LintResult(badDetail, locfile, Severity.WARNING, beginLine, beginColumn, endLine,
+					endColumn + 1));
 		}
 		return results;
 	}

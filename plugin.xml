@@ -101,7 +101,7 @@
           </command>
           <command
                 commandId="aiXcoder.commands.lintCommand"
-                icon="icons/aix_log.png"
+                icon="icons/lint.png"
                 id="aiXcoder.popup.lintCommand">
           </command>
     </menuContribution>
