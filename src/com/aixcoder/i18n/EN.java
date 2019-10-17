@@ -36,6 +36,7 @@ public class EN extends Localization {
 		m.put(longResultCutSort, "The order of shorter results");
 		m.put(longResultCutS2L, "short to long");
 		m.put(longResultCutL2S, "long to short");
+		m.put(missingP3Cjar, "cannot locate codestyleworker.jar");
 	}
 
 	public static String R(String input) {
