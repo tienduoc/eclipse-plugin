@@ -13,6 +13,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
 
+import com.aixcoder.core.API;
 import com.aixcoder.i18n.EN;
 import com.aixcoder.i18n.Localization;
 import com.aixcoder.i18n.ZH;
@@ -95,6 +96,7 @@ public class Activator extends AbstractUIPlugin {
 				}
 			}.schedule();
 		}
+		API.checkUpdate(context.getBundle().getVersion());
 	}
 
 	/*
