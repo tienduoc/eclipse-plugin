@@ -33,6 +33,7 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		Composite parent = getFieldEditorParent();
 		addField(new BooleanFieldEditor(Preference.ACTIVE, R(Localization.enableAiXCoder), parent));
 		addField(new StringFieldEditor(Preference.ENDPOINT, R(Localization.serverURL), parent));
+		addField(new IntegerFieldEditor(Preference.ENTERPRISE_PORT, R(Localization.enterprisePort), parent));
 		addField(new StringFieldEditor(Preference.SEARCH_ENDPOINT, R(Localization.searchURL), parent));
 		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
 		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));

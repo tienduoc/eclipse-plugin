@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -303,27 +306,36 @@ public class API {
 
 	public static void checkUpdate(Version version) {
 		try {
-			String updateJson = HttpHelper
-					.get("https://www.aixcoder.com/download/installtool/aixcoderinstaller_aixcoder.json");
-			JsonObject updateObj = new Gson().fromJson(updateJson, JsonObject.class);
-			String OS = System.getProperty("os.name").toLowerCase();
-			if (OS.contains("win")) {
-				updateObj = updateObj.getAsJsonObject("win");
-			} else {
-				updateObj = updateObj.getAsJsonObject("mac");
+			String endpoint = Preference.getEndpoint();
+			int enterprisePort = Preference.getEnterprisePort();
+			endpoint = endpoint.replaceFirst(":\\d+", ":" + enterprisePort);
+			String filesHtml = HttpHelper.get(endpoint + "plugins/eclipse");
+			Pattern p = Pattern.compile("<a href=\"([^\\\"]+)\">eclipse-aiXcoder_([0-9.]+).enterprise.jar<\\/a>");
+			Matcher m = p.matcher(filesHtml);
+			String bestHref = "";
+			Version bestV = new Version("0");
+			while (m.find()) {
+				String href = m.group(1);
+				final String newVersion = m.group(2);
+				Version v = Version.parseVersion(newVersion);
+				if (v.compareTo(bestV) > 0) {
+					bestHref = href;
+					bestV = v;
+				}
 			}
-			final String newVersion = updateObj.getAsJsonObject("eclipse").get("version").getAsString();
-			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
+			final String bestVersion = bestV.toString();
+			final String bestHref2 = endpoint + bestHref;
+			if (bestV.compareTo(version) > 0) {
 				// new version available
 				new UIJob("Prompt aiXcoder update") {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						boolean update = MessageDialog.openQuestion(null, "New version available",
-								String.format("A new version of aiXcoder %s is available, update now?", newVersion));
+								String.format("A new version of aiXcoder %s is available, update now?", bestVersion));
 						if (update) {
 							try {
-								Desktop.getDesktop().browse(new URI("https://www.aixcoder.com/download/installtool"));
+								Desktop.getDesktop().browse(new URI(bestHref2));
 							} catch (IOException e) {
 								e.printStackTrace();
 								return Status.CANCEL_STATUS;

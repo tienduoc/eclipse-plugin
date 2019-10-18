@@ -30,6 +30,7 @@ public class Localization {
 	public static final String longResultCutS2L = "longResultCutS2L";
 	public static final String longResultCutL2S = "longResultCutL2S";
 	public static final String missingP3Cjar = "missingP3Cjar";
+	public static final String enterprisePort = "enterprisePort";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {

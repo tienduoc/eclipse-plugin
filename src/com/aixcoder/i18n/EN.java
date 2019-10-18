@@ -37,6 +37,7 @@ public class EN extends Localization {
 		m.put(longResultCutS2L, "short to long");
 		m.put(longResultCutL2S, "long to short");
 		m.put(missingP3Cjar, "cannot locate codestyleworker.jar");
+		m.put(enterprisePort, "Enterprise update port");
 	}
 
 	public static String R(String input) {

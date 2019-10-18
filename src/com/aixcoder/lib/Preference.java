@@ -13,6 +13,7 @@ public class Preference {
 
 	public static final String ACTIVE = "ACTIVE";
 	public static final String ENDPOINT = "ENDPOINT";
+	public static final String ENTERPRISE_PORT = "ENTERPRISE_PORT";
 	public static final String MODEL = "MODEL";
 	public static final String P_UUID = "UUID";
 	public static final String PARAMS = "PARAMS";
@@ -36,7 +37,15 @@ public class Preference {
 	}
 
 	public static String getEndpoint() {
-		return preferenceManager.getString(ENDPOINT);
+		String endpoint = preferenceManager.getString(ENDPOINT);
+		if (!endpoint.endsWith("/")) {
+			endpoint = endpoint + "/";
+		}
+		return endpoint;
+	}
+
+	public static int getEnterprisePort() {
+		return preferenceManager.getInt(ENTERPRISE_PORT);
 	}
 
 	public static String getModel() {
@@ -51,12 +60,12 @@ public class Preference {
 				}
 			}
 		}
-        String corpUser = System.getProperty("user.name");
-        String uuid = preferenceManager.getString(P_UUID);
-        if (corpUser != null && uuid.indexOf(corpUser + "=>") < 0) {
-            uuid = corpUser + "=>" + uuid;
+		String corpUser = System.getProperty("user.name");
+		String uuid = preferenceManager.getString(P_UUID);
+		if (corpUser != null && uuid.indexOf(corpUser + "=>") < 0) {
+			uuid = corpUser + "=>" + uuid;
 			preferenceManager.setValue(P_UUID, uuid);
-        }
+		}
 		return preferenceManager.getString(P_UUID);
 	}
 

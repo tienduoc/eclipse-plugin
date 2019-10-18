@@ -57,6 +57,8 @@ public class ZH extends Localization {
 		m.put(longResultCutL2S, "\u4ece\u957f\u5230\u77ed");
 //		m.put(missingP3Cjar, "找不到codestyleworker.jar");
 		m.put(missingP3Cjar, "\u627e\u4e0d\u5230codestyleworker.jar");
+//		m.put(enterprisePort, "企业版更新端口");
+		m.put(enterprisePort, "\u4f01\u4e1a\u7248\u66f4\u65b0\u7aef\u53e3");
 	}
 
 	public static String R(String input) {
