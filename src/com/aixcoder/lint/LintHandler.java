@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -81,7 +80,7 @@ public class LintHandler extends AbstractHandler {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					JavaEditor editor = (JavaEditor) window.getActivePage().getActiveEditor();
-					IFile file = ((IFileEditorInput) editor.getEditorInput()).getFile();
+					IFile file = editor.getEditorInput().getAdapter(IFile.class);;
 					lintSingleFile(file);
 					return Status.OK_STATUS;
 				}

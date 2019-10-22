@@ -310,6 +310,9 @@ public class API {
 			int enterprisePort = Preference.getEnterprisePort();
 			endpoint = endpoint.replaceFirst(":\\d+", ":" + enterprisePort);
 			String filesHtml = HttpHelper.get(endpoint + "plugins/eclipse");
+			if (filesHtml == null ) {
+				return;
+			}
 			Pattern p = Pattern.compile("<a href=\"([^\\\"]+)\">eclipse-aiXcoder_([0-9.]+).enterprise.jar<\\/a>");
 			Matcher m = p.matcher(filesHtml);
 			String bestHref = "";
