@@ -57,7 +57,11 @@ public class P3CLinter extends Linter {
 		} else {
 			ProcessBuilder pb = new ProcessBuilder(javaExecPath, "-jar", jarPath);
 			p = pb.start();
-			is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String cmdEncoding = System.getProperty("sun.jnu.encoding");
+			if (cmdEncoding == null) {
+				cmdEncoding = "utf-8";
+			}
+			is = new BufferedReader(new InputStreamReader(p.getInputStream(), cmdEncoding));
 			os = new OutputStreamWriter(p.getOutputStream());
 		}
 	}
