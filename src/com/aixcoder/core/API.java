@@ -6,11 +6,20 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
@@ -43,8 +52,95 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+class LocalServerStatus {
+	String name;
+	boolean active;
+	String url;
+
+	public LocalServerStatus(String name, boolean active, String url) {
+		super();
+		this.name = name;
+		this.active = active;
+		this.url = url;
+	}
+}
+
 public class API {
 	public static long timestamp;
+	static long lastCheckLocalTime = 0;
+	static ConcurrentHashMap<String, LocalServerStatus> models = new ConcurrentHashMap<String, LocalServerStatus>();
+
+	static void readFile() {
+		try {
+			Path localserver = Paths.get(System.getProperty("user.home"), "aiXcoder", "localserver.json");
+			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
+				return;
+			}
+			lastCheckLocalTime = System.currentTimeMillis();
+			String text = new String(Files.readAllBytes(localserver), StandardCharsets.UTF_8);
+			JsonArray jo = new Gson().fromJson(text, JsonObject.class).get("models").getAsJsonArray();
+			models.clear();
+			for (int i = 0; i < jo.size(); i++) {
+				JsonObject j = jo.get(i).getAsJsonObject();
+				models.put(j.get("name").getAsString(), new LocalServerStatus(j.get("name").getAsString(),
+						j.get("active").getAsBoolean(), j.get("url").getAsString()));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	static void initWatch() {
+		try {
+			Path dir = Paths.get(System.getProperty("user.home"), "aiXcoder");
+			final WatchService watcher = FileSystems.getDefault().newWatchService();
+			dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+			new Thread("localServerWatcher") {
+				public void run() {
+					while (true) {
+						WatchKey wk;
+						try {
+							wk = watcher.take();
+						} catch (InterruptedException e) {
+							break;
+						}
+						for (WatchEvent<?> event : wk.pollEvents()) {
+							// we only register "ENTRY_MODIFY" so the context is always a Path.
+							final Path changed = (Path) event.context();
+							System.out.println(changed);
+							if (changed.endsWith("localserver.json")) {
+								System.out.println("localserver.json has changed");
+								readFile();
+							}
+						}
+						// reset the key
+						boolean valid = wk.reset();
+						if (!valid) {
+							System.out.println("Key has been unregisterede");
+						}
+					}
+				};
+			}.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	static {
+		new Thread("periodicReadLocalServer") {
+			public void run() {
+				while (true) {
+					try {
+						readFile();
+						Thread.sleep(1000 * 60 * 5);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+			};
+		}.start();
+		initWatch();
+	}
 
 	public static String[] getModels() {
 		String body;
@@ -61,15 +157,27 @@ public class API {
 		return null;
 	}
 
+	static boolean local = false;
+
 	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
 		timestamp = Calendar.getInstance().getTimeInMillis();
-		PredictResult r = predict(true, predictContext, remainingText, UUID);
+		String ext = Preference.getModel();
+		String endpoint;
+		if (models.containsKey(ext) && models.get(ext).active && models.get(ext).url != null) {
+			endpoint = models.get(ext).url;
+			System.out.println("LOCAL!");
+			local = true;
+		} else {
+			endpoint = Preference.getEndpoint();
+			local = false;
+		}
+		PredictResult r = predict(true, predictContext, remainingText, UUID, endpoint);
 		System.out.println("API.predict took " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
 		return r;
 	}
 
 	public static void report(ReportType type, int tokenNum, int charNum) {
-		if (Preference.allowTelemetry()) {
+		if (Preference.allowTelemetry() && !local) {
 			System.out.println("API.report " + type.name());
 			final String uuid = Preference.getUUID();
 			Map<String, String> m = new HashMap<String, String>();
@@ -107,7 +215,7 @@ public class API {
 	}
 
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
-			final String remainingText, final String UUID) {
+			final String remainingText, final String UUID, final String endpoint) {
 		try {
 			final String fileid = predictContext.filename;
 			final String uuid = Preference.getUUID();
@@ -118,7 +226,7 @@ public class API {
 			final int offset = CodeStore.getInstance().getDiffPosition(fileid, maskedText);
 			final String md5 = DigestUtils.getMD5(maskedText);
 			final int longResultCuts = Preference.getLongResultCuts();
-			String string = HttpHelper.post(Preference.getEndpoint() + "predict", new Consumer<HttpRequest>() {
+			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
 					// send request
@@ -149,7 +257,7 @@ public class API {
 			if (string.contains("Conflict")) {
 				CodeStore.getInstance().invalidateFile(proj, fileid);
 				if (allowRetry) {
-					return predict(false, predictContext, maskedRemainingText, UUID);
+					return predict(false, predictContext, maskedRemainingText, UUID, endpoint);
 				}
 			} else {
 				System.out.println(string);
