@@ -1,7 +1,5 @@
 package com.aixcoder.lint;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -10,7 +8,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -112,11 +109,9 @@ public class LintHandler extends AbstractHandler {
 
 	public void lintSingleFile(IFile file) {
 		try {
-			IPath projPath = file.getProject().getFullPath();
-			String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-			Path projFullPath = Paths.get(workspacePath, projPath.toOSString());
-			String projectPath = projFullPath.toAbsolutePath().toString();
-			String filePath = file.getFullPath().makeRelativeTo(projPath).toOSString();
+			IPath projPath = file.getProject().getLocation();
+			String projectPath = projPath.toOSString();
+			String filePath = file.getFullPath().makeRelativeTo(file.getProject().getFullPath()).toOSString();
 			ArrayList<LintResult> results = LinterManager.getInstance().lint(projectPath, filePath);
 			clearMarker(file);
 			for (LintResult r : results) {
