@@ -36,7 +36,7 @@ public class Preference {
 	}
 
 	public static String getEndpoint() {
-		return preferenceManager.getString(ENDPOINT);
+		return "https://api.aixcoder.com/";
 	}
 
 	public static String getModel() {
