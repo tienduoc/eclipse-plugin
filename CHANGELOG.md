@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.1.0] - 2019-10-18
+## [1.1.1] - 2019-10-28
 ### 新增
 - 主动提示更新
 - 增加了本地版的支持
