@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.8.101",
  org.eclipse.core.net;bundle-version="1.2.200",
  org.eclipse.ui.browser;bundle-version="3.4.100",
- org.eclipse.ui.editors;bundle-version="3.8.100"
+ org.eclipse.ui.editors;bundle-version="3.8.100",
+ org.eclipse.ui.ide
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

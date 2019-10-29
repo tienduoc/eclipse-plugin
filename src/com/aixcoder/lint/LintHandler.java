@@ -1,6 +1,9 @@
 package com.aixcoder.lint;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -8,7 +11,9 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,73 +24,143 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.IFileEditorInput;
 
 @SuppressWarnings("restriction")
 public class LintHandler extends AbstractHandler {
 
+//	@Override
+//	public Object execute(ExecutionEvent event) throws ExecutionException {
+//		final IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+//		try {
+//			ISelectionService service = window.getSelectionService();
+//			// set structured selection
+//			IStructuredSelection structured = (IStructuredSelection) service.getSelection();
+//
+//			if (structured.getFirstElement() instanceof ICompilationUnit) {
+//				// check if it is an ICompilationUnit
+//				ICompilationUnit cu = (ICompilationUnit) structured.getFirstElement();
+//				final IFile file = (IFile) cu.getResource();
+//				new Job("aiXcoder: lint") {
+//					@Override
+//					protected IStatus run(IProgressMonitor monitor) {
+//						lintSingleFile(file);
+//						return Status.OK_STATUS;
+//					}
+//				}.schedule();
+//			} else if (structured.getFirstElement() instanceof JavaElement) {
+//				// check if it is an IFile
+//				// get the selected file
+//				final JavaElement pkg = (JavaElement) structured.getFirstElement();
+//				new UIJob("aiXcoder: lint - list files") {
+//					@Override
+//					public IStatus runInUIThread(IProgressMonitor monitor) {
+//						final ArrayList<IFile> files = lintSinglePackage(pkg);
+//						new Job("aiXcoder: lint") {
+//
+//							@Override
+//							protected IStatus run(IProgressMonitor monitor) {
+//								for (IFile f : files) {
+//									lintSingleFile(f);
+//								}
+//								return null;
+//							}
+//
+//						}.schedule();
+//						return Status.OK_STATUS;
+//					}
+//				}.schedule();
+//			} else {
+//				throw new Exception();
+//			}
+//		} catch (Exception e) {
+//			new Job("aiXcoder: lint") {
+//				@Override
+//				protected IStatus run(IProgressMonitor monitor) {
+//					JavaEditor editor = (JavaEditor) window.getActivePage().getActiveEditor();
+//					IFile file = editor.getEditorInput().getAdapter(IFile.class);;
+//					lintSingleFile(file);
+//					return Status.OK_STATUS;
+//				}
+//			}.schedule();
+//		}
+//		return null;
+//	}
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		try {
-			ISelectionService service = window.getSelectionService();
-			// set structured selection
-			IStructuredSelection structured = (IStructuredSelection) service.getSelection();
-
-			if (structured.getFirstElement() instanceof ICompilationUnit) {
-				// check if it is an ICompilationUnit
-				ICompilationUnit cu = (ICompilationUnit) structured.getFirstElement();
-				final IFile file = (IFile) cu.getResource();
-				new Job("aiXcoder: lint") {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						lintSingleFile(file);
-						return Status.OK_STATUS;
-					}
-				}.schedule();
-			} else if (structured.getFirstElement() instanceof JavaElement) {
-				// check if it is an IFile
-				// get the selected file
-				final JavaElement pkg = (JavaElement) structured.getFirstElement();
-				new UIJob("aiXcoder: lint - list files") {
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						final ArrayList<IFile> files = lintSinglePackage(pkg);
-						new Job("aiXcoder: lint") {
-
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								for (IFile f : files) {
-									lintSingleFile(f);
-								}
-								return null;
-							}
-
-						}.schedule();
-						return Status.OK_STATUS;
-					}
-				}.schedule();
-			} else {
-				throw new Exception();
+		ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
+		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		if (part instanceof ViewPart) {
+			if (selection instanceof IStructuredSelection) {
+				try {
+					handlerForMutiFiles((IStructuredSelection)selection);
+				} catch (PartInitException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
 			}
-		} catch (Exception e) {
-			new Job("aiXcoder: lint") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					JavaEditor editor = (JavaEditor) window.getActivePage().getActiveEditor();
-					IFile file = editor.getEditorInput().getAdapter(IFile.class);;
-					lintSingleFile(file);
-					return Status.OK_STATUS;
-				}
-			}.schedule();
+		}else if (part instanceof EditorPart){
+			IEditorInput editorInput = HandlerUtil.getActiveEditorInput(event);
+			if(editorInput instanceof IFileEditorInput) {
+				Set<IResource> set = new HashSet<IResource>();
+				set.add(((IFileEditorInput) editorInput).getFile());
+				handlerIfile(set);
+			}
 		}
 		return null;
 	}
-
+	private void handlerForMutiFiles(IStructuredSelection selection ) throws PartInitException {
+		Set<IResource> resources =  new LinkedHashSet<IResource>() ;
+		selection.toList().forEach(it->{
+			if ( null != it ) {
+				
+				if (it instanceof IWorkingSet) {
+					 resources.add(((IWorkingSet) it).getAdapter(IResource.class));
+				}
+				if (it instanceof IAdaptable) {
+					if(null != ((IAdaptable)it).getAdapter(IResource.class)) {
+						resources.add(((IAdaptable)it).getAdapter(IResource.class));
+					}
+				}
+			}
+		});
+		handlerIfile(resources);
+	}
+	public void handlerIfile(Set<IResource> resources ) {
+		new Job("aiXcoder: lint") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				FileCollectVisitor fileVisitor = new FileCollectVisitor();
+				resources.forEach(it ->{
+					if (it.isAccessible()) {
+						try {
+							it.accept(fileVisitor);
+						} catch (CoreException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+				fileVisitor.getFileSet().forEach(ifile->{
+					lintSingleFile(ifile);
+				});
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+	}
 	public ArrayList<IFile> lintSinglePackage(final JavaElement pkg) {
 		ArrayList<IFile> files = new ArrayList<IFile>();
 		try {
@@ -174,5 +249,25 @@ public class LintHandler extends AbstractHandler {
 		// note: you can also use attributes from your supertype
 		marker.setAttribute(IMarker.MESSAGE, detail);
 		return marker;
+	}
+	class FileCollectVisitor implements IResourceVisitor{
+		private final LinkedHashSet<IFile> fileSet = new LinkedHashSet<IFile>() ;
+		public LinkedHashSet<IFile> getFileSet() {
+			return fileSet;
+		}
+		@Override
+		public boolean visit(IResource resource) throws CoreException {
+			if(null == resource) {
+				return false;
+			}
+			IFile file = resource.getAdapter(IFile.class);
+			if(null == file) {
+				return true;
+			}else if(file.exists() &&file.getFileExtension().equals("java") || file.getFileExtension().equals("vm") ){
+				fileSet.add(file);
+			}
+			return false;
+		}
+		
 	}
 }
