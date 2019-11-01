@@ -36,6 +36,8 @@ public class EN extends Localization {
 		m.put(longResultCutSort, "The order of shorter results");
 		m.put(longResultCutS2L, "short to long");
 		m.put(longResultCutL2S, "long to short");
+		m.put(localServerAutoStartTitle, "aiXcoder local service is not responding");
+		m.put(localServerAutoStartQuestion, "AiXcoder Local service is not responding, start it now?");
 	}
 
 	public static String R(String input) {

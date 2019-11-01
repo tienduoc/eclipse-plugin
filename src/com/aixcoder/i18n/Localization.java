@@ -29,6 +29,8 @@ public class Localization {
 	public static final String longResultCutSort = "longResultCutSort";
 	public static final String longResultCutS2L = "longResultCutS2L";
 	public static final String longResultCutL2S = "longResultCutL2S";
+	public static final String localServerAutoStartTitle = "localServerAutoStartTitle";
+	public static final String localServerAutoStartQuestion = "localServerAutoStartQuestion";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {

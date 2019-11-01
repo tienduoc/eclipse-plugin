@@ -8,6 +8,7 @@ public class ZH extends Localization {
 	public static final String display = "\u7b80\u4f53\u4e2d\u6587(Chinese Simplified)";
 	static Map<String, String> m = new HashMap<String, String>();
 	static {
+		// https://www.bejson.com/convert/unicode_chinese/
 //		m.put(enableAiXCoder, "启用aiXcoder(&e)");
 		m.put(enableAiXCoder, "\u542f\u7528aiXcoder(&e)");
 //		m.put(serverURL, "预测服务器地址(&s)");
@@ -55,6 +56,10 @@ public class ZH extends Localization {
 		m.put(longResultCutS2L, "\u4ece\u77ed\u5230\u957f");
 //		m.put(longResultCutL2S, "从长到短");
 		m.put(longResultCutL2S, "\u4ece\u957f\u5230\u77ed");
+//		m.put(localServerAutoStartTitle, "aiXcoder本地服务没有响应");
+		m.put(localServerAutoStartTitle, "aiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94");
+//		m.put(localServerAutoStartQuestion, "AiXcoder本地服务没有响应，现在启动吗？");
+		m.put(localServerAutoStartQuestion, "AiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94\uff0c\u73b0\u5728\u542f\u52a8\u5417\uff1f");
 	}
 
 	public static String R(String input) {

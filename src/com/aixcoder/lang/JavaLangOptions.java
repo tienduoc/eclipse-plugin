@@ -175,7 +175,7 @@ public class JavaLangOptions extends LangOptions {
 		addSpacingOption(SpacingKeyALL, ",", false);
 
 		addSpacingOption(";", "<ENTER>", false);
-		addSpacingOption(";", SpacingKeyALL, false);
+		addSpacingOption(";", SpacingKeyALL, true);
 
 		addSpacingOption(SpacingKeyALL, ";", false);
 
