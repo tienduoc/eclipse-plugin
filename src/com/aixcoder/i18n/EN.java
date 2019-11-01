@@ -38,6 +38,8 @@ public class EN extends Localization {
 		m.put(longResultCutL2S, "long to short");
 		m.put(missingP3Cjar, "cannot locate codestyleworker.jar");
 		m.put(enterprisePort, "Enterprise update port");
+		m.put(localServerAutoStartTitle, "aiXcoder local service is not responding");
+		m.put(localServerAutoStartQuestion, "AiXcoder Local service is not responding, start it now?");
 	}
 
 	public static String R(String input) {

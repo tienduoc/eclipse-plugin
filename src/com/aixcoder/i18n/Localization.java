@@ -31,6 +31,8 @@ public class Localization {
 	public static final String longResultCutL2S = "longResultCutL2S";
 	public static final String missingP3Cjar = "missingP3Cjar";
 	public static final String enterprisePort = "enterprisePort";
+	public static final String localServerAutoStartTitle = "localServerAutoStartTitle";
+	public static final String localServerAutoStartQuestion = "localServerAutoStartQuestion";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {

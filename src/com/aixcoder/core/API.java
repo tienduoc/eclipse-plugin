@@ -1,5 +1,7 @@
 package com.aixcoder.core;
 
+import static com.aixcoder.i18n.Localization.R;
+
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,11 +30,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.Version;
 
 import com.aixcoder.extension.Activator;
+import com.aixcoder.i18n.Localization;
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.HttpRequest.HttpRequestException;
 import com.aixcoder.lib.Preference;
@@ -214,7 +218,20 @@ public class API {
 		}
 		return null;
 	}
+	
+	static int localError = 0;
+	static boolean localAutoStart = false;
+	static boolean askedLocalAutoStart = false;
 
+	static void startLocalServer() {
+		String url_open = "aixcoder://localserver";
+		try {
+			java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID, String endpoint) {
 		try {
@@ -321,6 +338,7 @@ public class API {
 					Rescue[] rescues = readRescues(jsonRescues != null ? jsonRescues.getAsJsonArray() : null);
 					longPredicts[j] = new Predict.LongPredictResult(tokens, current, rescues, rCompletion);
 				}
+				localError = 0;
 				return new PredictResult(longPredicts, sortResults);
 			}
 		} catch (HttpRequest.HttpRequestException e) {
@@ -329,14 +347,25 @@ public class API {
 			} else {
 				e.printStackTrace();
 			}
-			if (local && firstLocalRequestAttempt) {
-				String url_open ="aixcoder://localserver";
-				try {
-					java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
-				} catch (IOException e1) {
-					e1.printStackTrace();
+			if (local) {
+				localError++;
+				if (localError >= 5) {
+					if (!askedLocalAutoStart) {
+						MessageDialog dialog = new MessageDialog(null, R(Localization.localServerAutoStartTitle), null,
+								R(Localization.localServerAutoStartQuestion), MessageDialog.QUESTION,
+								new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+						int choice = dialog.open();
+						if (choice == 0 || choice == 1) {
+							localAutoStart = choice == 0;
+							askedLocalAutoStart = true;
+						}
+					}
+					startLocalServer();
+					localError = 0;
+				} else if (firstLocalRequestAttempt) {
+					startLocalServer();
+					firstLocalRequestAttempt = false;
 				}
-				firstLocalRequestAttempt = false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
