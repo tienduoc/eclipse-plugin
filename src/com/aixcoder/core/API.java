@@ -156,6 +156,7 @@ public class API {
 	}
 
 	static boolean local = false;
+	static boolean firstLocalRequestAttempt = true;
 
 	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
 		timestamp = Calendar.getInstance().getTimeInMillis();
@@ -213,7 +214,7 @@ public class API {
 	}
 
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
-			final String remainingText, final String UUID, final String endpoint) {
+			final String remainingText, final String UUID, String endpoint) {
 		try {
 			final String fileid = predictContext.filename;
 			final String uuid = Preference.getUUID();
@@ -224,6 +225,9 @@ public class API {
 			final int offset = CodeStore.getInstance().getDiffPosition(fileid, maskedText);
 			final String md5 = DigestUtils.getMD5(maskedText);
 			final int longResultCuts = Preference.getLongResultCuts();
+			if (!endpoint.endsWith("/")) {
+				endpoint = endpoint + "/";
+			}
 			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
@@ -322,6 +326,15 @@ public class API {
 				System.out.println("time out");
 			} else {
 				e.printStackTrace();
+			}
+			if (local && firstLocalRequestAttempt) {
+				String url_open ="aixcoder://localserver";
+				try {
+					java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				firstLocalRequestAttempt = false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
