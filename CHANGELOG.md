@@ -1,7 +1,16 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
-## [1.1.0] - 2019-10-18
+## [1.1.2] - 2019-10-28
+### 新增
+
+### 改动
+- 如果使用本地版服务，则自动启动本地版服务程序
+
+### 修复
+- 老版本eclipse上的一个兼容问题
+
+## [1.1.1] - 2019-10-28
 ### 新增
 - 主动提示更新
 - 增加了本地版的支持
