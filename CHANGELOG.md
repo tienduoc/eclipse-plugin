@@ -8,6 +8,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ### 修复
 - 老版本eclipse上的一个兼容问题
+- 设置系统代理时无法使用的bug
 
 ## [1.1.2] - 2019-11-01
 ### 新增
