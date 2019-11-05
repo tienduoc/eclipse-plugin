@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.3] - 2019-11-04
+### 新增
+
+### 改动
+
+### 修复
+- 老版本eclipse上的一个兼容问题
+
 ## [1.1.2] - 2019-11-01
 ### 新增
 
