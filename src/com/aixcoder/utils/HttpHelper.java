@@ -56,7 +56,7 @@ public class HttpHelper {
 	private static String requestRaw(HTTPMethod method, String url, IProxyData proxy, Consumer<HttpRequest> prepare)
 			throws URISyntaxException {
 		// step 1: build request
-		HttpRequest httpRequest = method == HTTPMethod.POST ? HttpRequest.post(url).header("uuid", Preference.getUUID()).header("ext", Preference.getModel()) : HttpRequest.get(url);
+		HttpRequest httpRequest = method == HTTPMethod.POST ? HttpRequest.post(url) : HttpRequest.get(url);
 
 		// step 2: check proxy
 		if (proxy == null) {
@@ -94,6 +94,9 @@ public class HttpHelper {
 			if (proxy.isRequiresAuthentication()) {
 				httpRequest.proxyBasic(proxy.getUserId(), proxy.getPassword());
 			}
+		}
+		if (method == HTTPMethod.POST) {
+			httpRequest.header("uuid", Preference.getUUID()).header("ext", Preference.getModel());
 		}
 		httpRequest.connectTimeout(TIME_OUT).readTimeout(TIME_OUT).useCaches(false);
 		if (prepare != null) {

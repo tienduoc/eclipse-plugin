@@ -3,7 +3,7 @@ Automatic-Module-Name: aixcoder
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: aiXcoder;singleton:=true
-Bundle-Version: 1.1.2.enterprise
+Bundle-Version: 1.1.3.enterprise
 Bundle-Activator: com.aixcoder.extension.Activator
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
