@@ -30,6 +30,9 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		new AiXPreInitializer().initializeDefaultPreferences();
 		Composite parent = getFieldEditorParent();
 		addField(new BooleanFieldEditor(Preference.ACTIVE, R(Localization.enableAiXCoder), parent));
+		BooleanFieldEditor selfLearnCheck = new BooleanFieldEditor(Preference.SELF_LEARN, R(Localization.selfLearn), parent);
+		selfLearnCheck.setEnabled(Preference.isProfessional(), parent);
+		addField(selfLearnCheck);
 		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
 		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
 		IntegerFieldEditor longResultRank = new IntegerFieldEditor(Preference.LONG_RESULT_RANK,

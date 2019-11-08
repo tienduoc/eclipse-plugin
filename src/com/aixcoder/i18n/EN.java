@@ -38,6 +38,13 @@ public class EN extends Localization {
 		m.put(longResultCutL2S, "long to short");
 		m.put(localServerAutoStartTitle, "aiXcoder local service is not responding");
 		m.put(localServerAutoStartQuestion, "AiXcoder Local service is not responding, start it now?");
+		m.put(selfLearn, "(Professional Edition) Allows aiXcoder to learn your coding idiom");
+		m.put(unableToLoginTitle, "Unable to login aiXcoder");
+		m.put(unableToLogin, "Login now?");
+		m.put(notProfessionalTitle, "You are not using aiXcoder Professional Edition");
+		m.put(notProfessional, "Some features are only available in Professional Edition. Learn more?");
+		m.put(newVersionTitle, "New version available");
+		m.put(newVersionContent, "A new version of aiXcoder %s is available, update now?");
 	}
 
 	public static String R(String input) {

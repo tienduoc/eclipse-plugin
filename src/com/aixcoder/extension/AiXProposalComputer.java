@@ -1,5 +1,6 @@
 package com.aixcoder.extension;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -46,7 +47,9 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				if (file == null) {
 					filePath = "tmp-" + new Random().nextInt() + ".java";
 				} else {
-					filePath = file.getFullPath().toString();
+					String projPath = file.getProject().getLocation().toOSString();
+					filePath = file.getFullPath().makeRelativeTo(file.getProject().getFullPath()).toOSString();
+					filePath = Paths.get(projPath, filePath).toAbsolutePath().toString();
 				}
 				IProject project = (IProject) input.getAdapter(IProject.class);
 				if (project == null) {
