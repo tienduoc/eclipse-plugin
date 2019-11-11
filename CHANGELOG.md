@@ -3,6 +3,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ## [1.1.3] - 2019-11-04
 ### 新增
+自动设置企业端配置
 
 ### 改动
 

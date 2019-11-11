@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -511,39 +509,26 @@ public class API {
 
 	public static void checkUpdate(Version version) {
 		try {
-			String endpoint = Preference.getEndpoint();
-			int enterprisePort = Preference.getEnterprisePort();
-			endpoint = endpoint.replaceFirst(":\\d+", ":" + enterprisePort);
-			String filesHtml = HttpHelper.get(endpoint + "plugins/eclipse");
-			if (filesHtml == null ) {
-				return;
+			String updateJson = HttpHelper.get(Preference.remoteVersionUrl);
+			JsonObject updateObj = new Gson().fromJson(updateJson, JsonObject.class);
+			String OS = System.getProperty("os.name").toLowerCase();
+			if (OS.contains("win")) {
+				updateObj = updateObj.getAsJsonObject("win");
+			} else {
+				updateObj = updateObj.getAsJsonObject("mac");
 			}
-			Pattern p = Pattern.compile("<a href=\"([^\\\"]+)\">eclipse-aiXcoder_([0-9.]+).enterprise.jar<\\/a>");
-			Matcher m = p.matcher(filesHtml);
-			String bestHref = "";
-			Version bestV = new Version("0");
-			while (m.find()) {
-				String href = m.group(1);
-				final String newVersion = m.group(2);
-				Version v = Version.parseVersion(newVersion);
-				if (v.compareTo(bestV) > 0) {
-					bestHref = href;
-					bestV = v;
-				}
-			}
-			final String bestVersion = bestV.toString();
-			final String bestHref2 = endpoint + bestHref;
-			if (bestV.compareTo(version) > 0) {
+			final String newVersion = updateObj.getAsJsonObject("eclipse").get("version").getAsString();
+			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
 				// new version available
 				new UIJob("Prompt aiXcoder update") {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						boolean update = MessageDialog.openQuestion(null, R(Localization.newVersionTitle),
-								String.format(R(Localization.newVersionContent), bestVersion));
+								String.format(R(Localization.newVersionContent), newVersion));
 						if (update) {
 							try {
-								Desktop.getDesktop().browse(new URI(bestHref2));
+								Desktop.getDesktop().browse(new URI(Preference.installPage));
 							} catch (IOException e) {
 								e.printStackTrace();
 								return Status.CANCEL_STATUS;

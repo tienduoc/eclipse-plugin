@@ -2,9 +2,13 @@ package com.aixcoder.lib;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -16,6 +20,7 @@ import com.aixcoder.i18n.Localization;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.shims.Consumer;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 class LoginInfo {
@@ -62,8 +67,34 @@ public class Preference {
 		return preferenceManager.getBoolean(ACTIVE);
 	}
 
+	public static String remoteVersionUrl;
+	public static String group;
+	public static String endpoint;
+	public static String installPage;
+	public static Map<String, String> defaultModel = new HashMap<String, String>();
+	static {
+		try {
+			Path localserver = Paths.get(System.getProperty("user.home"), "aiXcoder", "aix-enterprise-config.json");
+			String text = new String(Files.readAllBytes(localserver), StandardCharsets.UTF_8);
+			JsonObject jo = new Gson().fromJson(text, JsonObject.class);
+			group = jo.get("group").getAsString();
+			installPage = jo.get("installPage").getAsString();
+			remoteVersionUrl = jo.get("remoteVersionUrl").getAsString();
+			endpoint = jo.get("endpoint").getAsString();
+			JsonObject model = jo.get("model").getAsJsonObject();
+			for (Entry<String, JsonElement> entry : model.entrySet()) {
+				defaultModel.put(entry.getKey(), entry.getValue().getAsString());
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
 	public static String getEndpoint() {
 		String endpoint = preferenceManager.getString(ENDPOINT);
+		if (endpoint == null || endpoint.isEmpty()) {
+			endpoint = Preference.endpoint;
+		}
 		if (!endpoint.endsWith("/")) {
 			endpoint = endpoint + "/";
 		}
@@ -75,7 +106,11 @@ public class Preference {
 	}
 
 	public static String getModel() {
-		return preferenceManager.getString(MODEL);
+		String model = preferenceManager.getString(MODEL);
+		if (model.equals("java(Java)") && defaultModel.containsKey("java")) {
+			model = defaultModel.get("java");
+		}
+		return model;
 	}
 
 	public static String getUUID() {
@@ -96,7 +131,10 @@ public class Preference {
 			uuid = corpUser + "=>" + uuid;
 			preferenceManager.setValue(P_UUID, uuid);
 		}
-		return preferenceManager.getString(P_UUID);
+		if (group == null) {
+			return preferenceManager.getString(P_UUID);
+		}
+		return group + "-" + preferenceManager.getString(P_UUID);
 	}
 
 	public static String getParams() {
