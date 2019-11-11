@@ -1,5 +1,10 @@
 package com.aixcoder.lib;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -8,10 +13,27 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import com.aixcoder.extension.Activator;
 import com.aixcoder.extension.AiXPreInitializer;
 import com.aixcoder.i18n.Localization;
+import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.shims.Consumer;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+class LoginInfo {
+	String uuid;
+	String token;
+
+	public LoginInfo(String uuid, String token) {
+		super();
+		this.uuid = uuid;
+		this.token = token;
+	}
+
+}
 
 public class Preference {
 
 	public static final String ACTIVE = "ACTIVE";
+	public static final String SELF_LEARN = "SELF_LEARN";
 	public static final String ENDPOINT = "ENDPOINT";
 	public static final String ENTERPRISE_PORT = "ENTERPRISE_PORT";
 	public static final String MODEL = "MODEL";
@@ -30,6 +52,10 @@ public class Preference {
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
+
+	private static boolean isProfessional = false;
+	public static boolean isProfessionalError = true;
+	public static boolean isProfessionalFetched = false;
 
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
@@ -53,6 +79,10 @@ public class Preference {
 	}
 
 	public static String getUUID() {
+		LoginInfo info = getUUIDFromFile();
+		synchronized (id) {
+			preferenceManager.setValue(P_UUID, info.uuid);
+		}
 		if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
 			synchronized (id) {
 				if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
@@ -138,4 +168,62 @@ public class Preference {
 	public static String getLongResultCutsOrder() {
 		return preferenceManager.getString(LONG_RESULT_CUT_SORT);
 	}
+
+	public static boolean getSelfLearn() {
+		return preferenceManager.getBoolean(SELF_LEARN);
+	}
+
+	static LoginInfo loginInfo;
+
+	public static LoginInfo getUUIDFromFile() {
+		if (loginInfo == null) {
+			String homedir = System.getProperty("user.home");
+			Path loginFile = Paths.get(homedir, "aiXcoder", "login");
+			String token = null;
+			String uuid = null;
+			try {
+				String content = new String(Files.readAllBytes(loginFile), "utf-8");
+				JsonObject o = new Gson().fromJson(content, JsonObject.class);
+				token = o.get("token").getAsString();
+				uuid = o.get("uuid").getAsString();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			loginInfo = new LoginInfo(uuid, token);
+		}
+		return loginInfo;
+	}
+
+	public static boolean isProfessional() {
+		if (isProfessionalFetched) {
+			return isProfessional;
+		}
+		try {
+			final LoginInfo info = getUUIDFromFile();
+			String r = HttpHelper.post("https://aixcoder.com/aixcoderutil/plug/checkToken",
+					new Consumer<HttpRequest>() {
+						@Override
+						public void apply(HttpRequest httpRequest) {
+							// send request
+							httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("token", info.token);
+						}
+					});
+			if (r == null) {
+				throw new Exception();
+			}
+			JsonObject o = new Gson().fromJson(r, JsonObject.class);
+			isProfessional = o.get("level").getAsInt() == 2 || true;
+			isProfessionalError = false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			isProfessionalError = true;
+		}
+		isProfessionalFetched = true;
+		return isProfessional;
+	}
+
 }

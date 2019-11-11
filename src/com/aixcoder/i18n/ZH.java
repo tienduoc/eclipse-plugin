@@ -64,6 +64,20 @@ public class ZH extends Localization {
 		m.put(localServerAutoStartTitle, "aiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94");
 //		m.put(localServerAutoStartQuestion, "AiXcoder本地服务没有响应，现在启动吗？");
 		m.put(localServerAutoStartQuestion, "AiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94\uff0c\u73b0\u5728\u542f\u52a8\u5417\uff1f");
+//		m.put(selfLearn, "(专业版)允许aiXcoder学习您的编程习惯");
+		m.put(selfLearn, "(\u4e13\u4e1a\u7248)\u5141\u8bb8aixcoder\u5b66\u4e60\u60a8\u7684\u7f16\u7a0b\u4e60\u60ef");
+//		m.put(unableToLoginTitle, "无法登录aiXcoder");
+		m.put(unableToLoginTitle, "\u65e0\u6cd5\u767b\u5f55aixcoder");
+//		m.put(unableToLogin, "现在登录？");
+		m.put(unableToLogin, "\u73b0\u5728\u767b\u5f55\uff1f");
+//		m.put(notProfessionalTitle, "没有使用aiXcoder专业版");
+		m.put(notProfessionalTitle, "\u6ca1\u6709\u4f7f\u7528aixcoder\u4e13\u4e1a\u7248");
+//		m.put(notProfessional, "有些功能只在aiXcoder专业版里被使用，了解更多？");
+		m.put(notProfessional, "\u6709\u4e9b\u529f\u80fd\u53ea\u5728aixcoder\u4e13\u4e1a\u7248\u91cc\u88ab\u4f7f\u7528\uff0c\u4e86\u89e3\u66f4\u591a\uff1f");
+//		m.put(newVersionTitle, "新版本可用");
+		m.put(newVersionTitle, "\u65b0\u7248\u672c\u53ef\u7528");
+//		m.put(newVersionContent, "一个新的 aiXcoder版本 %s已可用，现在更新？");
+		m.put(newVersionContent, "\u4e00\u4e2a\u65b0\u7684 aixcoder\u7248\u672c %25s\u5df2\u53ef\u7528\uff0c\u73b0\u5728\u66f4\u65b0\uff1f");
 	}
 
 	public static String R(String input) {

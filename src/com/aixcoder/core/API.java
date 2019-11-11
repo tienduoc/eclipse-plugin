@@ -111,7 +111,6 @@ public class API {
 						for (WatchEvent<?> event : wk.pollEvents()) {
 							// we only register "ENTRY_MODIFY" so the context is always a Path.
 							final Path changed = (Path) event.context();
-							System.out.println(changed);
 							if (changed.endsWith("localserver.json")) {
 								System.out.println("localserver.json has changed");
 								readFile();
@@ -218,7 +217,7 @@ public class API {
 		}
 		return null;
 	}
-	
+
 	static int localError = 0;
 	static boolean localAutoStart = false;
 	static boolean askedLocalAutoStart = false;
@@ -231,11 +230,67 @@ public class API {
 			e1.printStackTrace();
 		}
 	}
-	
+
+	static boolean isProfessionalErrorShown = false;
+	static boolean notProfessionalErrorShown = false;
+	static Learner learner;
+
+	public static void learn(String ext, String fileid) {
+		if (Preference.getSelfLearn()) {
+			boolean professional = Preference.isProfessional();
+			if (Preference.isProfessionalError && !isProfessionalErrorShown) {
+				isProfessionalErrorShown = true;
+				new UIJob("Prompt aiXcoder unable to login") {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						boolean login = MessageDialog.openQuestion(null, R(Localization.unableToLoginTitle),
+								R(Localization.unableToLogin));
+						if (login) {
+							String url_open = "aixcoder://login";
+							try {
+								java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+						}
+						return Status.OK_STATUS;
+					}
+				}.schedule();
+			} else if (professional) {
+				if (learner == null) {
+					learner = new Learner();
+				}
+				learner.learn(ext, fileid);
+			} else {
+				isProfessionalErrorShown = true;
+				new UIJob("Prompt aiXcoder not professional") {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						boolean login = MessageDialog.openQuestion(null, R(Localization.notProfessionalTitle),
+								R(Localization.notProfessional));
+						if (login) {
+							String url_open = "https://www.aixcoder.com/#/Product?tab=0";
+							try {
+								java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+						}
+						return Status.OK_STATUS;
+					}
+				}.schedule();
+			}
+		}
+	}
+
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID, String endpoint) {
 		try {
 			final String fileid = predictContext.filename;
+			final String ext = Preference.getModel();
+			learn(ext, fileid);
 			final String uuid = Preference.getUUID();
 			final String proj = predictContext.proj;
 			final String text = predictContext.prefix;
@@ -253,9 +308,9 @@ public class API {
 					// send request
 					httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("queryUUID", UUID)
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
-							.form("ext", Preference.getModel()).form("fileid", fileid)
-							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
-							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts);
+							.form("ext", ext).form("fileid", fileid).form("remaining_text", maskedRemainingText)
+							.form("offset", String.valueOf(offset)).form("md5", md5).form("sort", 1)
+							.form("long_result_cuts", longResultCuts);
 					if (Preference.sortOnly()) {
 						httpRequest.form("ngen", 1);
 					}
@@ -484,8 +539,8 @@ public class API {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean update = MessageDialog.openQuestion(null, "New version available",
-								String.format("A new version of aiXcoder %s is available, update now?", bestVersion));
+						boolean update = MessageDialog.openQuestion(null, R(Localization.newVersionTitle),
+								String.format(R(Localization.newVersionContent), bestVersion));
 						if (update) {
 							try {
 								Desktop.getDesktop().browse(new URI(bestHref2));

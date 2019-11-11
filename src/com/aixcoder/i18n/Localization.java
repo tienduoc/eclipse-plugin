@@ -33,6 +33,13 @@ public class Localization {
 	public static final String enterprisePort = "enterprisePort";
 	public static final String localServerAutoStartTitle = "localServerAutoStartTitle";
 	public static final String localServerAutoStartQuestion = "localServerAutoStartQuestion";
+	public static final String selfLearn = "selfLearn";
+	public static final String unableToLoginTitle = "unableToLoginTitle";
+	public static final String unableToLogin = "unableToLogin";
+	public static final String notProfessionalTitle = "notProfessionalTitle";
+	public static final String notProfessional = "notProfessional";
+	public static final String newVersionTitle = "newVersionTitle";
+	public static final String newVersionContent = "newVersionContent";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {
