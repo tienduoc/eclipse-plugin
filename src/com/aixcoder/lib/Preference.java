@@ -74,8 +74,8 @@ public class Preference {
 	public static Map<String, String> defaultModel = new HashMap<String, String>();
 	static {
 		try {
-			Path localserver = Paths.get(System.getProperty("user.home"), "aiXcoder", "aix-enterprise-config.json");
-			String text = new String(Files.readAllBytes(localserver), StandardCharsets.UTF_8);
+			Path configFile = Paths.get(System.getProperty("user.home"), "aiXcoder", "aix-enterprise-config.json");
+			String text = new String(Files.readAllBytes(configFile), StandardCharsets.UTF_8);
 			JsonObject jo = new Gson().fromJson(text, JsonObject.class);
 			group = jo.get("group").getAsString();
 			installPage = jo.get("installPage").getAsString();
@@ -87,7 +87,7 @@ public class Preference {
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
-		}
+		} 
 	}
 
 	public static String getEndpoint() {
