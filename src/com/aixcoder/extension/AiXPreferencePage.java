@@ -5,7 +5,6 @@ import static com.aixcoder.i18n.Localization.R;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -30,29 +29,29 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 		new AiXPreInitializer().initializeDefaultPreferences();
 		Composite parent = getFieldEditorParent();
 		addField(new BooleanFieldEditor(Preference.ACTIVE, R(Localization.enableAiXCoder), parent));
-		BooleanFieldEditor selfLearnCheck = new BooleanFieldEditor(Preference.SELF_LEARN, R(Localization.selfLearn), parent);
-		selfLearnCheck.setEnabled(Preference.isProfessional(), parent);
-		addField(selfLearnCheck);
-		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
-		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
-		IntegerFieldEditor longResultRank = new IntegerFieldEditor(Preference.LONG_RESULT_RANK,
-				R(Localization.longResultRank), parent);
-		longResultRank.setValidRange(1, 5);
-		addField(longResultRank);
-
-		addField(new ComboFieldEditor(Preference.LONG_RESULT_CUT, R(Localization.longResultCut),
-				new String[][] { { R(Localization.longResultCutAuto), Localization.longResultCutAuto },
-						{ R(Localization.longResultCut0), Localization.longResultCut0 },
-						{ R(Localization.longResultCut1), Localization.longResultCut1 },
-						{ R(Localization.longResultCut2), Localization.longResultCut2 },
-						{ R(Localization.longResultCut3), Localization.longResultCut3 },
-						{ R(Localization.longResultCut4), Localization.longResultCut4 },
-						{ R(Localization.longResultCut5), Localization.longResultCut5 }, },
-				parent));
-		addField(new ComboFieldEditor(Preference.LONG_RESULT_CUT_SORT, R(Localization.longResultCutSort),
-				new String[][] { { R(Localization.longResultCutL2S), Localization.longResultCutL2S },
-						{ R(Localization.longResultCutS2L), Localization.longResultCutS2L } },
-				parent));
+//		BooleanFieldEditor selfLearnCheck = new BooleanFieldEditor(Preference.SELF_LEARN, R(Localization.selfLearn), parent);
+//		selfLearnCheck.setEnabled(Preference.isProfessional(), parent);
+//		addField(selfLearnCheck);
+//		addField(new BooleanFieldEditor(Preference.AUTO_IMPORT, R(Localization.autoImportClasses), parent));
+//		addField(new BooleanFieldEditor(Preference.SORT_ONLY, R(Localization.sortOnly), parent));
+//		IntegerFieldEditor longResultRank = new IntegerFieldEditor(Preference.LONG_RESULT_RANK,
+//				R(Localization.longResultRank), parent);
+//		longResultRank.setValidRange(1, 5);
+//		addField(longResultRank);
+//
+//		addField(new ComboFieldEditor(Preference.LONG_RESULT_CUT, R(Localization.longResultCut),
+//				new String[][] { { R(Localization.longResultCutAuto), Localization.longResultCutAuto },
+//						{ R(Localization.longResultCut0), Localization.longResultCut0 },
+//						{ R(Localization.longResultCut1), Localization.longResultCut1 },
+//						{ R(Localization.longResultCut2), Localization.longResultCut2 },
+//						{ R(Localization.longResultCut3), Localization.longResultCut3 },
+//						{ R(Localization.longResultCut4), Localization.longResultCut4 },
+//						{ R(Localization.longResultCut5), Localization.longResultCut5 }, },
+//				parent));
+//		addField(new ComboFieldEditor(Preference.LONG_RESULT_CUT_SORT, R(Localization.longResultCutSort),
+//				new String[][] { { R(Localization.longResultCutL2S), Localization.longResultCutL2S },
+//						{ R(Localization.longResultCutS2L), Localization.longResultCutS2L } },
+//				parent));
 
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
 		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),

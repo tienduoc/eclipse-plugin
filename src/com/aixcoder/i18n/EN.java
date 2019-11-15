@@ -36,8 +36,8 @@ public class EN extends Localization {
 		m.put(longResultCutSort, "The order of shorter results");
 		m.put(longResultCutS2L, "short to long");
 		m.put(longResultCutL2S, "long to short");
-		m.put(localServerAutoStartTitle, "aiXcoder local service is not responding");
-		m.put(localServerAutoStartQuestion, "AiXcoder Local service is not responding, start it now?");
+		m.put(localServerAutoStartTitle, "aiXcoder service is not responding");
+		m.put(localServerAutoStartQuestion, "Failed to start aiXcoder service in one minute. You can report this issue on https://github.com/aixcoder-plugin/eclipse-plugin/issues");
 		m.put(selfLearn, "(Professional Edition) Allows aiXcoder to learn your coding idiom");
 		m.put(unableToLoginTitle, "Unable to login aiXcoder");
 		m.put(unableToLogin, "Login now?");
@@ -45,6 +45,8 @@ public class EN extends Localization {
 		m.put(notProfessional, "Some features are only available in Professional Edition. Learn more?");
 		m.put(newVersionTitle, "New version available");
 		m.put(newVersionContent, "A new version of aiXcoder %s is available, update now?");
+		m.put(localDownloadTitle, "Download failed");
+		m.put(localDownloadQuestion, "aiXcoder service update failed. You can manually download the latest service zipfile/tarball from: %s. And then unzip it here: %s.");
 	}
 
 	public static String R(String input) {

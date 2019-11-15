@@ -2,10 +2,8 @@ package com.aixcoder.core;
 
 import static com.aixcoder.i18n.Localization.R;
 
-import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -20,8 +18,9 @@ import java.nio.file.WatchService;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +41,7 @@ import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.CompletionOptions;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.HttpHelper.HTTPMethod;
 import com.aixcoder.utils.Predict;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
@@ -222,11 +222,7 @@ public class API {
 
 	static void startLocalServer() {
 		String url_open = "aixcoder://localserver";
-		try {
-			java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		LocalService.openurl(url_open);
 	}
 
 	static boolean isProfessionalErrorShown = false;
@@ -403,16 +399,6 @@ public class API {
 			if (local) {
 				localError++;
 				if (localError >= 5) {
-					if (!askedLocalAutoStart) {
-						MessageDialog dialog = new MessageDialog(null, R(Localization.localServerAutoStartTitle), null,
-								R(Localization.localServerAutoStartQuestion), MessageDialog.QUESTION,
-								new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-						int choice = dialog.open();
-						if (choice == 0 || choice == 1) {
-							localAutoStart = choice == 0;
-							askedLocalAutoStart = true;
-						}
-					}
 					startLocalServer();
 					localError = 0;
 				} else if (firstLocalRequestAttempt) {
@@ -474,75 +460,75 @@ public class API {
 		}
 	}
 
-	static int versionCompare(Scanner s1, Scanner s2) {
-		s1.useDelimiter("\\.");
-		s2.useDelimiter("\\.");
-		int result = -2;
-		while (s1.hasNextInt() && s2.hasNextInt()) {
-			int v1 = s1.nextInt();
-			int v2 = s2.nextInt();
-			if (v1 < v2) {
-				return result;
-			} else if (v1 > v2) {
-				return result;
-			}
+	static double parseVersion(String v) {
+		if (v.isEmpty()) {
+			return 0;
 		}
-
-		if (s1.hasNextInt() && s1.nextInt() != 0) {
-			return 1; // str1 has an additional lower-level version number
+		Pattern p = Pattern.compile("^(\\D*)(\\d*)(\\D*)$");
+		Matcher m = p.matcher(v);
+		m.find();
+		if (m.group(2).isEmpty()) {
+			// v1.0.0.[preview]
+			return -1;
 		}
-		if (s2.hasNextInt() && s2.nextInt() != 0) {
-			return -1; // str2 has an additional lower-level version
+		double i = Integer.parseInt(m.group(2));
+		if (!m.group(3).isEmpty()) {
+			// v1.0.[0b]
+			i -= 0.1;
 		}
-
-		return 0;
+		return i;
 	}
 
 	public static int versionCompare(String str1, String str2) {
-		Scanner s1 = new Scanner(str1);
-		Scanner s2 = new Scanner(str2);
-		int r = versionCompare(s1, s2);
-		s1.close();
-		s2.close();
-		return r;
+		String[] v1 = str1.split("\\.");
+		String[] v2 = str2.split("\\.");
+		int i = 0;
+		for (; i < v1.length && i < v2.length; i++) {
+			double iv1 = parseVersion(v1[i]);
+			double iv2 = parseVersion(v2[i]);
+
+			if (iv1 != iv2) {
+				return iv1 - iv2 < 0 ? -1 : 1;
+			}
+		}
+		if (i < v1.length) {
+			// "1.0.1", "1.0"
+			double iv1 = parseVersion(v1[i]);
+			return iv1 < 0 ? -1 : (int) Math.ceil(iv1);
+		}
+		if (i < v2.length) {
+			double iv2 = parseVersion(v2[i]);
+			return -iv2 < 0 ? -1 : (int) Math.ceil(iv2);
+		}
+		return 0;
 	}
 
 	public static void checkUpdate(Version version) {
 		try {
-			String updateJson = HttpHelper
-					.get("https://www.aixcoder.com/download/installtool/aixcoderinstaller_aixcoder.json");
-			JsonObject updateObj = new Gson().fromJson(updateJson, JsonObject.class);
-			String OS = System.getProperty("os.name").toLowerCase();
-			if (OS.contains("win")) {
-				updateObj = updateObj.getAsJsonObject("win");
-			} else {
-				updateObj = updateObj.getAsJsonObject("mac");
-			}
-			final String newVersion = updateObj.getAsJsonObject("eclipse").get("version").getAsString();
-			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
-				// new version available
-				new UIJob("Prompt aiXcoder update") {
+			String updateURL = "https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest";
+			String versionJson = HttpHelper.request(HTTPMethod.GET, updateURL, null, new Consumer<HttpRequest>() {
 
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean update = MessageDialog.openQuestion(null, R(Localization.newVersionTitle),
-								String.format(R(Localization.newVersionContent), newVersion));
-						if (update) {
-							try {
-								Desktop.getDesktop().browse(new URI("https://www.aixcoder.com/download/installtool"));
-							} catch (IOException e) {
-								e.printStackTrace();
-								return Status.CANCEL_STATUS;
-							} catch (URISyntaxException e) {
-								e.printStackTrace();
-								return Status.CANCEL_STATUS;
-							}
-						}
-						return Status.OK_STATUS;
-					}
-				}.schedule();
+				@Override
+				public void apply(HttpRequest t) {
+					t.header("User-Agent", "aiXcoder-eclipse-plugin");
+				}
+
+			});
+			JsonObject newVersions = new Gson().fromJson(versionJson, JsonElement.class).getAsJsonObject();
+			String v = newVersions.get("tag_name").getAsString();
+			String localVersion = LocalService.getVersion();
+			boolean doUpdate = false;
+			if (versionCompare(localVersion, v) < 0) {
+				System.out.println("New aiXCoder version is available: " + v);
+				doUpdate = true;
+			} else {
+				System.out.println("AiXCoder is up to date");
+				doUpdate = false;
 			}
-		} catch (Exception e) {
+			if (doUpdate) {
+				LocalService.forceUpdate();
+			}
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}

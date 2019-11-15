@@ -53,8 +53,8 @@ public class Preference {
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
 
 	private static boolean isProfessional = false;
-	public static boolean isProfessionalError = true;
-	public static boolean isProfessionalFetched = false;
+	public static boolean isProfessionalError = false;
+	public static boolean isProfessionalFetched = true;
 
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
@@ -62,7 +62,7 @@ public class Preference {
 	}
 
 	public static String getEndpoint() {
-		return "https://api.aixcoder.com/";
+		return "http://localhost:8787/";
 	}
 
 	public static String getModel() {
@@ -155,7 +155,7 @@ public class Preference {
 	}
 
 	public static boolean getSelfLearn() {
-		return preferenceManager.getBoolean(SELF_LEARN);
+		return false;
 	}
 
 	static LoginInfo loginInfo;
