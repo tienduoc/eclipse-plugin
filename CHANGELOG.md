@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.4] - 2019-11-19
+### Add
+- Now works better with project-scope completion.
+
+### Change
+
+### Fix
+- Fix a bug when there is quote in comment.
+
 ## [1.1.3] - 2019-11-04
 ### 新增
 

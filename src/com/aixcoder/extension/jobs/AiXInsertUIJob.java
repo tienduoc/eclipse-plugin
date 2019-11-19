@@ -65,7 +65,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 					// 文本变化，重新发起请求
 					log("文本变化，重新发起请求");
 					PredictContext newPredictContext = new PredictContext(newPrefix, predictContext.proj,
-							predictContext.filename);
+							predictContext.filename, predictContext.projRoot);
 					new AiXFetchJob(newPredictContext, remainingText, proposalFactory).schedule();
 				} // else 预测结果为空
 				throw new AiXAbortInsertionException();

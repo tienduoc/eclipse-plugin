@@ -71,7 +71,7 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				// step 2: send request
 				// Eclipse's way of using its thread pool
 				String projName = project == null ? "tmp" : project.getName();
-				new AiXFetchJob(new PredictContext(prefix, projName, filePath), remainingText, proposalFactory)
+				new AiXFetchJob(new PredictContext(prefix, projName, filePath, project.getLocation().toOSString()), remainingText, proposalFactory)
 						.schedule();
 			} catch (Exception e) {
 				e.printStackTrace();
