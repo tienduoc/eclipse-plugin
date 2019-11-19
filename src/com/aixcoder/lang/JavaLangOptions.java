@@ -256,14 +256,49 @@ public class JavaLangOptions extends LangOptions {
 	@Override
 	public String datamask(String s, Set<String> trivialLiterals) {
 		StringBuilder stringBuilder = new StringBuilder();
+		boolean emptyLine = true;
+		int lastLineEnd = -1;
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
-			stringBuilder.append(c);
-			if (c == '"' || c == '\'') {
+			if (c == '\n') {
+				stringBuilder.append(c);
+				emptyLine = true;
+				lastLineEnd = stringBuilder.length();
+			} else if (c == '"' || c == '\'') {
+				stringBuilder.append(c);
+				emptyLine = false;
 				i = skipString(s, trivialLiterals, stringBuilder, i, c);
+			} else if (s.startsWith("//", i)) {
+				// line comment
+				i = skipAfter(s, i + 2, "\n") - 1;
+				if (emptyLine) {
+					stringBuilder.replace(lastLineEnd, stringBuilder.length(), "");
+				}
+				emptyLine = true;
+			} else if (s.startsWith("/*", i)) {
+				/* block comment */
+				i = skipAfter(s, i + 2, "*/") - 1;
+				if (emptyLine) {
+					stringBuilder.replace(lastLineEnd, stringBuilder.length(), "");
+				}
+			} else {
+				stringBuilder.append(c);
+				if (c != '\t' && c != ' ') {
+					emptyLine = false;
+				}
 			}
 		}
 		return stringBuilder.toString();
+	}
+
+	private int skipAfter(String s, int i, String target) {
+		for (; i < s.length(); i++) {
+			if (s.startsWith(target, i)) {
+				i += target.length();
+				break;
+			}
+		}
+		return i;
 	}
 
 	private int skipString(String s, Set<String> trivialLiterals, StringBuilder stringBuilder, int i, char c) {
@@ -315,12 +350,14 @@ public class JavaLangOptions extends LangOptions {
 			for (int i = 0; i < imports.size(); i++) {
 				String importContent = imports.get(i).first;
 				int compareResult = importContent.compareTo(rescue.value);
-				if (compareResult == 0) return; // duplicate, skip
+				if (compareResult == 0)
+					return; // duplicate, skip
 			}
 			for (int i = 0; i < imports.size(); i++) {
 				String importContent = imports.get(i).first;
 				int compareResult = importContent.compareTo(rescue.value);
-				if (compareResult == 0) return; // duplicate, skip
+				if (compareResult == 0)
+					return; // duplicate, skip
 				if (compareResult > 0) {
 					// stop here
 					imports.add(i, new Pair<String, Integer>(rescue.value, prevImportStart + 1));
