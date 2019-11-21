@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.5] - 2019-11-21
+
+### Add
+### Change
+### Fix
+- Java 1.6 compliance
+
 ## [1.1.4] - 2019-11-19
 ### Add
 - Now works better with project-scope completion.
@@ -9,6 +16,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ### Fix
 - Fix a bug when there is quote in comment.
+- Kill local service when updating to prevent file overwrite failures.
 
 ## [1.1.3] - 2019-11-04
 ### 新增

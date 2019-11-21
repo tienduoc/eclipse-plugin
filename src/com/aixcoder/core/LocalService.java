@@ -11,15 +11,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -138,12 +136,12 @@ public class LocalService {
 	static {
 		homedir = System.getProperty("user.home");
 		if (OsCheck.getOperatingSystemType() == OSType.MacOS) {
-			homedir = Paths.get(homedir, "Library", "Application Support").toAbsolutePath().toString();
+			homedir = FilenameUtils.concat(FilenameUtils.concat(homedir, "Library"), "Application Support");
 		}
 	}
 
 	public static String getAixcoderInstallUserPath() {
-		return Paths.get(homedir, "aiXcoder", "installer").toString();
+		return FilenameUtils.concat(FilenameUtils.concat(homedir, "aiXcoder"), "installer");
 	}
 
 	public static String getActivePid(String pid) {
@@ -193,9 +191,9 @@ public class LocalService {
 	}
 
 	public static String getLocalServerPid() {
-		Path lockfile = Paths.get(homedir, "aiXcoder", ".router.lock");
+		String lockfile = FilenameUtils.concat(FilenameUtils.concat(homedir, "aiXcoder"), ".router.lock");
 		try {
-			String startPid = new String(Files.readAllBytes(lockfile), StandardCharsets.UTF_8).trim();
+			String startPid = FileUtils.readFileToString(new File(lockfile), "utf-8").trim();
 			return getActivePid(startPid);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -204,11 +202,11 @@ public class LocalService {
 	}
 
 	public static String getExePath() {
-		String localserver = Paths.get(getAixcoderInstallUserPath(), "localserver", "current").toString();
+		String localserver = FilenameUtils.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current").toString();
 		if (OsCheck.getOperatingSystemType() == OSType.Windows) {
-			return Paths.get(localserver, "server", "aixcoder.bat").toString();
+			return FilenameUtils.concat(FilenameUtils.concat(localserver, "server"), "aixcoder.bat").toString();
 		} else {
-			return Paths.get(localserver, "server", "aixcoder.sh").toString();
+			return FilenameUtils.concat(FilenameUtils.concat(localserver, "server"), "aixcoder.sh").toString();
 		}
 	}
 
@@ -230,7 +228,7 @@ public class LocalService {
 			}
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			Map<String, String> env = pb.environment();
-			env.put("Path", env.get("Path") + ";" + Paths.get(javaHome, "bin").toString());
+			env.put("Path", env.get("Path") + ";" + FilenameUtils.concat(javaHome, "bin").toString());
 			pb.start();
 			new Job("Launching aiXcoder service") {
 
@@ -267,7 +265,7 @@ public class LocalService {
 							public IStatus runInUIThread(IProgressMonitor monitor) {
 								MessageDialog dialog = new MessageDialog(null,
 										R(Localization.localServerAutoStartTitle), null,
-										R(Localization.localServerAutoStartQuestion), MessageDialog.ERROR, 0);
+										R(Localization.localServerAutoStartQuestion), MessageDialog.ERROR, new String[] {}, 0);
 								dialog.open();
 								return Status.OK_STATUS;
 							}
@@ -290,17 +288,17 @@ public class LocalService {
 		if (!url.equals("aixcoder://localserver")) {
 			return;
 		}
-		String aixcoderPath = Paths.get(getAixcoderInstallUserPath(), "localserver", "current", "server").toString();
+		String aixcoderPath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server");
 		new File(aixcoderPath).mkdirs();
 		lastOpenFailed = true;
 		launchLocalServer();
 	}
 
 	public static String getVersion() {
-		Path aixcoderPath = Paths.get(getAixcoderInstallUserPath(), "localserver", "current", "server", ".version");
+		String aixcoderPath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server"), ".version");
 		String version;
 		try {
-			version = new String(Files.readAllBytes(aixcoderPath), StandardCharsets.UTF_8).trim();
+			version = FileUtils.readFileToString(new File(aixcoderPath), "utf-8").trim();
 		} catch (IOException e) {
 			version = "0.0.0";
 		}
@@ -339,12 +337,31 @@ public class LocalService {
 		}
 	}
 
+	private static void kill() throws IOException, InterruptedException {
+		String lockfile = FilenameUtils.concat(FilenameUtils.concat(homedir, "aiXcoder"), ".router.lock");
+		String prevPid = FileUtils.readFileToString(new File(lockfile), "utf-8").trim();
+		if (OsCheck.getOperatingSystemType() == OSType.Windows) {
+			Runtime.getRuntime().exec(String.format("taskkill /F /PID %s", prevPid));
+		} else {
+			Runtime.getRuntime().exec(String.format("kill %s", prevPid));
+		}
+
+		int tries = 10;
+		while (getActivePid(prevPid) != null) {
+			if (tries == 0) {
+				throw new InterruptedException("failed to kill process");
+			}
+			tries--;
+			Thread.sleep(1000);
+		}
+	}
+
 	public static void forceUpdate() {
 		new Job("Downloading aiXcoder local service") {
 
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
-				final String aixcoderPath = Paths.get(getAixcoderInstallUserPath(), "localserver", "current", "server")
+				final String aixcoderPath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server")
 						.toString();
 				final String releasePath = "https://github.com/aixcoder-plugin/localservice/releases";
 				new File(aixcoderPath).mkdirs();
@@ -352,7 +369,8 @@ public class LocalService {
 				String ball;
 				ErrorListener onErr = new ErrorListener() {
 					@Override
-					public void onError(Exception e) {
+					public void onError(final Exception e) {
+						e.printStackTrace();
 						monitor.setCanceled(true);
 
 						new UIJob("Prompt aiXcoder update") {
@@ -360,7 +378,7 @@ public class LocalService {
 							@Override
 							public IStatus runInUIThread(IProgressMonitor monitor) {
 								MessageDialog dialog = new MessageDialog(null, R(Localization.localDownloadTitle), null,
-										String.format(R(Localization.localDownloadQuestion), releasePath, aixcoderPath),
+										String.format(R(Localization.localDownloadQuestion), releasePath, aixcoderPath) + "\nCause:\n" + e.getMessage(),
 										MessageDialog.QUESTION,
 										new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 								int choice = dialog.open();
@@ -406,18 +424,17 @@ public class LocalService {
 					ball = "server-linux.tar.gz";
 					download(releasePath + "/latest/download/" + ball, aixcoderPath, onProgress, onErr);
 				}
-				if (ball.endsWith(".tar.gz")) {
-					try {
+				try {
+					kill();
+					if (ball.endsWith(".tar.gz")) {
 						Process p = Runtime.getRuntime().exec(String.format("tar zxf \"%s\" -C \"%s\"",
-								Paths.get(aixcoderPath, ball).toString(), aixcoderPath));
+								FilenameUtils.concat(aixcoderPath, ball), aixcoderPath));
 						p.waitFor();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
+					} else if (ball.endsWith(".zip")) {
+						UnzipFiles.unzip(FilenameUtils.concat(aixcoderPath, ball), aixcoderPath);
 					}
-				} else if (ball.endsWith(".zip")) {
-					UnzipFiles.unzip(Paths.get(aixcoderPath, ball).toString(), aixcoderPath);
+				} catch (Exception e1) {
+					onErr.onError(e1);
 				}
 				monitor.done();
 				lastOpenFailed = false;
