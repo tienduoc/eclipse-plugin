@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.6] - 2019-11-21
+### Fix
+- (Mac) Execute permission issue
+
 ## [1.1.5] - 2019-11-21
 
 ### Add

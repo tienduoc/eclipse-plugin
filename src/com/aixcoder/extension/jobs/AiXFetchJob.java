@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Display;
 
 import com.aixcoder.core.PredictCache;
 import com.aixcoder.core.PredictContext;
-import com.aixcoder.core.ReportType;
 import com.aixcoder.extension.AiXUIJob;
 import com.aixcoder.extension.ProposalFactory;
 import com.aixcoder.utils.Predict;
