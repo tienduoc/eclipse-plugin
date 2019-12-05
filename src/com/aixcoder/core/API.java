@@ -298,6 +298,24 @@ public class API {
 			if (!endpoint.endsWith("/")) {
 				endpoint = endpoint + "/";
 			}
+			//local true
+			final Map<String,Object> localParameter = new HashMap<String, Object>();
+			if(true) {
+				String laterFileId = fileid + ".later";
+				StringBuilder laterCode = new StringBuilder(predictContext.suffix);
+				StringBuilder laterCodeReverse = laterCode.reverse();
+				int laterOffset = CodeStore.getInstance().getDiffPosition(laterFileId, laterCodeReverse.toString());
+				String laterMd5 = DigestUtils.getMD5(laterCodeReverse.toString());
+				laterCode = new StringBuilder(laterCodeReverse.substring(laterOffset)).reverse();
+				if (true){
+					localParameter.put("laterCode", laterCode);
+					localParameter.put("laterOffset", String.valueOf(laterOffset));
+					localParameter.put("laterMd5", laterMd5);
+				}
+
+			}
+
+
 			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
@@ -321,6 +339,11 @@ public class API {
 						String paramValue = paramParts[1];
 						httpRequest.form(paramKey, paramValue);
 					}
+
+					// localParameter
+					if (localParameter.size() > 0) {
+						httpRequest.form(localParameter, "UTF-8");
+					}
 				}
 			});
 			if (string == null) {
@@ -329,6 +352,10 @@ public class API {
 
 			if (string.contains("Conflict")) {
 				CodeStore.getInstance().invalidateFile(proj, fileid);
+				if (localParameter.size() > 0) {
+					String laterFileId = fileid + ".later";
+					CodeStore.getInstance().invalidateFile(proj, laterFileId);
+				}
 				if (allowRetry) {
 					return predict(false, predictContext, maskedRemainingText, UUID, endpoint);
 				}
@@ -343,6 +370,12 @@ public class API {
 				}
 				if (list.size() > 0) {
 					CodeStore.getInstance().saveLastSent(proj, fileid, maskedText);
+					if (localParameter.size() > 0) {
+						String laterFileId = fileid + ".later";
+						StringBuilder laterCode = new StringBuilder(predictContext.suffix);
+						StringBuilder laterCodeReverse = laterCode.reverse();
+						CodeStore.getInstance().saveLastSent(proj, laterFileId,laterCodeReverse.toString());
+					}
 				}
 				Predict.LongPredictResult[] longPredicts = new Predict.LongPredictResult[list.size()];
 				SortResult[] sortResults = null;
