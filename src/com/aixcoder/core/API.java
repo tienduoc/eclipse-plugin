@@ -307,12 +307,9 @@ public class API {
 				int laterOffset = CodeStore.getInstance().getDiffPosition(laterFileId, laterCodeReverse.toString());
 				String laterMd5 = DigestUtils.getMD5(laterCodeReverse.toString());
 				laterCode = new StringBuilder(laterCodeReverse.substring(laterOffset)).reverse();
-				if (true){
-					localParameter.put("laterCode", laterCode);
-					localParameter.put("laterOffset", String.valueOf(laterOffset));
-					localParameter.put("laterMd5", laterMd5);
-				}
-
+				localParameter.put("laterCode", laterCode);
+				localParameter.put("laterOffset", String.valueOf(laterOffset));
+				localParameter.put("laterMd5", laterMd5);
 			}
 
 
