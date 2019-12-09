@@ -125,6 +125,7 @@ public abstract class AiXUIJob extends UIJob {
 						dislayProposals.invoke(fProposalPopup);
 					}
 				} catch (AiXAbortInsertionException e) {
+					System.out.println(e);
 				}
 			}
 			System.out.println(this.getName() + " took "
