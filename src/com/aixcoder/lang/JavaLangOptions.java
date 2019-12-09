@@ -257,7 +257,7 @@ public class JavaLangOptions extends LangOptions {
 	public String datamask(String s, Set<String> trivialLiterals) {
 		StringBuilder stringBuilder = new StringBuilder();
 		boolean emptyLine = true;
-		int lastLineEnd = -1;
+		int lastLineEnd = 0;
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 			if (c == '\n') {
