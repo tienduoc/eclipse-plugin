@@ -1,12 +1,15 @@
 package com.aixcoder.lib;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -163,11 +166,11 @@ public class Preference {
 	public static LoginInfo getUUIDFromFile() {
 		if (loginInfo == null) {
 			String homedir = System.getProperty("user.home");
-			Path loginFile = Paths.get(homedir, "aiXcoder", "login");
+			String loginFile = FilenameUtils.concat(FilenameUtils.concat(homedir, "aiXcoder"), "login");
 			String token = null;
 			String uuid = null;
 			try {
-				String content = new String(Files.readAllBytes(loginFile), "utf-8");
+				String content = FileUtils.readFileToString(new File(loginFile), "utf-8");
 				JsonObject o = new Gson().fromJson(content, JsonObject.class);
 				token = o.get("token").getAsString();
 				uuid = o.get("uuid").getAsString();

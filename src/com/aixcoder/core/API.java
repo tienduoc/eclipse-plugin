@@ -4,19 +4,11 @@ import static com.aixcoder.i18n.Localization.R;
 
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +16,12 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.DeflaterOutputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -74,12 +72,12 @@ public class API {
 
 	static void readFile() {
 		try {
-			Path localserver = Paths.get(System.getProperty("user.home"), "aiXcoder", "localserver.json");
+			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "localserver.json");
 			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
 				return;
 			}
 			lastCheckLocalTime = System.currentTimeMillis();
-			String text = new String(Files.readAllBytes(localserver), StandardCharsets.UTF_8);
+			String text = FileUtils.readFileToString(new File(localserver), Charset.forName("UTF-8"));
 			JsonArray jo = new Gson().fromJson(text, JsonObject.class).get("models").getAsJsonArray();
 			models.clear();
 			for (int i = 0; i < jo.size(); i++) {
@@ -94,35 +92,40 @@ public class API {
 
 	static void initWatch() {
 		try {
-			Path dir = Paths.get(System.getProperty("user.home"), "aiXcoder");
-			final WatchService watcher = FileSystems.getDefault().newWatchService();
-			dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
-			new Thread("localServerWatcher") {
-				public void run() {
-					while (true) {
-						WatchKey wk;
-						try {
-							wk = watcher.take();
-						} catch (InterruptedException e) {
-							break;
-						}
-						for (WatchEvent<?> event : wk.pollEvents()) {
-							// we only register "ENTRY_MODIFY" so the context is always a Path.
-							final Path changed = (Path) event.context();
-							if (changed.endsWith("localserver.json")) {
-								System.out.println("localserver.json has changed");
-								readFile();
-							}
-						}
-						// reset the key
-						boolean valid = wk.reset();
-						if (!valid) {
-							System.out.println("Key has been unregisterede");
-						}
+			String dir = FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder");
+			FileAlterationObserver observer = new FileAlterationObserver(dir);
+			FileAlterationMonitor monitor = new FileAlterationMonitor();
+			FileAlterationListener listener = new FileAlterationListenerAdaptor() {
+			    @Override
+			    public void onFileCreate(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
 					}
-				};
-			}.start();
+			    }
+			 
+			    @Override
+			    public void onFileDelete(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
+					}
+			    }
+			 
+			    @Override
+			    public void onFileChange(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
+					}
+			    }
+			};
+			observer.addListener(listener);
+			monitor.addObserver(observer);
+			monitor.start();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

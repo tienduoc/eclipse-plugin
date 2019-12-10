@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.5] - 2019-11-21
+
+### Add
+### Change
+### Fix
+- Java 1.6 compliance
+
 ## [1.1.3] - 2019-11-04
 ### 新增
 

@@ -1,11 +1,9 @@
 package com.aixcoder.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,16 +11,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
 public class Learner {
-	private Path learnFilesFolder;
-	private Path learnFilesRegistry;
+	private String learnFilesFolder;
+	private String learnFilesRegistry;
 	private Thread saver;
 	private Map<String, Set<String>> cached = new HashMap<String, Set<String>>();
 
 	public Learner() {
-		Path aixFolder = Paths.get(System.getProperty("user.home"), "aiXcoder");
-		this.learnFilesFolder = aixFolder.resolve("learnFiles");
-		this.learnFilesRegistry = learnFilesFolder.resolve("registry");
+		String aixFolder = FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder");
+		this.learnFilesFolder = FilenameUtils.concat(aixFolder, "learnFiles");
+		this.learnFilesRegistry = FilenameUtils.concat(learnFilesFolder, "registry");
 		final Learner _this = this;
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -72,7 +73,7 @@ public class Learner {
 	public Map<String, Map<String, String>> readRegistry() {
 		HashMap<String, Map<String, String>> savedFiles = new HashMap<String, Map<String, String>>();
 		try {
-			List<String> registry = Files.readAllLines(learnFilesRegistry, Charset.forName("utf-8"));
+			List<String> registry = FileUtils.readLines(new File(learnFilesRegistry), "utf-8");
 			for (String line : registry) {
 				if (line.length() > 0) {
 					String[] splits = line.split("\t");
@@ -114,11 +115,10 @@ public class Learner {
 				for (Map.Entry<String, String> entry2 : cached.entrySet()) {
 					String file = entry2.getKey();
 					String cachedPath = entry2.getValue();
-					newRegistryContent.add(String.join("\t", new String[] { ext, file, cachedPath }));
+					newRegistryContent.add(ext + "\t" + file + "\t" + cachedPath);
 				}
 			}
-			Files.write(learnFilesRegistry,
-					String.join(System.getProperty("line.separator"), newRegistryContent).getBytes("utf-8"));
+			FileUtils.writeLines(new File(learnFilesRegistry), newRegistryContent, "utf-8");
 			this.cached.clear();
 			System.out.println("saved");
 
