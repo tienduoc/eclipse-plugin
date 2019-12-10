@@ -20,6 +20,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/gson-2.8.5.jar
+ lib/commons-io-2.6.jar
 Export-Package: com.aixcoder.core,
  com.aixcoder.extension,
  com.aixcoder.extension.jobs,

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -65,22 +64,19 @@ public class LintHandler extends AbstractHandler {
 	@SuppressWarnings("unchecked")
 	private void handlerForMutiFiles(IStructuredSelection selection) throws PartInitException {
 		final Set<IResource> resources = new LinkedHashSet<IResource>();
-		selection.toList().forEach(new Consumer<Object>() {
-			@Override
-			public void accept(Object it) {
-				if (null != it) {
+		for (Object it: selection.toList()) {
+			if (null != it) {
 
-					if (it instanceof IWorkingSet) {
-						resources.add(((IWorkingSet) it).getAdapter(IResource.class));
-					}
-					if (it instanceof IAdaptable) {
-						if (null != ((IAdaptable) it).getAdapter(IResource.class)) {
-							resources.add(((IAdaptable) it).getAdapter(IResource.class));
-						}
+				if (it instanceof IWorkingSet) {
+					resources.add(((IWorkingSet) it).getAdapter(IResource.class));
+				}
+				if (it instanceof IAdaptable) {
+					if (null != ((IAdaptable) it).getAdapter(IResource.class)) {
+						resources.add(((IAdaptable) it).getAdapter(IResource.class));
 					}
 				}
 			}
-		});
+		}
 		handlerIfile(resources);
 	}
 
@@ -89,25 +85,19 @@ public class LintHandler extends AbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final FileCollectVisitor fileVisitor = new FileCollectVisitor();
-				resources.forEach(new Consumer<IResource>() {
-					@Override
-					public void accept(IResource it) {
-						if (it.isAccessible()) {
-							try {
-								it.accept(fileVisitor);
-							} catch (CoreException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+				for (IResource it : resources) {
+					if (it.isAccessible()) {
+						try {
+							it.accept(fileVisitor);
+						} catch (CoreException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
-				});
-				fileVisitor.getFileSet().forEach(new Consumer<IFile>() {
-					@Override
-					public void accept(IFile ifile) {
-						lintSingleFile(ifile);
-					}
-				});
+				}
+				for (IFile ifile : fileVisitor.getFileSet()) {
+					lintSingleFile(ifile);
+				}
 				return Status.OK_STATUS;
 			}
 		}.schedule();
