@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
@@ -32,6 +33,8 @@ import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.HttpHelper.HTTPMethod;
 import com.aixcoder.utils.shims.Consumer;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * types of Operating Systems
@@ -133,6 +136,12 @@ interface ErrorListener {
 public class LocalService {
 	static String homedir;
 	private static boolean lastOpenFailed;
+	private static boolean serverStarting;
+
+	public static boolean isServerStarting() {
+		return serverStarting;
+	}
+
 	static {
 		homedir = System.getProperty("user.home");
 		if (OsCheck.getOperatingSystemType() == OSType.MacOS) {
@@ -231,52 +240,6 @@ public class LocalService {
 			Map<String, String> env = pb.environment();
 			env.put("Path", env.get("Path") + ";" + FilenameUtils.concat(javaHome, "bin").toString());
 			pb.start();
-			new Job("Launching aiXcoder service") {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					long startTime = System.currentTimeMillis();
-					boolean succeed = false;
-					while (System.currentTimeMillis() - startTime < 60 * 1000) {
-						try {
-							Thread.sleep(3000);
-							HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint(), null,
-									new Consumer<HttpRequest>() {
-
-										@Override
-										public void apply(HttpRequest t) {
-											t.connectTimeout(1000).readTimeout(1000);
-										}
-									});
-							succeed = true;
-							break;
-						} catch (Exception e) {
-							continue;
-						}
-					}
-					if (succeed) {
-						monitor.done();
-						lastOpenFailed = false;
-						return Status.OK_STATUS;
-					} else {
-						monitor.setCanceled(true);
-						new UIJob("aiXcoder service failed to start") {
-
-							@Override
-							public IStatus runInUIThread(IProgressMonitor monitor) {
-								MessageDialog dialog = new MessageDialog(null,
-										R(Localization.localServerAutoStartTitle), null,
-										R(Localization.localServerAutoStartQuestion), MessageDialog.ERROR,
-										new String[] {}, 0);
-								dialog.open();
-								return Status.OK_STATUS;
-							}
-						}.schedule();
-						return Status.CANCEL_STATUS;
-					}
-				}
-
-			}.schedule();
 		} catch (IOException e) {
 			lastOpenFailed = true;
 			e.printStackTrace();
@@ -296,20 +259,82 @@ public class LocalService {
 		}
 	}
 
-	public static void openurl(String url) {
+	public static Job startLocalService(boolean soft) {
 		if (lastOpenFailed) {
-			return;
-		}
-		if (!url.equals("aixcoder://localserver")) {
-			return;
+			return null;
 		}
 		String aixcoderPath = FilenameUtils.concat(
 				FilenameUtils.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"),
 				"server");
 		new File(aixcoderPath).mkdirs();
-		lastOpenFailed = true;
+		if (soft) {
+			try {
+				String r = HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint(), null, new Consumer<HttpRequest>() {
+
+					@Override
+					public void apply(HttpRequest t) {
+						t.connectTimeout(1000).readTimeout(1000);
+					}
+				});
+				if (r != null) {
+					lastOpenFailed = false;
+					serverStarting = false;
+					return null;
+				}
+				// server not running
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+		}
+		serverStarting = true;
 		authorize();
 		launchLocalServer();
+		Job j = new Job("Launching aiXcoder service") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				long startTime = System.currentTimeMillis();
+				boolean succeed = false;
+				while (System.currentTimeMillis() - startTime < 60 * 1000) {
+					try {
+						Thread.sleep(3000);
+						HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint(), null, new Consumer<HttpRequest>() {
+
+							@Override
+							public void apply(HttpRequest t) {
+								t.connectTimeout(1000).readTimeout(1000);
+							}
+						});
+						succeed = true;
+						break;
+					} catch (Exception e) {
+						continue;
+					}
+				}
+				if (succeed) {
+					monitor.done();
+					lastOpenFailed = false;
+					return Status.OK_STATUS;
+				} else {
+					monitor.setCanceled(true);
+					new UIJob("aiXcoder service failed to start") {
+
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							MessageDialog dialog = new MessageDialog(null, R(Localization.localServerAutoStartTitle),
+									null, R(Localization.localServerAutoStartQuestion), MessageDialog.ERROR,
+									new String[] {}, 0);
+							dialog.open();
+							return Status.OK_STATUS;
+						}
+					}.schedule();
+					return Status.CANCEL_STATUS;
+				}
+			}
+
+		};
+		j.schedule();
+		return j;
 	}
 
 	public static String getVersion() {
@@ -464,5 +489,22 @@ public class LocalService {
 				return Status.OK_STATUS;
 			}
 		}.schedule();
+	}
+
+	public static int getServiceStatus(String ext) {
+		try {
+			String resp = HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint() + "getSaStatus?ext=" + ext, null,
+					new Consumer<HttpRequest>() {
+
+						@Override
+						public void apply(HttpRequest t) {
+							t.connectTimeout(1000).readTimeout(1000);
+						}
+					});
+			JsonObject o = new Gson().fromJson(resp, JsonObject.class);
+			return o.get("status").getAsInt();
+		} catch (URISyntaxException e) {
+			return 0;
+		}
 	}
 }

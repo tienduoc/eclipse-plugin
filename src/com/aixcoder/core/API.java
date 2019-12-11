@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.Version;
@@ -64,6 +66,10 @@ class LocalServerStatus {
 	}
 }
 
+class CancellationToken {
+	public boolean cancelled = false;
+}
+
 public class API {
 	public static long timestamp;
 	static long lastCheckLocalTime = 0;
@@ -71,13 +77,18 @@ public class API {
 
 	static void readFile() {
 		try {
-			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "localserver.json");
+			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
+					"localserver.json");
 			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
 				return;
 			}
 			lastCheckLocalTime = System.currentTimeMillis();
 			String text = FileUtils.readFileToString(new File(localserver), Charset.forName("UTF-8"));
-			JsonArray jo = new Gson().fromJson(text, JsonObject.class).get("models").getAsJsonArray();
+			JsonObject _j = new Gson().fromJson(text, JsonObject.class);
+			if (!_j.has("models")) {
+				return;
+			}
+			JsonArray jo = _j.get("models").getAsJsonArray();
 			models.clear();
 			for (int i = 0; i < jo.size(); i++) {
 				JsonObject j = jo.get(i).getAsJsonObject();
@@ -95,29 +106,29 @@ public class API {
 			FileAlterationObserver observer = new FileAlterationObserver(dir);
 			FileAlterationMonitor monitor = new FileAlterationMonitor();
 			FileAlterationListener listener = new FileAlterationListenerAdaptor() {
-			    @Override
-			    public void onFileCreate(File file) {
+				@Override
+				public void onFileCreate(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
-			 
-			    @Override
-			    public void onFileDelete(File file) {
+				}
+
+				@Override
+				public void onFileDelete(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
-			 
-			    @Override
-			    public void onFileChange(File file) {
+				}
+
+				@Override
+				public void onFileChange(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
+				}
 			};
 			observer.addListener(listener);
 			monitor.addObserver(observer);
@@ -129,6 +140,10 @@ public class API {
 		}
 	}
 
+	static String lastExt = null;
+	static CancellationToken saStatusToken = new CancellationToken();
+	static int saStatus = 0;
+	static boolean allowIgnoreSaStatus = false;
 	static {
 		new Thread("periodicReadLocalServer") {
 			public void run() {
@@ -143,6 +158,86 @@ public class API {
 			};
 		}.start();
 		initWatch();
+		new Thread("saStatusCheckerWorker") {
+			public void run() {
+				final CancellationToken asking = new CancellationToken();
+				while (true) {
+					if (lastExt != null) {
+						saStatusToken.cancelled = true;
+						saStatusToken = new CancellationToken();
+						try {
+							saStatus = LocalService.getServiceStatus(lastExt);
+						} catch (Exception e) {
+							// service not started
+							Job j = LocalService.startLocalService(true);
+							if (j != null) {
+								try {
+									j.join();
+								} catch (InterruptedException e1) {
+									e1.printStackTrace();
+								}
+							}
+							saStatus = 0;
+						}
+						if (saStatus <= 1) {
+							new Job("aiXcoder is indexing your project") {
+								protected IStatus run(IProgressMonitor monitor) {
+									while (saStatus <= 1 && !saStatusToken.cancelled) {
+										if (!asking.cancelled && !Preference.preferenceManager.getBoolean(Preference.ASKED_LOCAL_INITIALIZING)) {
+											asking.cancelled = true;
+											new UIJob("ASKED_LOCAL_INITIALIZING") {
+												
+												@Override
+												public IStatus runInUIThread(IProgressMonitor monitor) {
+													MessageDialog dialog = new MessageDialog(null,
+															R(Localization.localInitializingTitle), null,
+															R(Localization.localInitializing), MessageDialog.QUESTION,
+															new String[] { IDialogConstants.YES_LABEL,
+																	IDialogConstants.NO_LABEL },
+															0);
+													int choice = dialog.open();
+													if (choice == 0 || choice == 1) {
+														allowIgnoreSaStatus = choice == 0;
+														Preference.preferenceManager.setValue(Preference.ALLOW_LOCAL_INCOMPLETE,
+																allowIgnoreSaStatus);
+														Preference.preferenceManager
+																.setValue(Preference.ASKED_LOCAL_INITIALIZING, true);
+													}
+													return Status.OK_STATUS;
+												}
+											}.schedule();
+										}
+										try {
+											Thread.sleep(1000);
+										} catch (InterruptedException e1) {
+											e1.printStackTrace();
+										}
+										try {
+											saStatus = LocalService.getServiceStatus(lastExt);
+										} catch (Exception e) {
+											// service not started
+											Job j = LocalService.startLocalService(true);
+											try {
+												j.join();
+											} catch (InterruptedException e1) {
+												e1.printStackTrace();
+											}
+											saStatus = 0;
+										}
+									}
+									return Status.OK_STATUS;
+								};
+							}.schedule();
+						}
+					}
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
 	}
 
 	public static String[] getModels() {
@@ -171,9 +266,11 @@ public class API {
 			endpoint = models.get(ext).url;
 			System.out.println("LOCAL!");
 			local = true;
+			lastExt = ext;
 		} else {
 			endpoint = Preference.getEndpoint();
-			local = false;
+			local = true;
+			lastExt = ext;
 		}
 		PredictResult r = predict(true, predictContext, remainingText, UUID, endpoint);
 		System.out.println("API.predict took " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
@@ -223,8 +320,7 @@ public class API {
 	static boolean askedLocalAutoStart = false;
 
 	static void startLocalServer() {
-		String url_open = "aixcoder://localserver";
-		LocalService.openurl(url_open);
+		LocalService.startLocalService(true);
 	}
 
 	static boolean isProfessionalErrorShown = false;
@@ -284,6 +380,9 @@ public class API {
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID, String endpoint) {
 		try {
+			if (LocalService.isServerStarting()) {
+				return null;
+			}
 			final String fileid = predictContext.filename;
 			final String ext = Preference.getModel();
 			learn(ext, fileid);
@@ -298,9 +397,9 @@ public class API {
 			if (!endpoint.endsWith("/")) {
 				endpoint = endpoint + "/";
 			}
-			//local true
-			final Map<String,Object> localParameter = new HashMap<String, Object>();
-			if(true) {
+			// local true
+			final Map<String, Object> localParameter = new HashMap<String, Object>();
+			if (true) {
 				String laterFileId = fileid + ".later";
 				StringBuilder laterCode = new StringBuilder(predictContext.suffix);
 				StringBuilder laterCodeReverse = laterCode.reverse();
@@ -312,17 +411,15 @@ public class API {
 				localParameter.put("laterMd5", laterMd5);
 			}
 
-
 			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
 					// send request
 					httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("queryUUID", UUID)
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
-							.form("projectRoot", predictContext.projRoot)
-							.form("ext", ext).form("fileid", fileid).form("remaining_text", maskedRemainingText)
-							.form("offset", String.valueOf(offset)).form("md5", md5).form("sort", 1)
-							.form("long_result_cuts", longResultCuts);
+							.form("projectRoot", predictContext.projRoot).form("ext", ext).form("fileid", fileid)
+							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
+							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts);
 					if (Preference.sortOnly()) {
 						httpRequest.form("ngen", 1);
 					}
@@ -371,7 +468,7 @@ public class API {
 						String laterFileId = fileid + ".later";
 						StringBuilder laterCode = new StringBuilder(predictContext.suffix);
 						StringBuilder laterCodeReverse = laterCode.reverse();
-						CodeStore.getInstance().saveLastSent(proj, laterFileId,laterCodeReverse.toString());
+						CodeStore.getInstance().saveLastSent(proj, laterFileId, laterCodeReverse.toString());
 					}
 				}
 				Predict.LongPredictResult[] longPredicts = new Predict.LongPredictResult[list.size()];

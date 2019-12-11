@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.8] - 2019-12-11
+### Added
+- Show local service indexing status.
+
+### Fix
+- Fix a bug that make service failed to start.
+
+
 ## [1.1.6] - 2019-11-21
 ### Fix
 - (Mac) Execute permission issue

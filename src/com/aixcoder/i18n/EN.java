@@ -47,6 +47,9 @@ public class EN extends Localization {
 		m.put(newVersionContent, "A new version of aiXcoder %s is available, update now?");
 		m.put(localDownloadTitle, "Download failed");
 		m.put(localDownloadQuestion, "aiXcoder service update failed. You can manually download the latest service zipfile/tarball from: %s. And then unzip it here: %s.");
+		m.put(localInitializingTitle, "aiXcoder is indexing your project.");
+		m.put(localInitializing, "aiXcoder is indexing your project for the first time. The suggestions may not be accurate until it is done. Do you want to show incomplete suggestions while wait for indexing to finish?");
+		m.put(allowLocalIncomplete, "Show incomplete suggestions before indexing finishes");
 	}
 
 	public static String R(String input) {

@@ -48,6 +48,8 @@ public class Preference {
 	public static final String LONG_RESULT_RANK = "LONG_RESULT_RANK";
 	public static final String LONG_RESULT_CUT = "LONG_RESULT_CUT";
 	public static final String LONG_RESULT_CUT_SORT = "LONG_RESULT_CUT_SORT";
+	public static final String ASKED_LOCAL_INITIALIZING = "ASKED_LOCAL_INITIALIZING";
+	public static final String ALLOW_LOCAL_INCOMPLETE = "ALLOW_LOCAL_INCOMPLETE";
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);

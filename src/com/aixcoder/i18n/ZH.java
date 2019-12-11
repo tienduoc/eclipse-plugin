@@ -78,6 +78,12 @@ public class ZH extends Localization {
 		m.put(localDownloadTitle, "\u4e0b\u8f7d\u5931\u8d25");
 //		m.put(localDownloadQuestion, "aiXcoder服务更新失败。您可以手动在此下载最新的压缩包：%s。然后解压到这个目录：%s。");
 		m.put(localDownloadQuestion, "aixcoder\u670d\u52a1\u66f4\u65b0\u5931\u8d25\u3002\u60a8\u53ef\u4ee5\u624b\u52a8\u5728\u6b64\u4e0b\u8f7d\u6700\u65b0\u7684\u538b\u7f29\u5305\uff1a%25s\u3002\u7136\u540e\u89e3\u538b\u5230\u8fd9\u4e2a\u76ee\u5f55\uff1a%25s\u3002");
+//		m.put(localInitializingTitle, "aiXcoder正在索引您的项目");
+		m.put(localInitializingTitle, "aixcoder\u6b63\u5728\u7d22\u5f15\u60a8\u7684\u9879\u76ee");
+//		m.put(localInitializing, "aiXcoder正在初次索引您的项目。在这结束之前提示可能是不准确的。你想要在索引完成之前显示可能不准确的提示吗？");
+		m.put(localInitializing, "aixcoder\u6b63\u5728\u521d\u6b21\u7d22\u5f15\u60a8\u7684\u9879\u76ee\u3002\u5728\u8fd9\u7ed3\u675f\u4e4b\u524d\u63d0\u793a\u53ef\u80fd\u662f\u4e0d\u51c6\u786e\u7684\u3002\u4f60\u60f3\u8981\u5728\u7d22\u5f15\u5b8c\u6210\u4e4b\u524d\u663e\u793a\u53ef\u80fd\u4e0d\u51c6\u786e\u7684\u63d0\u793a\u5417\uff1f");
+//		m.put(allowLocalIncomplete, "在索引完成前显示不完整的推荐");
+		m.put(allowLocalIncomplete, "\u5728\u7d22\u5f15\u5b8c\u6210\u524d\u663e\u793a\u4e0d\u5b8c\u6574\u7684\u63a8\u8350");
 	}
 
 	public static String R(String input) {
