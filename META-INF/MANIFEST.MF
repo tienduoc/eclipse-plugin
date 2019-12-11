@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.8.101",
  org.eclipse.core.net;bundle-version="1.2.200",
  org.eclipse.ui.browser;bundle-version="3.4.100",
- org.eclipse.ui.editors
+ org.eclipse.ui.editors,
+ javax.inject;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
@@ -26,7 +27,6 @@ Export-Package: com.aixcoder.core,
  com.aixcoder.i18n,
  com.aixcoder.lang,
  com.aixcoder.lib,
- com.aixcoder.lint,
  com.aixcoder.utils,
  com.aixcoder.utils.shims,
  com.aixcoder.utils.zipfile
