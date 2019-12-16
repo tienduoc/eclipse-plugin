@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.1.9] - 2019-12-16
+### Fix
+- Fix a bug that make service start multiple times.
+
 ## [1.1.8] - 2019-12-11
 ### Added
 - Show local service indexing status.

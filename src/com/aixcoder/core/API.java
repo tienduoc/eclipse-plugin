@@ -180,13 +180,14 @@ public class API {
 							saStatus = 0;
 						}
 						if (saStatus <= 1) {
-							new Job("aiXcoder is indexing your project") {
+							Job j = new Job("aiXcoder is indexing your project") {
 								protected IStatus run(IProgressMonitor monitor) {
 									while (saStatus <= 1 && !saStatusToken.cancelled) {
-										if (!asking.cancelled && !Preference.preferenceManager.getBoolean(Preference.ASKED_LOCAL_INITIALIZING)) {
+										if (!asking.cancelled && !Preference.preferenceManager
+												.getBoolean(Preference.ASKED_LOCAL_INITIALIZING)) {
 											asking.cancelled = true;
 											new UIJob("ASKED_LOCAL_INITIALIZING") {
-												
+
 												@Override
 												public IStatus runInUIThread(IProgressMonitor monitor) {
 													MessageDialog dialog = new MessageDialog(null,
@@ -198,8 +199,8 @@ public class API {
 													int choice = dialog.open();
 													if (choice == 0 || choice == 1) {
 														allowIgnoreSaStatus = choice == 0;
-														Preference.preferenceManager.setValue(Preference.ALLOW_LOCAL_INCOMPLETE,
-																allowIgnoreSaStatus);
+														Preference.preferenceManager.setValue(
+																Preference.ALLOW_LOCAL_INCOMPLETE, allowIgnoreSaStatus);
 														Preference.preferenceManager
 																.setValue(Preference.ASKED_LOCAL_INITIALIZING, true);
 													}
@@ -217,17 +218,25 @@ public class API {
 										} catch (Exception e) {
 											// service not started
 											Job j = LocalService.startLocalService(true);
-											try {
-												j.join();
-											} catch (InterruptedException e1) {
-												e1.printStackTrace();
+											if (j != null) {
+												try {
+													j.join();
+												} catch (InterruptedException e1) {
+													e1.printStackTrace();
+												}
 											}
 											saStatus = 0;
 										}
 									}
 									return Status.OK_STATUS;
 								};
-							}.schedule();
+							};
+							j.schedule();
+							try {
+								j.join();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					try {
@@ -380,9 +389,6 @@ public class API {
 	public static PredictResult predict(boolean allowRetry, final PredictContext predictContext,
 			final String remainingText, final String UUID, String endpoint) {
 		try {
-			if (LocalService.isServerStarting()) {
-				return null;
-			}
 			final String fileid = predictContext.filename;
 			final String ext = Preference.getModel();
 			learn(ext, fileid);

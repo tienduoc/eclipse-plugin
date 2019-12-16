@@ -225,7 +225,7 @@ public class LocalService {
 		try {
 			String javaHome = System.getProperty("java.home");
 			String[] commands;
-			if (Preference.getParams().contains("localconsole")) {
+			if (Preference.getParams().contains("localconsole=1")) {
 				if (OsCheck.getOperatingSystemType() == OSType.Windows) {
 					commands = new String[] { "cmd", "/C", "start", exePath };
 				} else if (OsCheck.getOperatingSystemType() == OSType.MacOS) {
@@ -259,8 +259,9 @@ public class LocalService {
 		}
 	}
 
+	private static long lastStartTime = 0;
 	public static Job startLocalService(boolean soft) {
-		if (lastOpenFailed) {
+		if (lastOpenFailed || !Preference.isActive()) {
 			return null;
 		}
 		String aixcoderPath = FilenameUtils.concat(
@@ -286,6 +287,10 @@ public class LocalService {
 				e.printStackTrace();
 			}
 		}
+		if (System.currentTimeMillis() - lastStartTime < 1000 * 30) {
+			return null;
+		}
+		lastStartTime = System.currentTimeMillis();
 		serverStarting = true;
 		authorize();
 		launchLocalServer();
