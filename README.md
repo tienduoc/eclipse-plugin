@@ -2,8 +2,6 @@
 
 [Update site](https://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.wb.doc.user%2Fhtml%2Finstallation%2Fupdatesite_3.5.html): https://github.com/aixcoder-plugin/eclipse-update-site/raw/master/
 
-In case you have trouble connecting to Github, there is a mirror site at https://gitee.com/felixhao/eclipse-update-site/raw/master/
-
 AiXcoder is an code suggestions generator using the latest AI technologies. Our model is trained on over 1 TB of open source code and served from your own computer.
 
 For now aiXcoder only supports Java.
