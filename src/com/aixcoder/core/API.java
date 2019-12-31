@@ -3,24 +3,16 @@ package com.aixcoder.core;
 import static com.aixcoder.i18n.Localization.R;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -53,116 +45,23 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-class LocalServerStatus {
-	String name;
-	boolean active;
-	String url;
-
-	public LocalServerStatus(String name, boolean active, String url) {
-		super();
-		this.name = name;
-		this.active = active;
-		this.url = url;
-	}
-}
-
 class CancellationToken {
 	public boolean cancelled = false;
 }
 
 public class API {
 	public static long timestamp;
-	static long lastCheckLocalTime = 0;
-	static ConcurrentHashMap<String, LocalServerStatus> models = new ConcurrentHashMap<String, LocalServerStatus>();
-
-	static void readFile() {
-		try {
-			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
-					"localserver.json");
-			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
-				return;
-			}
-			lastCheckLocalTime = System.currentTimeMillis();
-			String text = FileUtils.readFileToString(new File(localserver), Charset.forName("UTF-8"));
-			JsonObject _j = new Gson().fromJson(text, JsonObject.class);
-			if (!_j.has("models")) {
-				return;
-			}
-			JsonArray jo = _j.get("models").getAsJsonArray();
-			models.clear();
-			for (int i = 0; i < jo.size(); i++) {
-				JsonObject j = jo.get(i).getAsJsonObject();
-				models.put(j.get("name").getAsString(), new LocalServerStatus(j.get("name").getAsString(),
-						j.get("active").getAsBoolean(), j.get("url").getAsString()));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	static void initWatch() {
-		try {
-			String dir = FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder");
-			FileAlterationObserver observer = new FileAlterationObserver(dir);
-			FileAlterationMonitor monitor = new FileAlterationMonitor();
-			FileAlterationListener listener = new FileAlterationListenerAdaptor() {
-				@Override
-				public void onFileCreate(File file) {
-					if (file.getName().endsWith("localserver.json")) {
-						System.out.println("localserver.json has changed");
-						readFile();
-					}
-				}
-
-				@Override
-				public void onFileDelete(File file) {
-					if (file.getName().endsWith("localserver.json")) {
-						System.out.println("localserver.json has changed");
-						readFile();
-					}
-				}
-				
-				@Override
-				public void onFileChange(File file) {
-					if (file.getName().endsWith("localserver.json")) {
-						System.out.println("localserver.json has changed");
-						readFile();
-					}
-			    }
-			};
-			observer.addListener(listener);
-			monitor.addObserver(observer);
-			monitor.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	static String lastExt = null;
 	static CancellationToken saStatusToken = new CancellationToken();
 	static int saStatus = 0;
 	static boolean allowIgnoreSaStatus = false;
 	static {
-		new Thread("periodicReadLocalServer") {
-			public void run() {
-				while (true) {
-					try {
-						readFile();
-						Thread.sleep(1000 * 60 * 5);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			};
-		}.start();
-		initWatch();
 		new Thread("saStatusCheckerWorker") {
 			public void run() {
 				final CancellationToken asking = new CancellationToken();
 				while (true) {
-					if (lastExt != null) {
+					if (local && lastExt != null) {
 						saStatusToken.cancelled = true;
 						saStatusToken = new CancellationToken();
 						try {
@@ -249,38 +148,15 @@ public class API {
 		}.start();
 	}
 
-	public static String[] getModels() {
-		String body;
-		try {
-			if (Preference.getEndpoint().isEmpty())
-				return null;
-			body = HttpHelper.get(Preference.getEndpoint() + "getmodels");
-			JsonArray jo = new Gson().fromJson(body, JsonElement.class).getAsJsonArray();
-			String[] models = CollectionUtils.getStringList(jo);
-			return models;
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	static boolean local = false;
 	static boolean firstLocalRequestAttempt = true;
 
 	public static PredictResult predict(PredictContext predictContext, String remainingText, String UUID) {
 		timestamp = Calendar.getInstance().getTimeInMillis();
 		String ext = Preference.getModel();
-		String endpoint;
-		if (models.containsKey(ext) && models.get(ext).active && models.get(ext).url != null) {
-			endpoint = models.get(ext).url;
-			System.out.println("LOCAL!");
-			local = true;
-			lastExt = ext;
-		} else {
-			endpoint = Preference.getEndpoint();
-			local = true;
-			lastExt = ext;
-		}
+		String endpoint = Preference.getEndpoint(ext);
+		lastExt = ext;
+		local = Preference.useLocalEndpoint(ext);
 		PredictResult r = predict(true, predictContext, remainingText, UUID, endpoint);
 		System.out.println("API.predict took " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
 		return r;
@@ -300,7 +176,7 @@ public class API {
 			m.put("token_num", String.valueOf(tokenNum));
 			m.put("char_num", String.valueOf(charNum));
 			try {
-				HttpHelper.post(Preference.getEndpoint() + "user/predict/userUseInfo", m);
+				HttpHelper.post(Preference.getRemoteEndpoint() + "user/predict/userUseInfo", m);
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			} catch (HttpRequestException e) {
@@ -395,8 +271,8 @@ public class API {
 			final String uuid = Preference.getUUID();
 			final String proj = predictContext.proj;
 			final String text = predictContext.prefix;
-			final String maskedText = DataMasking.mask(text);
-			final String maskedRemainingText = DataMasking.mask(remainingText);
+			final String maskedText = DataMasking.mask(text, ext);
+			final String maskedRemainingText = DataMasking.mask(remainingText, ext);
 			final int offset = CodeStore.getInstance().getDiffPosition(fileid, maskedText);
 			final String md5 = DigestUtils.getMD5(maskedText);
 			final int longResultCuts = Preference.getLongResultCuts();
@@ -549,13 +425,13 @@ public class API {
 		return new PredictResult(new Predict.LongPredictResult[0], new SortResult[0]);
 	}
 
-	public static String[] getTrivialLiterals() {
+	public static String[] getTrivialLiterals(String ext) {
 		try {
 			final String uuid = Preference.getUUID();
 			HashMap<String, String> params = new HashMap<String, String>();
 			params.put("uuid", uuid);
 			params.put("ext", Preference.getModel());
-			String string = HttpHelper.get(Preference.getEndpoint() + "trivial_literals", params);
+			String string = HttpHelper.get(Preference.getEndpoint(ext) + "trivial_literals", params);
 			JsonArray jo = new Gson().fromJson(string, JsonArray.class);
 			String[] literals = CollectionUtils.getStringList(jo);
 			return literals;
@@ -566,7 +442,7 @@ public class API {
 	}
 
 	public static void zipFile(String project, String[] data) {
-		if (data.length == 0)
+		if (data.length == 0 || !local)
 			return;
 		try {
 			final String uuid = Preference.getUUID();
@@ -582,7 +458,7 @@ public class API {
 			zipOut.close();
 			wr.close();
 			final byte[] arr = wr.toByteArray();
-			HttpHelper.post(Preference.getEndpoint() + "zipfile2", params, new Consumer<HttpRequest>() {
+			HttpHelper.post(Preference.getRemoteEndpoint() + "zipfile2", params, new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest t) {
 					t.connectTimeout(60 * 1000).readTimeout(60 * 1000);

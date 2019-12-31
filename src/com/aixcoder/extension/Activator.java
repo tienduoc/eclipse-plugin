@@ -50,7 +50,7 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		new AiXPreInitializer().initializeDefaultPreferences();
-		if (!Preference.askedLanguage() || !Preference.askedTelemetry() || Preference.getEndpoint().isEmpty()) {
+		if (!Preference.askedLanguage() || !Preference.askedTelemetry()) {
 			new UIJob("Prompt aiXcoder initialize") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -86,11 +86,6 @@ public class Activator extends AbstractUIPlugin {
 								e.printStackTrace();
 							}
 						}
-					}
-					// Warns empty endpoint
-					if (Preference.getEndpoint().isEmpty()) {
-						MessageDialog.openInformation(null, R(Localization.endpointEmptyTitle),
-								R(Localization.endpointEmptyWarning));
 					}
 					return Status.OK_STATUS;
 				}

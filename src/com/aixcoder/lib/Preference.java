@@ -3,19 +3,27 @@ package com.aixcoder.lib;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import com.aixcoder.core.LocalServerStatus;
 import com.aixcoder.extension.Activator;
 import com.aixcoder.extension.AiXPreInitializer;
 import com.aixcoder.i18n.Localization;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.shims.Consumer;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 class LoginInfo {
@@ -34,7 +42,6 @@ public class Preference {
 
 	public static final String ACTIVE = "ACTIVE";
 	public static final String SELF_LEARN = "SELF_LEARN";
-	public static final String ENDPOINT = "ENDPOINT";
 	public static final String MODEL = "MODEL";
 	public static final String P_UUID = "UUID";
 	public static final String PARAMS = "PARAMS";
@@ -63,18 +70,16 @@ public class Preference {
 		return preferenceManager.getBoolean(ACTIVE);
 	}
 
-	public static String getEndpoint() {
-		return "http://localhost:8787/";
-	}
-
 	public static String getModel() {
 		return preferenceManager.getString(MODEL);
 	}
 
 	public static String getUUID() {
 		LoginInfo info = getUUIDFromFile();
-		synchronized (id) {
-			preferenceManager.setValue(P_UUID, info.uuid);
+		if (info.uuid != null) {
+			synchronized (id) {
+				preferenceManager.setValue(P_UUID, info.uuid);
+			}
 		}
 		if (preferenceManager.getString(P_UUID) == null || preferenceManager.getString(P_UUID).isEmpty()) {
 			synchronized (id) {
@@ -174,11 +179,9 @@ public class Preference {
 				token = o.get("token").getAsString();
 				uuid = o.get("uuid").getAsString();
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				e.printStackTrace();
 			}
 			loginInfo = new LoginInfo(uuid, token);
 		}
@@ -211,6 +214,210 @@ public class Preference {
 		}
 		isProfessionalFetched = true;
 		return isProfessional;
+	}
+
+	private static String lastLocalEndpoint = null;
+	private static long lastLocalEndpointTimestamp = 0;
+
+	/**
+	 * 获取本地服务地址
+	 *
+	 * @return
+	 */
+	public static String getDefaultLocalEndpoint() {
+		if (System.currentTimeMillis() - lastLocalEndpointTimestamp > 10 * 1000) {
+			// 检查 localconfig.json
+			lastLocalEndpointTimestamp = System.currentTimeMillis();
+			String localConfigPath = FilenameUtils
+					.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "localconfig.json");
+			String localConfig;
+			try {
+				localConfig = FileUtils.readFileToString(new File(localConfigPath), Charset.forName("UTF-8"));
+			} catch (IOException e) {
+				return "http://localhost:8787";
+			}
+			boolean lastLocalEndpointSet = false;
+			if (localConfig != null) {
+				JsonObject jsonObject = new Gson().fromJson(localConfig, JsonObject.class);
+				if (jsonObject != null) {
+					Integer port = jsonObject.get("port").getAsInt();
+					if (port != null) {
+						lastLocalEndpoint = String.format("http://localhost:%d", port);
+						lastLocalEndpointSet = true;
+					}
+				}
+			}
+			if (!lastLocalEndpointSet) {
+				lastLocalEndpoint = "http://localhost:8787";
+			}
+		}
+		return lastLocalEndpoint;
+	}
+
+    public static boolean hasLoginFile = false;
+    public static boolean useLocalConfigFile = false;
+
+    /**
+     * 启动的时候检查login文件，如果不存在就用本地版
+     */
+    public static void detectLocalOrOnline() {
+		String loginPath = FilenameUtils
+				.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "login");
+		String login;
+		try {
+			login = FileUtils.readFileToString(new File(loginPath), Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			login = null;
+		}
+        if (login != null && login.length() > 0) {
+            // 可能登录过校验 uuid
+            JsonObject json = new Gson().fromJson(login, JsonObject.class);
+            String token = json.get("token").getAsString();
+            String uuid = json.get("uuid").getAsString();
+            if (uuid.startsWith("local-")) {
+                // 本地服务生成的假uuid，继续使用本地版
+                hasLoginFile = false;
+                useLocalConfigFile = false;
+            } else {
+                // 线上版
+                hasLoginFile = true;
+                useLocalConfigFile = true;
+            }
+        } else {
+            // 没有登录过
+            hasLoginFile = false;
+            useLocalConfigFile = false;
+        }
+    }
+
+	static ConcurrentHashMap<String, LocalServerStatus> models = new ConcurrentHashMap<String, LocalServerStatus>();
+
+	static long lastCheckLocalTime = 0;
+	static void readFile() {
+		try {
+			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
+					"localserver.json");
+			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
+				return;
+			}
+			lastCheckLocalTime = System.currentTimeMillis();
+			String text = FileUtils.readFileToString(new File(localserver), Charset.forName("UTF-8"));
+			JsonObject _j = new Gson().fromJson(text, JsonObject.class);
+			if (!_j.has("models")) {
+				return;
+			}
+			JsonArray jo = _j.get("models").getAsJsonArray();
+			models.clear();
+			for (int i = 0; i < jo.size(); i++) {
+				JsonObject j = jo.get(i).getAsJsonObject();
+				String name = j.has("name") ? j.get("name").getAsString() : null;
+				boolean active = j.has("active") ? j.get("active").getAsBoolean() : true;
+				models.put(j.get("name").getAsString(), new LocalServerStatus(name, active));
+			}
+		} catch (IOException e) {
+//			e.printStackTrace();
+		}
+	}
+
+	static void initWatch() {
+		try {
+			String dir = FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder");
+			FileAlterationObserver observer = new FileAlterationObserver(dir);
+			FileAlterationMonitor monitor = new FileAlterationMonitor();
+			FileAlterationListener listener = new FileAlterationListenerAdaptor() {
+				@Override
+				public void onFileCreate(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
+					}
+				}
+
+				@Override
+				public void onFileDelete(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
+					}
+				}
+				
+				@Override
+				public void onFileChange(File file) {
+					if (file.getName().endsWith("localserver.json")) {
+						System.out.println("localserver.json has changed");
+						readFile();
+					}
+			    }
+			};
+			observer.addListener(listener);
+			monitor.addObserver(observer);
+			monitor.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	static {
+		try {
+			detectLocalOrOnline();
+			new Thread("periodicReadLocalServer") {
+				public void run() {
+					while (true) {
+						try {
+							readFile();
+							Thread.sleep(1000 * 60 * 5);
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
+				};
+			}.start();
+			initWatch();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+    public static boolean useLocalEndpoint(String ext) {
+        LocalServerStatus model = models.get(ext);
+        if (hasLoginFile) {
+            if (model != null && model.active) {
+                // 使用本地版地址
+                return true;
+            } else {
+                // 使用线上版默认地址
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+    
+
+    public static String getEndpoint(String ext) {
+        LocalServerStatus model = models.get(ext);
+        String endpoint;
+        if (hasLoginFile) {
+            if (model != null && model.active) {
+                // 使用本地版地址
+            	endpoint = getDefaultLocalEndpoint();
+            } else {
+                // 使用线上版默认地址
+            	endpoint = getRemoteEndpoint();
+            }
+        } else {
+        	endpoint = getDefaultLocalEndpoint();
+        }
+        if (!endpoint.endsWith("/")) {
+        	endpoint += "/";
+        }
+        return endpoint;
+    }
+
+	public static String getRemoteEndpoint() {
+		return "https://api.aixcoder.com/";
 	}
 
 }

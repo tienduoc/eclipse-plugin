@@ -270,7 +270,7 @@ public class LocalService {
 		new File(aixcoderPath).mkdirs();
 		if (soft) {
 			try {
-				String r = HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint(), null, new Consumer<HttpRequest>() {
+				String r = HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null, new Consumer<HttpRequest>() {
 
 					@Override
 					public void apply(HttpRequest t) {
@@ -303,7 +303,7 @@ public class LocalService {
 				while (System.currentTimeMillis() - startTime < 60 * 1000) {
 					try {
 						Thread.sleep(3000);
-						HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint(), null, new Consumer<HttpRequest>() {
+						HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null, new Consumer<HttpRequest>() {
 
 							@Override
 							public void apply(HttpRequest t) {
@@ -498,7 +498,7 @@ public class LocalService {
 
 	public static int getServiceStatus(String ext) {
 		try {
-			String resp = HttpHelper.request(HTTPMethod.GET, Preference.getEndpoint() + "getSaStatus?ext=" + ext, null,
+			String resp = HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint() + "getSaStatus?ext=" + ext, null,
 					new Consumer<HttpRequest>() {
 
 						@Override

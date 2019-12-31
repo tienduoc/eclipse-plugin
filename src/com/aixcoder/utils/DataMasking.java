@@ -21,11 +21,11 @@ public class DataMasking {
 	 * @param s 原始字符串
 	 * @return 脱敏后字符串
 	 */
-	public static String mask(String s) {
+	public static String mask(String s, String ext) {
 		if (trivialLiterals == null) {
 			try {
 				trivialLiterals = new HashSet<String>();
-				String[] literals = API.getTrivialLiterals();
+				String[] literals = API.getTrivialLiterals(ext);
 				for (String l : literals) {
 					String lit = String.valueOf(l);
 					if (lit.startsWith("<str>")) {
