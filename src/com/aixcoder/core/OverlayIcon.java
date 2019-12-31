@@ -7,7 +7,7 @@ import org.eclipse.swt.graphics.Point;
 /**
  * An OverlayIcon consists of a main icon and an overlay icon
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings("deprecation")
 public class OverlayIcon extends CompositeImageDescriptor {
 
 	// the size of the OverlayIcon

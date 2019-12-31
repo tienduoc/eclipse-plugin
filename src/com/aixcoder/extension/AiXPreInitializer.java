@@ -16,7 +16,7 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 		ScopedPreferenceStore scopedPreferenceStore = Preference.preferenceManager;
 		if (!scopedPreferenceStore.getBoolean("INITIALIZED")) {
 			scopedPreferenceStore.setDefault(Preference.ACTIVE, true);
-			scopedPreferenceStore.setDefault(Preference.ENDPOINT, "https://api.aixcoder.com/");
+			scopedPreferenceStore.setDefault(Preference.ENDPOINT, "http://localhost:8787/");
 			scopedPreferenceStore.setDefault(Preference.SEARCH_ENDPOINT, "https://search.aixcoder.com/");
 			scopedPreferenceStore.setDefault(Preference.MODEL, "java(Java)");
 			scopedPreferenceStore.setDefault(Preference.AUTO_IMPORT, true);
@@ -28,6 +28,8 @@ public class AiXPreInitializer extends AbstractPreferenceInitializer {
 			scopedPreferenceStore.setDefault(Preference.PARAMS, "");
 			scopedPreferenceStore.setDefault(Preference.LANGUAGE, EN.id);
 			scopedPreferenceStore.setDefault(Preference.LONG_RESULT_RANK, 1);
+			scopedPreferenceStore.setDefault(Preference.ALLOW_LOCAL_INCOMPLETE, false);
+			scopedPreferenceStore.setDefault(Preference.ASKED_LOCAL_INITIALIZING, false);
 			Preference.getUUID();
 			try {
 				scopedPreferenceStore.save();

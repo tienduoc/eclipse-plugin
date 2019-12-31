@@ -64,6 +64,8 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 
 				IDocument document = context.getDocument();
 				String prefix = document.get(0, offset);
+				String suffix = document.get().substring(offset);
+				suffix = suffix.substring(suffix.indexOf("\n"));
 				IRegion line = document.getLineInformationOfOffset(offset);
 				String remainingText = document.get(offset, line.getOffset() + line.getLength() - offset);
 //				System.out.println("computeCompletionProposals + " + prefix.substring(Math.max(0, prefix.length() - 50)));
@@ -71,7 +73,7 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 				// step 2: send request
 				// Eclipse's way of using its thread pool
 				String projName = project == null ? "tmp" : project.getName();
-				new AiXFetchJob(new PredictContext(prefix, projName, filePath), remainingText, proposalFactory)
+				new AiXFetchJob(new PredictContext(prefix, projName, filePath, project.getLocation().toOSString(),suffix), remainingText, proposalFactory)
 						.schedule();
 			} catch (Exception e) {
 				e.printStackTrace();

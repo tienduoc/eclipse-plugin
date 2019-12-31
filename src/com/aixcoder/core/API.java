@@ -2,18 +2,17 @@ package com.aixcoder.core;
 
 import static com.aixcoder.i18n.Localization.R;
 
-import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -26,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.progress.UIJob;
@@ -40,6 +40,7 @@ import com.aixcoder.utils.CodeStore;
 import com.aixcoder.utils.CompletionOptions;
 import com.aixcoder.utils.DataMasking;
 import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.HttpHelper.HTTPMethod;
 import com.aixcoder.utils.Predict;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
@@ -65,6 +66,10 @@ class LocalServerStatus {
 	}
 }
 
+class CancellationToken {
+	public boolean cancelled = false;
+}
+
 public class API {
 	public static long timestamp;
 	static long lastCheckLocalTime = 0;
@@ -72,13 +77,18 @@ public class API {
 
 	static void readFile() {
 		try {
-			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "localserver.json");
+			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
+					"localserver.json");
 			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
 				return;
 			}
 			lastCheckLocalTime = System.currentTimeMillis();
 			String text = FileUtils.readFileToString(new File(localserver), Charset.forName("UTF-8"));
-			JsonArray jo = new Gson().fromJson(text, JsonObject.class).get("models").getAsJsonArray();
+			JsonObject _j = new Gson().fromJson(text, JsonObject.class);
+			if (!_j.has("models")) {
+				return;
+			}
+			JsonArray jo = _j.get("models").getAsJsonArray();
 			models.clear();
 			for (int i = 0; i < jo.size(); i++) {
 				JsonObject j = jo.get(i).getAsJsonObject();
@@ -96,24 +106,24 @@ public class API {
 			FileAlterationObserver observer = new FileAlterationObserver(dir);
 			FileAlterationMonitor monitor = new FileAlterationMonitor();
 			FileAlterationListener listener = new FileAlterationListenerAdaptor() {
-			    @Override
-			    public void onFileCreate(File file) {
+				@Override
+				public void onFileCreate(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
-			 
-			    @Override
-			    public void onFileDelete(File file) {
+				}
+
+				@Override
+				public void onFileDelete(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
-			 
-			    @Override
-			    public void onFileChange(File file) {
+				}
+				
+				@Override
+				public void onFileChange(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
@@ -130,6 +140,10 @@ public class API {
 		}
 	}
 
+	static String lastExt = null;
+	static CancellationToken saStatusToken = new CancellationToken();
+	static int saStatus = 0;
+	static boolean allowIgnoreSaStatus = false;
 	static {
 		new Thread("periodicReadLocalServer") {
 			public void run() {
@@ -144,6 +158,95 @@ public class API {
 			};
 		}.start();
 		initWatch();
+		new Thread("saStatusCheckerWorker") {
+			public void run() {
+				final CancellationToken asking = new CancellationToken();
+				while (true) {
+					if (lastExt != null) {
+						saStatusToken.cancelled = true;
+						saStatusToken = new CancellationToken();
+						try {
+							saStatus = LocalService.getServiceStatus(lastExt);
+						} catch (Exception e) {
+							// service not started
+							Job j = LocalService.startLocalService(true);
+							if (j != null) {
+								try {
+									j.join();
+								} catch (InterruptedException e1) {
+									e1.printStackTrace();
+								}
+							}
+							saStatus = 0;
+						}
+						if (saStatus <= 1) {
+							Job j = new Job("aiXcoder is indexing your project") {
+								protected IStatus run(IProgressMonitor monitor) {
+									while (saStatus <= 1 && !saStatusToken.cancelled) {
+										if (!asking.cancelled && !Preference.preferenceManager
+												.getBoolean(Preference.ASKED_LOCAL_INITIALIZING)) {
+											asking.cancelled = true;
+											new UIJob("ASKED_LOCAL_INITIALIZING") {
+
+												@Override
+												public IStatus runInUIThread(IProgressMonitor monitor) {
+													MessageDialog dialog = new MessageDialog(null,
+															R(Localization.localInitializingTitle), null,
+															R(Localization.localInitializing), MessageDialog.QUESTION,
+															new String[] { IDialogConstants.YES_LABEL,
+																	IDialogConstants.NO_LABEL },
+															0);
+													int choice = dialog.open();
+													if (choice == 0 || choice == 1) {
+														allowIgnoreSaStatus = choice == 0;
+														Preference.preferenceManager.setValue(
+																Preference.ALLOW_LOCAL_INCOMPLETE, allowIgnoreSaStatus);
+														Preference.preferenceManager
+																.setValue(Preference.ASKED_LOCAL_INITIALIZING, true);
+													}
+													return Status.OK_STATUS;
+												}
+											}.schedule();
+										}
+										try {
+											Thread.sleep(1000);
+										} catch (InterruptedException e1) {
+											e1.printStackTrace();
+										}
+										try {
+											saStatus = LocalService.getServiceStatus(lastExt);
+										} catch (Exception e) {
+											// service not started
+											Job j = LocalService.startLocalService(true);
+											if (j != null) {
+												try {
+													j.join();
+												} catch (InterruptedException e1) {
+													e1.printStackTrace();
+												}
+											}
+											saStatus = 0;
+										}
+									}
+									return Status.OK_STATUS;
+								};
+							};
+							j.schedule();
+							try {
+								j.join();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
 	}
 
 	public static String[] getModels() {
@@ -172,9 +275,11 @@ public class API {
 			endpoint = models.get(ext).url;
 			System.out.println("LOCAL!");
 			local = true;
+			lastExt = ext;
 		} else {
 			endpoint = Preference.getEndpoint();
-			local = false;
+			local = true;
+			lastExt = ext;
 		}
 		PredictResult r = predict(true, predictContext, remainingText, UUID, endpoint);
 		System.out.println("API.predict took " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
@@ -224,12 +329,7 @@ public class API {
 	static boolean askedLocalAutoStart = false;
 
 	static void startLocalServer() {
-		String url_open = "aixcoder://localserver";
-		try {
-			java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		LocalService.startLocalService(true);
 	}
 
 	static boolean isProfessionalErrorShown = false;
@@ -303,15 +403,29 @@ public class API {
 			if (!endpoint.endsWith("/")) {
 				endpoint = endpoint + "/";
 			}
+			// local true
+			final Map<String, Object> localParameter = new HashMap<String, Object>();
+			if (true) {
+				String laterFileId = fileid + ".later";
+				StringBuilder laterCode = new StringBuilder(predictContext.suffix);
+				StringBuilder laterCodeReverse = laterCode.reverse();
+				int laterOffset = CodeStore.getInstance().getDiffPosition(laterFileId, laterCodeReverse.toString());
+				String laterMd5 = DigestUtils.getMD5(laterCodeReverse.toString());
+				laterCode = new StringBuilder(laterCodeReverse.substring(laterOffset)).reverse();
+				localParameter.put("laterCode", laterCode);
+				localParameter.put("laterOffset", String.valueOf(laterOffset));
+				localParameter.put("laterMd5", laterMd5);
+			}
+
 			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {
 				@Override
 				public void apply(HttpRequest httpRequest) {
 					// send request
 					httpRequest.contentType("x-www-form-urlencoded", "UTF-8").form("queryUUID", UUID)
 							.form("text", maskedText.substring(offset)).form("uuid", uuid).form("project", proj)
-							.form("ext", ext).form("fileid", fileid).form("remaining_text", maskedRemainingText)
-							.form("offset", String.valueOf(offset)).form("md5", md5).form("sort", 1)
-							.form("long_result_cuts", longResultCuts);
+							.form("projectRoot", predictContext.projRoot).form("ext", ext).form("fileid", fileid)
+							.form("remaining_text", maskedRemainingText).form("offset", String.valueOf(offset))
+							.form("md5", md5).form("sort", 1).form("long_result_cuts", longResultCuts);
 					if (Preference.sortOnly()) {
 						httpRequest.form("ngen", 1);
 					}
@@ -325,6 +439,11 @@ public class API {
 						String paramValue = paramParts[1];
 						httpRequest.form(paramKey, paramValue);
 					}
+
+					// localParameter
+					if (localParameter.size() > 0) {
+						httpRequest.form(localParameter, "UTF-8");
+					}
 				}
 			});
 			if (string == null) {
@@ -333,6 +452,10 @@ public class API {
 
 			if (string.contains("Conflict")) {
 				CodeStore.getInstance().invalidateFile(proj, fileid);
+				if (localParameter.size() > 0) {
+					String laterFileId = fileid + ".later";
+					CodeStore.getInstance().invalidateFile(proj, laterFileId);
+				}
 				if (allowRetry) {
 					return predict(false, predictContext, maskedRemainingText, UUID, endpoint);
 				}
@@ -347,6 +470,12 @@ public class API {
 				}
 				if (list.size() > 0) {
 					CodeStore.getInstance().saveLastSent(proj, fileid, maskedText);
+					if (localParameter.size() > 0) {
+						String laterFileId = fileid + ".later";
+						StringBuilder laterCode = new StringBuilder(predictContext.suffix);
+						StringBuilder laterCodeReverse = laterCode.reverse();
+						CodeStore.getInstance().saveLastSent(proj, laterFileId, laterCodeReverse.toString());
+					}
 				}
 				Predict.LongPredictResult[] longPredicts = new Predict.LongPredictResult[list.size()];
 				SortResult[] sortResults = null;
@@ -406,16 +535,6 @@ public class API {
 			if (local) {
 				localError++;
 				if (localError >= 5) {
-					if (!askedLocalAutoStart) {
-						MessageDialog dialog = new MessageDialog(null, R(Localization.localServerAutoStartTitle), null,
-								R(Localization.localServerAutoStartQuestion), MessageDialog.QUESTION,
-								new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-						int choice = dialog.open();
-						if (choice == 0 || choice == 1) {
-							localAutoStart = choice == 0;
-							askedLocalAutoStart = true;
-						}
-					}
 					startLocalServer();
 					localError = 0;
 				} else if (firstLocalRequestAttempt) {
@@ -477,75 +596,75 @@ public class API {
 		}
 	}
 
-	static int versionCompare(Scanner s1, Scanner s2) {
-		s1.useDelimiter("\\.");
-		s2.useDelimiter("\\.");
-		int result = -2;
-		while (s1.hasNextInt() && s2.hasNextInt()) {
-			int v1 = s1.nextInt();
-			int v2 = s2.nextInt();
-			if (v1 < v2) {
-				return result;
-			} else if (v1 > v2) {
-				return result;
-			}
+	static double parseVersion(String v) {
+		if (v.isEmpty()) {
+			return 0;
 		}
-
-		if (s1.hasNextInt() && s1.nextInt() != 0) {
-			return 1; // str1 has an additional lower-level version number
+		Pattern p = Pattern.compile("^(\\D*)(\\d*)(\\D*)$");
+		Matcher m = p.matcher(v);
+		m.find();
+		if (m.group(2).isEmpty()) {
+			// v1.0.0.[preview]
+			return -1;
 		}
-		if (s2.hasNextInt() && s2.nextInt() != 0) {
-			return -1; // str2 has an additional lower-level version
+		double i = Integer.parseInt(m.group(2));
+		if (!m.group(3).isEmpty()) {
+			// v1.0.[0b]
+			i -= 0.1;
 		}
-
-		return 0;
+		return i;
 	}
 
 	public static int versionCompare(String str1, String str2) {
-		Scanner s1 = new Scanner(str1);
-		Scanner s2 = new Scanner(str2);
-		int r = versionCompare(s1, s2);
-		s1.close();
-		s2.close();
-		return r;
+		String[] v1 = str1.split("\\.");
+		String[] v2 = str2.split("\\.");
+		int i = 0;
+		for (; i < v1.length && i < v2.length; i++) {
+			double iv1 = parseVersion(v1[i]);
+			double iv2 = parseVersion(v2[i]);
+
+			if (iv1 != iv2) {
+				return iv1 - iv2 < 0 ? -1 : 1;
+			}
+		}
+		if (i < v1.length) {
+			// "1.0.1", "1.0"
+			double iv1 = parseVersion(v1[i]);
+			return iv1 < 0 ? -1 : (int) Math.ceil(iv1);
+		}
+		if (i < v2.length) {
+			double iv2 = parseVersion(v2[i]);
+			return -iv2 < 0 ? -1 : (int) Math.ceil(iv2);
+		}
+		return 0;
 	}
 
 	public static void checkUpdate(Version version) {
 		try {
-			String updateJson = HttpHelper
-					.get("https://www.aixcoder.com/download/installtool/aixcoderinstaller_aixcoder.json");
-			JsonObject updateObj = new Gson().fromJson(updateJson, JsonObject.class);
-			String OS = System.getProperty("os.name").toLowerCase();
-			if (OS.contains("win")) {
-				updateObj = updateObj.getAsJsonObject("win");
-			} else {
-				updateObj = updateObj.getAsJsonObject("mac");
-			}
-			final String newVersion = updateObj.getAsJsonObject("eclipse").get("version").getAsString();
-			if (Version.parseVersion(newVersion).compareTo(version) > 0) {
-				// new version available
-				new UIJob("Prompt aiXcoder update") {
+			String updateURL = "https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest";
+			String versionJson = HttpHelper.request(HTTPMethod.GET, updateURL, null, new Consumer<HttpRequest>() {
 
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean update = MessageDialog.openQuestion(null, R(Localization.newVersionTitle),
-								String.format(R(Localization.newVersionContent), newVersion));
-						if (update) {
-							try {
-								Desktop.getDesktop().browse(new URI("https://www.aixcoder.com/download/installtool"));
-							} catch (IOException e) {
-								e.printStackTrace();
-								return Status.CANCEL_STATUS;
-							} catch (URISyntaxException e) {
-								e.printStackTrace();
-								return Status.CANCEL_STATUS;
-							}
-						}
-						return Status.OK_STATUS;
-					}
-				}.schedule();
+				@Override
+				public void apply(HttpRequest t) {
+					t.header("User-Agent", "aiXcoder-eclipse-plugin");
+				}
+
+			});
+			JsonObject newVersions = new Gson().fromJson(versionJson, JsonElement.class).getAsJsonObject();
+			String v = newVersions.get("tag_name").getAsString();
+			String localVersion = LocalService.getVersion();
+			boolean doUpdate = false;
+			if (versionCompare(localVersion, v) < 0) {
+				System.out.println("New aiXCoder version is available: " + v);
+				doUpdate = true;
+			} else {
+				System.out.println("AiXCoder is up to date");
+				doUpdate = false;
 			}
-		} catch (Exception e) {
+			if (doUpdate) {
+				LocalService.forceUpdate();
+			}
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}

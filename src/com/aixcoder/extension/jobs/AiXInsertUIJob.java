@@ -52,6 +52,8 @@ public class AiXInsertUIJob extends AiXUIJob {
 			// insert aixcoder proposal
 			Point selection = viewer.getSelectedRange();
 			String newPrefix = viewer.getDocument().get(0, selection.x);
+			String suffix = viewer.getDocument().get().substring(selection.x);
+			suffix = suffix.substring(suffix.indexOf("\n"));
 
 			String lastLine = newPrefix.substring(newPrefix.lastIndexOf("\n") + 1);
 			// step 3: render results
@@ -65,7 +67,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 					// 文本变化，重新发起请求
 					log("文本变化，重新发起请求");
 					PredictContext newPredictContext = new PredictContext(newPrefix, predictContext.proj,
-							predictContext.filename);
+							predictContext.filename, predictContext.projRoot,suffix);
 					new AiXFetchJob(newPredictContext, remainingText, proposalFactory).schedule();
 				} // else 预测结果为空
 				throw new AiXAbortInsertionException();

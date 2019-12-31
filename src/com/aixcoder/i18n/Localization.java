@@ -38,6 +38,11 @@ public class Localization {
 	public static final String notProfessional = "notProfessional";
 	public static final String newVersionTitle = "newVersionTitle";
 	public static final String newVersionContent = "newVersionContent";
+	public static final String localDownloadTitle = "localDownloadTitle";
+	public static final String localDownloadQuestion = "localDownloadQuestion";
+	public static final String localInitializing = "localInitializing";
+	public static final String allowLocalIncomplete = "allowLocalIncomplete";
+	public static final String localInitializingTitle = "localInitializingTitle";
 
 	public static String R(String input) {
 		if (Preference.getLanguage().equals(ZH.id)) {

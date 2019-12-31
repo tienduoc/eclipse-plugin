@@ -3,9 +3,6 @@ package com.aixcoder.lib;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -51,13 +48,15 @@ public class Preference {
 	public static final String LONG_RESULT_RANK = "LONG_RESULT_RANK";
 	public static final String LONG_RESULT_CUT = "LONG_RESULT_CUT";
 	public static final String LONG_RESULT_CUT_SORT = "LONG_RESULT_CUT_SORT";
+	public static final String ASKED_LOCAL_INITIALIZING = "ASKED_LOCAL_INITIALIZING";
+	public static final String ALLOW_LOCAL_INCOMPLETE = "ALLOW_LOCAL_INCOMPLETE";
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
 
 	private static boolean isProfessional = false;
-	public static boolean isProfessionalError = true;
-	public static boolean isProfessionalFetched = false;
+	public static boolean isProfessionalError = false;
+	public static boolean isProfessionalFetched = true;
 
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
@@ -65,7 +64,7 @@ public class Preference {
 	}
 
 	public static String getEndpoint() {
-		return "https://api.aixcoder.com/";
+		return "http://localhost:8787/";
 	}
 
 	public static String getModel() {
@@ -158,7 +157,7 @@ public class Preference {
 	}
 
 	public static boolean getSelfLearn() {
-		return preferenceManager.getBoolean(SELF_LEARN);
+		return false;
 	}
 
 	static LoginInfo loginInfo;

@@ -58,8 +58,8 @@ public class ZH extends Localization {
 		m.put(longResultCutL2S, "\u4ece\u957f\u5230\u77ed");
 //		m.put(localServerAutoStartTitle, "aiXcoder本地服务没有响应");
 		m.put(localServerAutoStartTitle, "aiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94");
-//		m.put(localServerAutoStartQuestion, "AiXcoder本地服务没有响应，现在启动吗？");
-		m.put(localServerAutoStartQuestion, "AiXcoder\u672c\u5730\u670d\u52a1\u6ca1\u6709\u54cd\u5e94\uff0c\u73b0\u5728\u542f\u52a8\u5417\uff1f");
+//		m.put(localServerAutoStartQuestion, "没有在一分钟内启动aiXcodder服务。您可以在此汇报这个问题 https://github.com/aixcoder-plugin/eclipse-plugin/issues");
+		m.put(localServerAutoStartQuestion, "\u6ca1\u6709\u5728\u4e00\u5206\u949f\u5185\u542f\u52a8aixcodder\u670d\u52a1\u3002\u60a8\u53ef\u4ee5\u5728\u6b64\u6c47\u62a5\u8fd9\u4e2a\u95ee\u9898 https://github.com/aixcoder-plugin/eclipse-plugin/issues");
 //		m.put(selfLearn, "(专业版)允许aiXcoder学习您的编程习惯");
 		m.put(selfLearn, "(\u4e13\u4e1a\u7248)\u5141\u8bb8aixcoder\u5b66\u4e60\u60a8\u7684\u7f16\u7a0b\u4e60\u60ef");
 //		m.put(unableToLoginTitle, "无法登录aiXcoder");
@@ -74,6 +74,16 @@ public class ZH extends Localization {
 		m.put(newVersionTitle, "\u65b0\u7248\u672c\u53ef\u7528");
 //		m.put(newVersionContent, "一个新的 aiXcoder版本 %s已可用，现在更新？");
 		m.put(newVersionContent, "\u4e00\u4e2a\u65b0\u7684 aixcoder\u7248\u672c %25s\u5df2\u53ef\u7528\uff0c\u73b0\u5728\u66f4\u65b0\uff1f");
+//		m.put(localDownloadTitle, "下载失败");
+		m.put(localDownloadTitle, "\u4e0b\u8f7d\u5931\u8d25");
+//		m.put(localDownloadQuestion, "aiXcoder服务更新失败。您可以手动在此下载最新的压缩包：%s。然后解压到这个目录：%s。");
+		m.put(localDownloadQuestion, "aixcoder\u670d\u52a1\u66f4\u65b0\u5931\u8d25\u3002\u60a8\u53ef\u4ee5\u624b\u52a8\u5728\u6b64\u4e0b\u8f7d\u6700\u65b0\u7684\u538b\u7f29\u5305\uff1a%25s\u3002\u7136\u540e\u89e3\u538b\u5230\u8fd9\u4e2a\u76ee\u5f55\uff1a%25s\u3002");
+//		m.put(localInitializingTitle, "aiXcoder正在索引您的项目");
+		m.put(localInitializingTitle, "aixcoder\u6b63\u5728\u7d22\u5f15\u60a8\u7684\u9879\u76ee");
+//		m.put(localInitializing, "aiXcoder正在初次索引您的项目。在这结束之前提示可能是不准确的。你想要在索引完成之前显示可能不准确的提示吗？");
+		m.put(localInitializing, "aixcoder\u6b63\u5728\u521d\u6b21\u7d22\u5f15\u60a8\u7684\u9879\u76ee\u3002\u5728\u8fd9\u7ed3\u675f\u4e4b\u524d\u63d0\u793a\u53ef\u80fd\u662f\u4e0d\u51c6\u786e\u7684\u3002\u4f60\u60f3\u8981\u5728\u7d22\u5f15\u5b8c\u6210\u4e4b\u524d\u663e\u793a\u53ef\u80fd\u4e0d\u51c6\u786e\u7684\u63d0\u793a\u5417\uff1f");
+//		m.put(allowLocalIncomplete, "在索引完成前显示不完整的推荐");
+		m.put(allowLocalIncomplete, "\u5728\u7d22\u5f15\u5b8c\u6210\u524d\u663e\u793a\u4e0d\u5b8c\u6574\u7684\u63a8\u8350");
 	}
 
 	public static String R(String input) {

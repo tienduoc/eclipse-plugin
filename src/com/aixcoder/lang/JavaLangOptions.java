@@ -273,8 +273,9 @@ public class JavaLangOptions extends LangOptions {
 				i = skipAfter(s, i + 2, "\n") - 1;
 				if (emptyLine) {
 					stringBuilder.replace(lastLineEnd, stringBuilder.length(), "");
+				} else {
+					i--;
 				}
-				emptyLine = true;
 			} else if (s.startsWith("/*", i)) {
 				/* block comment */
 				i = skipAfter(s, i + 2, "*/") - 1;

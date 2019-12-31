@@ -1,7 +1,37 @@
-# aiXcoder plugin for Eclipse
+# aiXcoder Eclipse Plugin for Java
 
 If you are looking for the source code for local version plugin, it is here: https://github.com/aixcoder-plugin/eclipse-plugin/tree/local.
 
 An Eclipse plugin for aiXcoder, an AI-powered code completion service.
 
-Find more on https://www.aixcoder.com/ .
+[Update site](https://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.wb.doc.user%2Fhtml%2Finstallation%2Fupdatesite_3.5.html): https://github.com/aixcoder-plugin/eclipse-update-site/raw/master/
+
+AiXcoder is an code suggestions generator using the latest AI technologies. Our model is trained on over 1 TB of open source code and served from your own computer.
+
+For now aiXcoder only supports Java.
+
+Currently it runs on 64-bit Windows/Mac OS and Linux.
+
+![writing Java code with aiXcoder](https://github.com/aixcoder-plugin/vscode-plugin/raw/master/images/java_example.gif)
+
+## Requirements
+
+1. Eclipse Kepler+
+2. [JRE 1.8+](https://adoptopenjdk.net/)
+3. Around 500 MB of free memory.
+4. More than 300 MB of free disk space in your home directory.
+
+## Features
+
+1. Only support Java for now. More languages (C++/Python/JavaScript/TypeScript/Go/Php) on the way...
+2. Completely works offline. Your code is safe in your hand.
+3. Long completion result with length up to a full line.
+4. Rearrange completion items in a likelyhood probability descending order.
+
+## Troubleshooting
+
+The local server is downloaded into &lt;home&gt;/aiXcoder/installer/localserver/current/server/. Removing the folder and then restart VSCode will force this plugin to re-download the service.
+
+The service is started as two processes with name "aix-node(.exe)", you can safely kill them at any time. The plugin will automatically launch the service upon a completion event if not running.
+
+**Enjoy!**
