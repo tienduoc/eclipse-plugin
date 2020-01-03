@@ -346,12 +346,20 @@ public class LocalService {
 		String aixcoderPath = FilenameUtils.concat(
 				FilenameUtils.concat(FilenameUtils.concat(
 						FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server"),
-				".version");
+				"version");
 		String version;
 		try {
 			version = FileUtils.readFileToString(new File(aixcoderPath), "utf-8").trim();
 		} catch (IOException e) {
-			version = "0.0.0";
+			aixcoderPath = FilenameUtils.concat(
+					FilenameUtils.concat(FilenameUtils.concat(
+							FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server"),
+					".version");
+			try {
+				version = FileUtils.readFileToString(new File(aixcoderPath), "utf-8").trim();
+			} catch (IOException ex) {
+				version = "0.0.0";
+			}
 		}
 		return version;
 	}
