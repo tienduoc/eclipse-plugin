@@ -2,20 +2,13 @@ package com.aixcoder.core;
 
 import static com.aixcoder.i18n.Localization.R;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -30,6 +23,7 @@ import org.eclipse.ui.progress.UIJob;
 import com.aixcoder.i18n.Localization;
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.Preference;
+import com.aixcoder.utils.AiXUpdater;
 import com.aixcoder.utils.HttpHelper;
 import com.aixcoder.utils.HttpHelper.HTTPMethod;
 import com.aixcoder.utils.shims.Consumer;
@@ -80,51 +74,6 @@ final class OsCheck {
 	}
 }
 
-class UnzipFiles {
-	public static void unzip(String zipFilePath, String destDir) {
-		File dir = new File(destDir);
-		// create output directory if it doesn't exist
-		if (!dir.exists())
-			dir.mkdirs();
-		FileInputStream fis;
-		// buffer for read and write data to file
-		byte[] buffer = new byte[1024];
-		try {
-			fis = new FileInputStream(zipFilePath);
-			ZipInputStream zis = new ZipInputStream(fis);
-			ZipEntry ze = zis.getNextEntry();
-			while (ze != null) {
-				String fileName = ze.getName();
-				File newFile = new File(destDir + File.separator + fileName);
-				new File(newFile.getParent()).mkdirs();
-				if (ze.isDirectory()) {
-					newFile.mkdirs();
-				} else {
-					System.out.println("Unzipping to " + newFile.getAbsolutePath());
-					// create directories for sub directories in zip
-					FileOutputStream fos = new FileOutputStream(newFile);
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-					}
-					fos.close();
-				}
-				// close this ZipEntry
-				zis.closeEntry();
-				ze = zis.getNextEntry();
-			}
-			// close last ZipEntry
-			zis.closeEntry();
-			zis.close();
-			fis.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-}
-
 interface ProgressListener {
 	void update(long total, int done);
 }
@@ -135,7 +84,7 @@ interface ErrorListener {
 
 public class LocalService {
 	static String homedir;
-	private static boolean lastOpenFailed;
+	volatile private static Integer lastOpenFailed = 0;
 	private static boolean serverStarting;
 
 	public static boolean isServerStarting() {
@@ -241,7 +190,7 @@ public class LocalService {
 			env.put("Path", env.get("Path") + ";" + FilenameUtils.concat(javaHome, "bin").toString());
 			pb.start();
 		} catch (IOException e) {
-			lastOpenFailed = true;
+			lastOpenFailed = 1;
 			e.printStackTrace();
 		}
 	}
@@ -260,8 +209,9 @@ public class LocalService {
 	}
 
 	private static long lastStartTime = 0;
+
 	public static Job startLocalService(boolean soft) {
-		if (lastOpenFailed || !Preference.isActive()) {
+		if (lastOpenFailed != 0 || !Preference.isActive()) {
 			return null;
 		}
 		String aixcoderPath = FilenameUtils.concat(
@@ -270,15 +220,16 @@ public class LocalService {
 		new File(aixcoderPath).mkdirs();
 		if (soft) {
 			try {
-				String r = HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null, new Consumer<HttpRequest>() {
+				String r = HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null,
+						new Consumer<HttpRequest>() {
 
-					@Override
-					public void apply(HttpRequest t) {
-						t.connectTimeout(1000).readTimeout(1000);
-					}
-				});
+							@Override
+							public void apply(HttpRequest t) {
+								t.connectTimeout(1000).readTimeout(1000);
+							}
+						});
 				if (r != null) {
-					lastOpenFailed = false;
+					lastOpenFailed = 0;
 					serverStarting = false;
 					return null;
 				}
@@ -303,13 +254,14 @@ public class LocalService {
 				while (System.currentTimeMillis() - startTime < 60 * 1000) {
 					try {
 						Thread.sleep(3000);
-						HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null, new Consumer<HttpRequest>() {
+						HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint(), null,
+								new Consumer<HttpRequest>() {
 
-							@Override
-							public void apply(HttpRequest t) {
-								t.connectTimeout(1000).readTimeout(1000);
-							}
-						});
+									@Override
+									public void apply(HttpRequest t) {
+										t.connectTimeout(1000).readTimeout(1000);
+									}
+								});
 						succeed = true;
 						break;
 					} catch (Exception e) {
@@ -318,7 +270,7 @@ public class LocalService {
 				}
 				if (succeed) {
 					monitor.done();
-					lastOpenFailed = false;
+					lastOpenFailed = 0;
 					return Status.OK_STATUS;
 				} else {
 					monitor.setCanceled(true);
@@ -364,38 +316,6 @@ public class LocalService {
 		return version;
 	}
 
-	private static void download(String urlString, String target, ProgressListener listener, ErrorListener onErr) {
-		try {
-			URL url = new URL(urlString);
-			HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
-			long completeFileSize = httpConnection.getContentLength();
-
-			java.io.BufferedInputStream in = new java.io.BufferedInputStream(httpConnection.getInputStream());
-			if (new File(target).isDirectory()) {
-				target += File.separator + urlString.substring(urlString.lastIndexOf("/") + 1);
-			}
-			java.io.FileOutputStream fos = new java.io.FileOutputStream(target);
-			java.io.BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
-			byte[] data = new byte[4096];
-//			long downloadedFileSize = 0;
-			int x = 0;
-			while ((x = in.read(data, 0, 4096)) >= 0) {
-//				downloadedFileSize += x;
-
-				// calculate progress
-//				final int currentProgress = (int) ((((double) downloadedFileSize) / ((double) completeFileSize))
-//						* 100000d);
-				listener.update(completeFileSize, x);
-
-				bout.write(data, 0, x);
-			}
-			bout.close();
-			in.close();
-		} catch (Exception e) {
-			onErr.onError(e);
-		}
-	}
-
 	private static void kill() throws IOException, InterruptedException {
 		String lockfile = FilenameUtils.concat(FilenameUtils.concat(homedir, "aiXcoder"), ".router.lock");
 		String prevPid = FileUtils.readFileToString(new File(lockfile), "utf-8").trim();
@@ -415,14 +335,25 @@ public class LocalService {
 		}
 	}
 
-	public static void forceUpdate() {
+	public static String humanReadableByteCountBin(long bytes) {
+		long b = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+		return b < 1024L ? bytes + " B"
+				: b <= 0xfffccccccccccccL >> 40 ? String.format("%.1f KiB", bytes / 0x1p10)
+						: b <= 0xfffccccccccccccL >> 30 ? String.format("%.1f MiB", bytes / 0x1p20)
+								: b <= 0xfffccccccccccccL >> 20 ? String.format("%.1f GiB", bytes / 0x1p30)
+										: b <= 0xfffccccccccccccL >> 10 ? String.format("%.1f TiB", bytes / 0x1p40)
+												: b <= 0xfffccccccccccccL
+														? String.format("%.1f PiB", (bytes >> 10) / 0x1p40)
+														: String.format("%.1f EiB", (bytes >> 20) / 0x1p40);
+	}
+
+	public static void forceUpdate(final String localVersion, final String remoteVersion) {
 		new Job("Downloading aiXcoder local service") {
 
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
-				final String aixcoderPath = FilenameUtils.concat(FilenameUtils
-						.concat(FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server")
-						.toString();
+				final String aixcoderPath = FilenameUtils.concat(FilenameUtils.concat(
+						FilenameUtils.concat(getAixcoderInstallUserPath(), "localserver"), "current"), "server");
 				final String releasePath = "https://github.com/aixcoder-plugin/localservice/releases";
 				new File(aixcoderPath).mkdirs();
 
@@ -457,48 +388,84 @@ public class LocalService {
 					}
 				};
 
-				ProgressListener onProgress = new ProgressListener() {
-					boolean started = false;
-					int totalDone = 0;
-
-					@Override
-					public void update(long total, int done) {
-						if (!started) {
-							monitor.beginTask("download from https://github.com/aixcoder-plugin/localservice/releases",
-									(int) total);
-							started = true;
-						}
-						totalDone += done;
-						monitor.worked(done);
-						final int currentProgress = (int) ((((double) totalDone) / ((double) total)) * 100000d);
-						System.out.println(String.format("progress: %d/%d +%d %.2f%%", totalDone, total, done,
-								currentProgress / 1000.0));
-					}
-				};
+				String patchball;
+				String rawRemoteVersion = remoteVersion.startsWith("v") ? remoteVersion.substring(1) : remoteVersion;
 				if (OsCheck.getOperatingSystemType() == OSType.Windows) {
 					ball = "server-win.zip";
-					download(releasePath + "/latest/download/" + ball, aixcoderPath, onProgress, onErr);
+					patchball = String.format("win-patch_%s_%s_full.zip", localVersion, rawRemoteVersion);
 				} else if (OsCheck.getOperatingSystemType() == OSType.MacOS) {
 					ball = "server-osx.zip";
-					download(releasePath + "/latest/download/" + ball, aixcoderPath, onProgress, onErr);
+					patchball = String.format("osx-patch_%s_%s_full.zip", localVersion, rawRemoteVersion);
 				} else {
 					ball = "server-linux.tar.gz";
-					download(releasePath + "/latest/download/" + ball, aixcoderPath, onProgress, onErr);
+					patchball = String.format("linux-patch_%s_%s_full.tar.gz", localVersion, rawRemoteVersion);
 				}
+				String updatedVersion;
 				try {
-					kill();
-					if (ball.endsWith(".tar.gz")) {
-						Process p = Runtime.getRuntime().exec(String.format("tar zxf \"%s\" -C \"%s\"",
-								FilenameUtils.concat(aixcoderPath, ball), aixcoderPath));
-						p.waitFor();
-					} else if (ball.endsWith(".zip")) {
-						UnzipFiles.unzip(FilenameUtils.concat(aixcoderPath, ball), aixcoderPath);
+					final AiXUpdater.CancellationToken token = new AiXUpdater.CancellationToken();
+					updatedVersion = AiXUpdater.simplePatch(aixcoderPath, new String[] {
+							String.format("https://github.com/aixcoder-plugin/localservice/releases/latest/download/%s",
+									patchball),
+							String.format("http://image.aixcoder.com/localservice/releases/download/%s/%s",
+									remoteVersion, patchball) },
+							new String[] { String.format(
+									"https://github.com/aixcoder-plugin/localservice/releases/latest/download/%s",
+									ball),
+									String.format("http://image.aixcoder.com/localservice/releases/download/%s/%s",
+											remoteVersion, ball), },
+							new AiXUpdater.ProgressListener() {
+								boolean started = false;
+								int totalDone = 0;
+								long lastUpdated = 0;
+
+								@Override
+								public void update(long total, int done, long speed) {
+									if (monitor.isCanceled()) {
+										token.cancel("user cancel");
+										return;
+									}
+									if (!started) {
+										started = true;
+									}
+									totalDone += done;
+									monitor.worked(done);
+									if (System.currentTimeMillis() - lastUpdated > 100) {
+										lastUpdated = System.currentTimeMillis();
+										final int currentProgress = (int) ((((double) totalDone) / ((double) total))
+												* 100000d);
+										System.out.println(String.format("progress: %d/%d +%d %.2f%%", totalDone, total,
+												done, currentProgress / 1000.0));
+										monitor.setTaskName("Downloading AiXcoder Local Service "
+												+ humanReadableByteCountBin(speed) + "/s");
+									}
+								}
+							}, new Runnable() {
+
+								@Override
+								public void run() {
+									synchronized (lastOpenFailed) {
+										lastOpenFailed = 1;
+									}
+									try {
+										kill();
+									} catch (IOException e) {
+										e.printStackTrace();
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									monitor.setTaskName("Unzipping aiXcoder...");
+								}
+							}, token);
+					synchronized (lastOpenFailed) {
+						lastOpenFailed = 0;
 					}
+					System.out.println("aiXcoder is updated to " + updatedVersion);
 				} catch (Exception e1) {
 					onErr.onError(e1);
+                    updatedVersion = null;
 				}
 				monitor.done();
-				lastOpenFailed = false;
+				lastOpenFailed = 0;
 				return Status.OK_STATUS;
 			}
 		}.schedule();
@@ -506,8 +473,8 @@ public class LocalService {
 
 	public static int getServiceStatus(String ext) {
 		try {
-			String resp = HttpHelper.request(HTTPMethod.GET, Preference.getDefaultLocalEndpoint() + "getSaStatus?ext=" + ext, null,
-					new Consumer<HttpRequest>() {
+			String resp = HttpHelper.request(HTTPMethod.GET,
+					Preference.getDefaultLocalEndpoint() + "/getSaStatus?ext=" + ext, null, new Consumer<HttpRequest>() {
 
 						@Override
 						public void apply(HttpRequest t) {
@@ -519,5 +486,47 @@ public class LocalService {
 		} catch (URISyntaxException e) {
 			return 0;
 		}
+	}
+
+	public static void switchToLocal(boolean local) {
+		String s = local ? "true" : "false";
+		// @formatter:off
+		try {
+			FileUtils.writeStringToFile(new File(Preference.localserver), "{\n" + 
+					"  \"models\": [\n" + 
+					"    {\n" + 
+					"      \"name\": \"java(Java)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"python(Python)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"typescript(Typescript)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"javascript(Javascript)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"cpp(Cpp)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"go(Go)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"name\": \"php(Php)\",\n" + 
+					"      \"active\": "+ s +"\n" + 
+					"    }\n" + 
+					"  ]\n" + 
+					"}", "utf-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// @formatter:on
 	}
 }

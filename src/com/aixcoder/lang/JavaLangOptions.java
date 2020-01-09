@@ -254,7 +254,7 @@ public class JavaLangOptions extends LangOptions {
 	}
 
 	@Override
-	public String datamask(String s, Set<String> trivialLiterals) {
+	public String datamask(String s, Set<String> trivialLiterals) throws MatchFailedException {
 		StringBuilder stringBuilder = new StringBuilder();
 		boolean emptyLine = true;
 		int lastLineEnd = 0;
@@ -292,25 +292,36 @@ public class JavaLangOptions extends LangOptions {
 		return stringBuilder.toString();
 	}
 
-	private int skipAfter(String s, int i, String target) {
+	private int skipAfter(String s, int i, String target) throws MatchFailedException {
+		boolean matchFailed = true;
 		for (; i < s.length(); i++) {
 			if (s.startsWith(target, i)) {
+				matchFailed = false;
 				i += target.length();
 				break;
 			}
 		}
+		if (matchFailed) {
+			throw new MatchFailedException();
+		}
 		return i;
 	}
 
-	private int skipString(String s, Set<String> trivialLiterals, StringBuilder stringBuilder, int i, char c) {
+	private int skipString(String s, Set<String> trivialLiterals, StringBuilder stringBuilder, int i, char c) throws MatchFailedException {
 		i++;
 		int strStart = i;
+		boolean matchFailed = true;
 		for (; i < s.length(); i++) {
-			if (s.charAt(i) == c)
+			if (s.charAt(i) == c) {
+				matchFailed = false;
 				break;
+			}
 			if (s.charAt(i) == '\\') {
 				i++;
 			}
+		}
+		if (matchFailed) {
+			throw new MatchFailedException();
 		}
 		String strContent = s.substring(strStart, i);
 		if (trivialLiterals.contains(strContent)) {

@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.2.2] - 2020-01-09
+
+### Added
+- Prompts to login if previously used online service.
+- Does not download/update local service if the plugin is using online service.
+- Prompts to switch to local service if already using online service.
+
+### Fixed
+- No longer provide completions inside string or comments.
+
 ## [1.2.1] - 2019-12-31
 
 ### Added

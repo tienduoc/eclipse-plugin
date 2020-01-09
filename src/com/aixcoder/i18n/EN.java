@@ -50,6 +50,16 @@ public class EN extends Localization {
 		m.put(localInitializingTitle, "aiXcoder is indexing your project.");
 		m.put(localInitializing, "aiXcoder is indexing your project for the first time. The suggestions may not be accurate until it is done. Do you want to show incomplete suggestions while wait for indexing to finish?");
 		m.put(allowLocalIncomplete, "Show incomplete suggestions before indexing finishes");
+		m.put(switchToLocal, "aiXcoder is working in online mode. Do you want to switch to local service?");
+		m.put(yes, "Yes");
+		m.put(no, "No");
+		m.put(useLocalService, "Use Local Service");
+		m.put(unableToUpdateTitle, "Unable to install local service");
+		m.put(unableToLogin, "Unable to check latest version on https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest. Do you want to check it in browser?");
+		m.put(switchToOnline, "aiXcoder is working in local mode. You need to login in aiXcoder installer to switch to online service.");
+		m.put(login, "Login");
+		m.put(continueToUseLocal, "Keep Using Local Service");
+		m.put(promptToLogin, "Please login on aiXcoder Installer before using online service");
 	}
 
 	public static String R(String input) {

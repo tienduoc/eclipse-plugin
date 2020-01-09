@@ -1,7 +1,5 @@
 package com.aixcoder.core;
 
-import static com.aixcoder.i18n.Localization.R;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
@@ -18,13 +17,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.Version;
 
 import com.aixcoder.extension.Activator;
 import com.aixcoder.i18n.Localization;
+import com.aixcoder.lang.MatchFailedException;
 import com.aixcoder.lib.HttpRequest;
 import com.aixcoder.lib.HttpRequest.HttpRequestException;
 import com.aixcoder.lib.Preference;
@@ -36,6 +33,7 @@ import com.aixcoder.utils.HttpHelper.HTTPMethod;
 import com.aixcoder.utils.Predict;
 import com.aixcoder.utils.Predict.PredictResult;
 import com.aixcoder.utils.Predict.SortResult;
+import com.aixcoder.utils.PromptUtils;
 import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.CollectionUtils;
 import com.aixcoder.utils.shims.Consumer;
@@ -85,27 +83,23 @@ public class API {
 										if (!asking.cancelled && !Preference.preferenceManager
 												.getBoolean(Preference.ASKED_LOCAL_INITIALIZING)) {
 											asking.cancelled = true;
-											new UIJob("ASKED_LOCAL_INITIALIZING") {
+											PromptUtils.promptQuestion("ASKED_LOCAL_INITIALIZING",
+													Localization.localInitializingTitle, Localization.localInitializing,
+													new Consumer<Boolean>() {
 
-												@Override
-												public IStatus runInUIThread(IProgressMonitor monitor) {
-													MessageDialog dialog = new MessageDialog(null,
-															R(Localization.localInitializingTitle), null,
-															R(Localization.localInitializing), MessageDialog.QUESTION,
-															new String[] { IDialogConstants.YES_LABEL,
-																	IDialogConstants.NO_LABEL },
-															0);
-													int choice = dialog.open();
-													if (choice == 0 || choice == 1) {
-														allowIgnoreSaStatus = choice == 0;
-														Preference.preferenceManager.setValue(
-																Preference.ALLOW_LOCAL_INCOMPLETE, allowIgnoreSaStatus);
-														Preference.preferenceManager
-																.setValue(Preference.ASKED_LOCAL_INITIALIZING, true);
-													}
-													return Status.OK_STATUS;
-												}
-											}.schedule();
+														@Override
+														public void apply(Boolean choice) {
+															if (choice != null) {
+																allowIgnoreSaStatus = choice;
+																Preference.preferenceManager.setValue(
+																		Preference.ALLOW_LOCAL_INCOMPLETE,
+																		allowIgnoreSaStatus);
+																Preference.preferenceManager.setValue(
+																		Preference.ASKED_LOCAL_INITIALIZING, true);
+															}
+														}
+
+													});
 										}
 										try {
 											Thread.sleep(1000);
@@ -217,12 +211,10 @@ public class API {
 			boolean professional = Preference.isProfessional();
 			if (Preference.isProfessionalError && !isProfessionalErrorShown) {
 				isProfessionalErrorShown = true;
-				new UIJob("Prompt aiXcoder unable to login") {
-
+				PromptUtils.promptQuestion("Prompt aiXcoder unable to login", Localization.unableToLoginTitle, Localization.unableToLogin, new Consumer<Boolean>() {
+					
 					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean login = MessageDialog.openQuestion(null, R(Localization.unableToLoginTitle),
-								R(Localization.unableToLogin));
+					public void apply(Boolean login) {
 						if (login) {
 							String url_open = "aixcoder://login";
 							try {
@@ -231,9 +223,8 @@ public class API {
 								e1.printStackTrace();
 							}
 						}
-						return Status.OK_STATUS;
 					}
-				}.schedule();
+				});
 			} else if (professional) {
 				if (learner == null) {
 					learner = new Learner();
@@ -241,12 +232,10 @@ public class API {
 				learner.learn(ext, fileid);
 			} else {
 				isProfessionalErrorShown = true;
-				new UIJob("Prompt aiXcoder not professional") {
-
+				PromptUtils.promptQuestion("Prompt aiXcoder not professional", Localization.notProfessionalTitle, Localization.notProfessional, new Consumer<Boolean>() {
+					
 					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						boolean login = MessageDialog.openQuestion(null, R(Localization.notProfessionalTitle),
-								R(Localization.notProfessional));
+					public void apply(Boolean login) {
 						if (login) {
 							String url_open = "https://www.aixcoder.com/#/Product?tab=0";
 							try {
@@ -255,9 +244,8 @@ public class API {
 								e1.printStackTrace();
 							}
 						}
-						return Status.OK_STATUS;
 					}
-				}.schedule();
+				});
 			}
 		}
 	}
@@ -271,8 +259,16 @@ public class API {
 			final String uuid = Preference.getUUID();
 			final String proj = predictContext.proj;
 			final String text = predictContext.prefix;
-			final String maskedText = DataMasking.mask(text, ext);
-			final String maskedRemainingText = DataMasking.mask(remainingText, ext);
+			String _maskedText;
+			String _maskedRemainingText;
+			try {
+				_maskedText = DataMasking.mask(text, ext);
+				_maskedRemainingText = DataMasking.mask(remainingText, ext);
+			} catch (MatchFailedException e) {
+				return null;
+			}
+			final String maskedText = _maskedText;
+			final String maskedRemainingText = _maskedRemainingText;
 			final int offset = CodeStore.getInstance().getDiffPosition(fileid, maskedText);
 			final String md5 = DigestUtils.getMD5(maskedText);
 			final int longResultCuts = Preference.getLongResultCuts();
@@ -516,32 +512,90 @@ public class API {
 	}
 
 	public static void checkUpdate(Version version) {
-		try {
-			String updateURL = "https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest";
-			String versionJson = HttpHelper.request(HTTPMethod.GET, updateURL, null, new Consumer<HttpRequest>() {
-
-				@Override
-				public void apply(HttpRequest t) {
-					t.header("User-Agent", "aiXcoder-eclipse-plugin");
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					// Sleep for 10 seconds for Preference.models to load
+					Thread.sleep(1000 * 10);
+				} catch (InterruptedException e2) {
+					e2.printStackTrace();
 				}
+				if (Preference.hasLoginFile) {
+					ConcurrentHashMap<String, LocalServerStatus> mc = Preference.models;
+					boolean localActive = false;
+					if (mc.size() > 0) {
+						for (String ext : mc.keySet()) {
+							localActive = mc.get(ext).active;
+							if (localActive) {
+								break;
+							}
+						}
+					}
+					if (!localActive) {
+						System.out.println("Skip check update in online mode");
+						return;
+					}
+				}
+				String localVersion = LocalService.getVersion();
+				try {
+					String v;
+					try {
+						String updateURL = "https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest";
+						String versionJson = HttpHelper.request(HTTPMethod.GET, updateURL, null, new Consumer<HttpRequest>() {
 
-			});
-			JsonObject newVersions = new Gson().fromJson(versionJson, JsonElement.class).getAsJsonObject();
-			String v = newVersions.get("tag_name").getAsString();
-			String localVersion = LocalService.getVersion();
-			boolean doUpdate = false;
-			if (versionCompare(localVersion, v) < 0) {
-				System.out.println("New aiXCoder version is available: " + v);
-				doUpdate = true;
-			} else {
-				System.out.println("AiXCoder is up to date");
-				doUpdate = false;
-			}
-			if (doUpdate) {
-				LocalService.forceUpdate();
-			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
+							@Override
+							public void apply(HttpRequest t) {
+								t.header("User-Agent", "aiXcoder-eclipse-plugin");
+							}
+
+						});
+						JsonObject newVersions = new Gson().fromJson(versionJson, JsonElement.class).getAsJsonObject();
+						v = newVersions.get("tag_name").getAsString();
+					} catch (Exception e) {
+						String updateURL = "http://image.aixcoder.com/localservice/releases/latest";
+						v = HttpHelper.request(HTTPMethod.GET, updateURL, null, new Consumer<HttpRequest>() {
+
+							@Override
+							public void apply(HttpRequest t) {
+								t.header("User-Agent", "aiXcoder-eclipse-plugin");
+							}
+
+						});
+					}
+
+					boolean doUpdate = false;
+					if (versionCompare(localVersion, v) < 0) {
+						System.out.println("New aiXCoder version is available: " + v);
+						doUpdate = true;
+					} else {
+						System.out.println("AiXCoder is up to date");
+						doUpdate = false;
+					}
+					if (doUpdate) {
+						LocalService.forceUpdate(localVersion, v);
+					}
+				} catch (Exception e) {
+					if (localVersion.equals("0.0.0")) {
+						PromptUtils.promptYesNOError("Unable to update", Localization.unableToUpdateTitle,
+								Localization.unableToUpdate, new Consumer<Boolean>() {
+
+									@Override
+									public void apply(Boolean t) {
+										if (t) {
+											String url_open = "https://github.com/aixcoder-plugin/localservice/releases";
+											try {
+												java.awt.Desktop.getDesktop().browse(java.net.URI.create(url_open));
+											} catch (IOException e1) {
+												e1.printStackTrace();
+											}
+										}
+									}
+								});
+						e.printStackTrace();
+					}
+				}
+			};
+		}.start();
 	}
 }

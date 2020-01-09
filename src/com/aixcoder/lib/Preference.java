@@ -17,10 +17,12 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.aixcoder.core.LocalServerStatus;
+import com.aixcoder.core.LocalService;
 import com.aixcoder.extension.Activator;
 import com.aixcoder.extension.AiXPreInitializer;
 import com.aixcoder.i18n.Localization;
 import com.aixcoder.utils.HttpHelper;
+import com.aixcoder.utils.PromptUtils;
 import com.aixcoder.utils.shims.Consumer;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -57,6 +59,7 @@ public class Preference {
 	public static final String LONG_RESULT_CUT_SORT = "LONG_RESULT_CUT_SORT";
 	public static final String ASKED_LOCAL_INITIALIZING = "ASKED_LOCAL_INITIALIZING";
 	public static final String ALLOW_LOCAL_INCOMPLETE = "ALLOW_LOCAL_INCOMPLETE";
+	public static final String USE_LOCAL_SERVICE = "USE_LOCAL_SERVICE";
 
 	public static final String id = Activator.PLUGIN_ID + ".preferences.page";
 	public static ScopedPreferenceStore preferenceManager = new ScopedPreferenceStore(InstanceScope.INSTANCE, id);
@@ -254,49 +257,50 @@ public class Preference {
 		return lastLocalEndpoint;
 	}
 
-    public static boolean hasLoginFile = false;
-    public static boolean useLocalConfigFile = false;
+	public static boolean hasLoginFile = false;
+	public static boolean useLocalConfigFile = false;
 
-    /**
-     * 启动的时候检查login文件，如果不存在就用本地版
-     */
-    public static void detectLocalOrOnline() {
-		String loginPath = FilenameUtils
-				.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "login");
+	/**
+	 * 启动的时候检查login文件，如果不存在就用本地版
+	 */
+	public static void detectLocalOrOnline() {
+		String loginPath = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
+				"login");
 		String login;
 		try {
 			login = FileUtils.readFileToString(new File(loginPath), Charset.forName("UTF-8"));
 		} catch (IOException e) {
 			login = null;
 		}
-        if (login != null && login.length() > 0) {
-            // 可能登录过校验 uuid
-            JsonObject json = new Gson().fromJson(login, JsonObject.class);
-            String token = json.get("token").getAsString();
-            String uuid = json.get("uuid").getAsString();
-            if (uuid.startsWith("local-")) {
-                // 本地服务生成的假uuid，继续使用本地版
-                hasLoginFile = false;
-                useLocalConfigFile = false;
-            } else {
-                // 线上版
-                hasLoginFile = true;
-                useLocalConfigFile = true;
-            }
-        } else {
-            // 没有登录过
-            hasLoginFile = false;
-            useLocalConfigFile = false;
-        }
-    }
+		if (login != null && login.length() > 0) {
+			// 可能登录过校验 uuid
+			JsonObject json = new Gson().fromJson(login, JsonObject.class);
+			String token = json.get("token").getAsString();
+			String uuid = json.get("uuid").getAsString();
+			if (uuid.startsWith("local-")) {
+				// 本地服务生成的假uuid，继续使用本地版
+				hasLoginFile = false;
+				useLocalConfigFile = false;
+			} else {
+				// 线上版
+				hasLoginFile = true;
+				useLocalConfigFile = true;
+			}
+		} else {
+			// 没有登录过
+			hasLoginFile = false;
+			useLocalConfigFile = false;
+		}
+	}
 
-	static ConcurrentHashMap<String, LocalServerStatus> models = new ConcurrentHashMap<String, LocalServerStatus>();
+	public static ConcurrentHashMap<String, LocalServerStatus> models = new ConcurrentHashMap<String, LocalServerStatus>();
 
 	static long lastCheckLocalTime = 0;
+	public static String localserver = FilenameUtils
+			.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"), "localserver.json");
+
 	static void readFile() {
 		try {
-			String localserver = FilenameUtils.concat(FilenameUtils.concat(System.getProperty("user.home"), "aiXcoder"),
-					"localserver.json");
 			if (System.currentTimeMillis() - lastCheckLocalTime < 1000 * 5) {
 				return;
 			}
@@ -340,14 +344,14 @@ public class Preference {
 						readFile();
 					}
 				}
-				
+
 				@Override
 				public void onFileChange(File file) {
 					if (file.getName().endsWith("localserver.json")) {
 						System.out.println("localserver.json has changed");
 						readFile();
 					}
-			    }
+				}
 			};
 			observer.addListener(listener);
 			monitor.addObserver(observer);
@@ -358,7 +362,7 @@ public class Preference {
 			e.printStackTrace();
 		}
 	}
-	
+
 	static {
 		try {
 			detectLocalOrOnline();
@@ -380,41 +384,106 @@ public class Preference {
 		}
 	}
 
-    public static boolean useLocalEndpoint(String ext) {
-        LocalServerStatus model = models.get(ext);
-        if (hasLoginFile) {
-            if (model != null && model.active) {
-                // 使用本地版地址
-                return true;
-            } else {
-                // 使用线上版默认地址
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-    
+	public static boolean useLocalEndpoint(String ext) {
+		LocalServerStatus model = models.get(ext);
+		if (hasLoginFile) {
+			if (model != null && model.active) {
+				// 使用本地版地址
+				return true;
+			} else {
+				// 使用线上版默认地址
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
 
-    public static String getEndpoint(String ext) {
-        LocalServerStatus model = models.get(ext);
-        String endpoint;
-        if (hasLoginFile) {
-            if (model != null && model.active) {
-                // 使用本地版地址
-            	endpoint = getDefaultLocalEndpoint();
-            } else {
-                // 使用线上版默认地址
-            	endpoint = getRemoteEndpoint();
-            }
-        } else {
-        	endpoint = getDefaultLocalEndpoint();
-        }
-        if (!endpoint.endsWith("/")) {
-        	endpoint += "/";
-        }
-        return endpoint;
-    }
+	static String getEndpointBasedonModelConfig(ConcurrentHashMap<String, LocalServerStatus> mc, String ext) {
+		boolean localActive = false;
+		if (mc.containsKey(ext)) {
+			localActive = mc.get(ext).active;
+		}
+		if (!localActive) {
+			return getRemoteEndpoint();
+		} else {
+			return getDefaultLocalEndpoint();
+		}
+	}
+
+	public static boolean isInstallAiXcoderApp() {
+		String osName = System.getProperty("os.name");
+		if (osName.contains("Win")) {
+			String aiXcoderAppPath = FilenameUtils.concat(System.getenv("localappdata"), "aixcoderinstaller");
+			if (new File(aiXcoderAppPath).exists()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {// mac
+			String aiXcoderAppPath = "/Applications/aiXcoder.app";
+			if (new File(aiXcoderAppPath).exists()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	public static String getEndpoint(String ext) {
+		String endpoint;
+		if (hasLoginFile) {
+			ConcurrentHashMap<String, LocalServerStatus> mc = Preference.models;
+			if (mc.size() == 0) {
+				// prompt for switching to local
+				PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToLocal,
+						new String[] { Localization.yes, Localization.no }, new Consumer<String>() {
+
+							@Override
+							public void apply(String choice) {
+								if (choice.equals(Localization.yes)) {
+									LocalService.switchToLocal(true);
+								} else if (choice.equals(Localization.no)) {
+									LocalService.switchToLocal(false);
+								}
+							}
+
+						});
+				endpoint = getRemoteEndpoint();
+			} else {
+				endpoint = getEndpointBasedonModelConfig(mc, ext);
+			}
+		} else {
+			if (isInstallAiXcoderApp()) {
+				ConcurrentHashMap<String, LocalServerStatus> mc = Preference.models;
+				if (mc.size() == 0) {
+					// prompt for switching to local
+					PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToOnline,
+							new String[] { Localization.login, Localization.continueToUseLocal }, new Consumer<String>() {
+
+								@Override
+								public void apply(String choice) {
+									if (choice.equals(Localization.login)) {
+										PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
+									} else if (choice.equals(Localization.continueToUseLocal)) {
+										LocalService.switchToLocal(true);
+									}
+								}
+
+							});
+					endpoint = getDefaultLocalEndpoint();
+				} else {
+					endpoint = getEndpointBasedonModelConfig(mc, ext);
+				}
+			} else {
+				endpoint = getDefaultLocalEndpoint();
+			}
+		}
+		if (!endpoint.endsWith("/")) {
+			endpoint += "/";
+		}
+		return endpoint;
+	}
 
 	public static String getRemoteEndpoint() {
 		return "https://api.aixcoder.com/";

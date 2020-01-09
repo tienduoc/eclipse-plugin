@@ -43,8 +43,21 @@ public class Localization {
 	public static final String localInitializing = "localInitializing";
 	public static final String allowLocalIncomplete = "allowLocalIncomplete";
 	public static final String localInitializingTitle = "localInitializingTitle";
+	public static final String switchToLocal = "switchToLocal";
+	public static final String yes = "yes";
+	public static final String no = "no";
+	public static final String useLocalService = "useLocalService";
+	public static final String unableToUpdateTitle = "unableToUpdateTitle";
+	public static final String unableToUpdate = "unableToUpdate";
+	public static final String switchToOnline = "switchToOnline";
+	public static final String login = "login";
+	public static final String continueToUseLocal = "continueToUseLocal";
+	public static final String promptToLogin = "promptToLogin";
 
 	public static String R(String input) {
+		if (input == null) {
+			return input;
+		}
 		if (Preference.getLanguage().equals(ZH.id)) {
 			return ZH.R(input);
 		} else {

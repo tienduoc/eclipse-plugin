@@ -55,6 +55,9 @@ public class AiXPreferencePage extends FieldEditorPreferencePage implements IWor
 
 		addField(new BooleanFieldEditor(Preference.ALLOW_TELEMETRY, R(Localization.allowTelemetry), parent));
 		addField(new BooleanFieldEditor(Preference.ALLOW_LOCAL_INCOMPLETE, R(Localization.allowLocalIncomplete), parent));
+		if (Preference.hasLoginFile) {
+			addField(new BooleanFieldEditor(Preference.USE_LOCAL_SERVICE, R(Localization.useLocalService), parent));
+		}
 		addField(new ComboFieldEditor(Preference.LANGUAGE, R(Localization.language),
 				new String[][] { { EN.display, EN.id }, { ZH.display, ZH.id } }, parent));
 		addField(new StringFieldEditor(Preference.PARAMS, R(Localization.additionalParameters), parent));

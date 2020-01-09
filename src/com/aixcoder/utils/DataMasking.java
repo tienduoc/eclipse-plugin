@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.aixcoder.core.API;
 import com.aixcoder.lang.LangOptions;
+import com.aixcoder.lang.MatchFailedException;
 
 /**
  * 数据脱敏
@@ -20,8 +21,9 @@ public class DataMasking {
 	 *
 	 * @param s 原始字符串
 	 * @return 脱敏后字符串
+	 * @throws MatchFailedException 
 	 */
-	public static String mask(String s, String ext) {
+	public static String mask(String s, String ext) throws MatchFailedException {
 		if (trivialLiterals == null) {
 			try {
 				trivialLiterals = new HashSet<String>();

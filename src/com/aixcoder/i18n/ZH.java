@@ -84,6 +84,26 @@ public class ZH extends Localization {
 		m.put(localInitializing, "aixcoder\u6b63\u5728\u521d\u6b21\u7d22\u5f15\u60a8\u7684\u9879\u76ee\u3002\u5728\u8fd9\u7ed3\u675f\u4e4b\u524d\u63d0\u793a\u53ef\u80fd\u662f\u4e0d\u51c6\u786e\u7684\u3002\u4f60\u60f3\u8981\u5728\u7d22\u5f15\u5b8c\u6210\u4e4b\u524d\u663e\u793a\u53ef\u80fd\u4e0d\u51c6\u786e\u7684\u63d0\u793a\u5417\uff1f");
 //		m.put(allowLocalIncomplete, "在索引完成前显示不完整的推荐");
 		m.put(allowLocalIncomplete, "\u5728\u7d22\u5f15\u5b8c\u6210\u524d\u663e\u793a\u4e0d\u5b8c\u6574\u7684\u63a8\u8350");
+//      m.put(switchToLocal, "aiXcoder正在使用线上服务，是否切换到本地服务？。");
+		m.put(switchToLocal, "aixcoder\u6b63\u5728\u4f7f\u7528\u7ebf\u4e0a\u670d\u52a1\uff0c\u662f\u5426\u5207\u6362\u5230\u672c\u5730\u670d\u52a1\uff1f");
+//      m.put(yes, "是");
+		m.put(yes, "\u662f");
+//      m.put(no, "否");
+		m.put(no, "\u5426");
+//      m.put(useLocalService, "使用本地服务");
+		m.put(useLocalService, "\u4f7f\u7528\u672c\u5730\u670d\u52a1");
+//		m.put(unableToUpdateTitle, "无法安装本地服务");
+		m.put(unableToUpdateTitle, "\u65e0\u6cd5\u5b89\u88c5\u672c\u5730\u670d\u52a1");
+//		m.put(unableToLogin, "无法检查本地服务： https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest。你想要在浏览器中打开吗？");
+		m.put(unableToLogin, "\u65e0\u6cd5\u68c0\u67e5\u672c\u5730\u670d\u52a1\uff1a https://api.github.com/repos/aixcoder-plugin/localservice/releases/latest\u3002\u4f60\u60f3\u8981\u5728\u6d4f\u89c8\u5668\u4e2d\u6253\u5f00\u5417\uff1f");
+//		m.put(switchToOnline, "aiXcoder正在使用本地服务，您需要登录才能切换到线上服务。");
+		m.put(switchToOnline, "aixcoder\u6b63\u5728\u4f7f\u7528\u672c\u5730\u670d\u52a1\uff0c\u60a8\u9700\u8981\u767b\u5f55\u624d\u80fd\u5207\u6362\u5230\u7ebf\u4e0a\u670d\u52a1\u3002");
+//		m.put(login, "登录");
+		m.put(login, "\u767b\u5f55");
+//		m.put(continueToUseLocal, "继续使用本地服务");
+		m.put(continueToUseLocal, "\u7ee7\u7eed\u4f7f\u7528\u672c\u5730\u670d\u52a1");
+//		m.put(promptToLogin, "请用aiXcoder安装器登录您的账号以使用线上服务");
+		m.put(promptToLogin, "\u8bf7\u7528aixcoder\u5b89\u88c5\u5668\u767b\u5f55\u60a8\u7684\u8d26\u53f7\u4ee5\u4f7f\u7528\u7ebf\u4e0a\u670d\u52a1");
 	}
 
 	public static String R(String input) {

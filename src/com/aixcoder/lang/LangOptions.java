@@ -189,7 +189,7 @@ public abstract class LangOptions {
 
 	public abstract String[] getMultiCharacterSymbolList();
 
-	public abstract String datamask(String s, Set<String> trivialLiterals);
+	public abstract String datamask(String s, Set<String> trivialLiterals) throws MatchFailedException;
 
 	public void rescue(IDocument document, Rescue[] rescues) {
 	};
