@@ -425,7 +425,7 @@ public class AiXUpdater {
 	 * @param outputDir 要解压到某个指定的目录下
 	 */
 	public static void unTarGz(File file, String outputDir) throws IOException, InterruptedException {
-		Runtime.getRuntime().exec(String.format("tar zxf \"%s\" -C \"$%s\"", file.getAbsolutePath(), outputDir))
+		Runtime.getRuntime().exec(String.format("mkdir -p \"%s\" && tar zxf \"%s\" -C \"%s\"", outputDir, file.getAbsolutePath(), outputDir))
 				.waitFor();
 	}
 

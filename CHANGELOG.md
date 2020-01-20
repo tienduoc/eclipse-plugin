@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.2.3] - 2020-01-20
+
+### Fixed
+- A bug that causes first time installation on Linux to fail.
+
 ## [1.2.2] - 2020-01-09
 
 ### Added
