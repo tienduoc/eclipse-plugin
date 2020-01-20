@@ -48,6 +48,9 @@ public class PredictCache {
 
 	public static PredictResult update(String prefix, String newPrefix, PredictResult pr) {
 		if (newPrefix.startsWith(prefix)) {
+			if (newPrefix.equals(prefix)) {
+				return pr;
+			}
 			String newString = newPrefix.substring(prefix.length());
 
 			int i = 0;

@@ -5,6 +5,7 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ### Fixed
 - A bug that causes first time installation on Linux to fail.
+- A bug that sometimes causes prediction to not show at the end of a word.
 
 ## [1.2.2] - 2020-01-09
 

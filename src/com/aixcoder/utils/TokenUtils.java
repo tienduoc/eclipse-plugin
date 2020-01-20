@@ -88,7 +88,7 @@ public class TokenUtils {
 		CodeUtils utils = CodeUtils.getInstance(lang);
 		// 将<BREAK>标签移除,不做字符前后的空格处理
 		if (tokens == null || tokens.isEmpty()) {
-			return null;
+			return new RenderedInfo(current_yu, "");
 		}
 		tokens = new ArrayList<String>(tokens);
 		tokens.removeAll(Collections.singleton("<BREAK>"));
