@@ -3,6 +3,9 @@ All notable changes to the "aiXcoder" extension will be documented in this file.
 
 ## [1.2.3] - 2020-01-20
 
+### Added
+- Adds a download progress indicator.
+
 ### Fixed
 - A bug that causes first time installation on Linux to fail.
 - A bug that sometimes causes prediction to not show at the end of a word.

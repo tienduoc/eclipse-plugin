@@ -426,6 +426,7 @@ public class LocalService {
 									}
 									if (!started) {
 										started = true;
+										monitor.beginTask("Downloading AiXcoder Local Service", (int)total);
 									}
 									totalDone += done;
 									monitor.worked(done);
@@ -436,7 +437,8 @@ public class LocalService {
 										System.out.println(String.format("progress: %d/%d +%d %.2f%%", totalDone, total,
 												done, currentProgress / 1000.0));
 										monitor.setTaskName("Downloading AiXcoder Local Service "
-												+ humanReadableByteCountBin(speed) + "/s");
+												+ humanReadableByteCountBin(speed) + "/s "
+												+ humanReadableByteCountBin(totalDone) + "/" + humanReadableByteCountBin(total));
 									}
 								}
 							}, new Runnable() {

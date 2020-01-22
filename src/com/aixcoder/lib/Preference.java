@@ -237,7 +237,8 @@ public class Preference {
 			try {
 				localConfig = FileUtils.readFileToString(new File(localConfigPath), Charset.forName("UTF-8"));
 			} catch (IOException e) {
-				return "http://localhost:8787";
+				lastLocalEndpoint = "http://localhost:8787"; 
+				return lastLocalEndpoint;
 			}
 			boolean lastLocalEndpointSet = false;
 			if (localConfig != null) {

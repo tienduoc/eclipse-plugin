@@ -162,7 +162,7 @@ public class AiXUpdater {
 			return -1;
 		} finally {
 			try {
-				FileUtils.deleteDirectory(new File(tempFolder));
+				FileUtils.forceDelete(new File(tempFolder));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -328,13 +328,7 @@ public class AiXUpdater {
 			File targetPathFile = new File(targetPath);
 			FileUtils.deleteDirectory(targetPathFile);
 			// 源文件移动至目标文件目录
-			if (file.renameTo(targetPathFile)) {
-				// 输出移动成功
-				System.out.println("File is moved successful!");
-			} else {
-				// 输出移动失败
-				System.out.println("File is failed to move !");
-			}
+			FileUtils.moveDirectory(file, targetPathFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -425,8 +419,14 @@ public class AiXUpdater {
 	 * @param outputDir 要解压到某个指定的目录下
 	 */
 	public static void unTarGz(File file, String outputDir) throws IOException, InterruptedException {
-		Runtime.getRuntime().exec(String.format("mkdir -p \"%s\" && tar zxf \"%s\" -C \"%s\"", outputDir, file.getAbsolutePath(), outputDir))
-				.waitFor();
+		new File(outputDir).mkdirs();
+		final ProcessBuilder builder = new ProcessBuilder();
+	    builder.command("tar", "zxf", file.getAbsolutePath(), "-C", outputDir);
+	    final Process unzipProcess = builder.start();
+	    int code = unzipProcess.waitFor();
+	    System.out.println("tar zxf exited with code " + code);
+//		Runtime.getRuntime().exec(String.format("tar zxf \"%s\" -C \"%s\"", file.getAbsolutePath(), outputDir))
+//				.waitFor();
 	}
 
 	/**
