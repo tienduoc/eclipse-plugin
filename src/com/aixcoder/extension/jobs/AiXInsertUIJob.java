@@ -53,7 +53,7 @@ public class AiXInsertUIJob extends AiXUIJob {
 			Point selection = viewer.getSelectedRange();
 			String newPrefix = viewer.getDocument().get(0, selection.x);
 			String suffix = viewer.getDocument().get().substring(selection.x);
-			suffix = suffix.substring(suffix.indexOf("\n"));
+			suffix = suffix.indexOf("\n") >= 0 ? suffix.substring(suffix.indexOf("\n")) : "";
 
 			String lastLine = newPrefix.substring(newPrefix.lastIndexOf("\n") + 1);
 			// step 3: render results

@@ -9,6 +9,13 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.aixcoder.lib.Preference;
 import com.aixcoder.utils.Pair;
@@ -356,7 +363,7 @@ public class JavaLangOptions extends LangOptions {
 	}
 
 	private void rescueImport(Rescue rescue, int importStart, ArrayList<Pair<String, Integer>> imports,
-			IDocument document) {
+			IDocument document, ITextEditor editor) {
 		try {
 			int prevImportStart = importStart;
 			for (int i = 0; i < imports.size(); i++) {
@@ -383,7 +390,13 @@ public class JavaLangOptions extends LangOptions {
 			}
 			imports.add(new Pair<String, Integer>(rescue.value, prevImportStart + 1));
 			int offset = document.getLineInformation(prevImportStart + 1).getOffset();
-			document.replace(offset, 0, String.format("import %s;\n", rescue.value));
+			String importStr = String.format("import %s;\n", rescue.value);
+			document.replace(offset, 0, importStr);
+			
+			int selOffset = importStr.length(); 
+			ISelectionProvider selectionProvider = ((ITextEditor)editor).getSelectionProvider();
+			ITextSelection sel = (ITextSelection)selectionProvider.getSelection();
+			selectionProvider.setSelection(new TextSelection(sel.getOffset() + selOffset, sel.getLength()));
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -391,6 +404,11 @@ public class JavaLangOptions extends LangOptions {
 
 	@Override
 	public void rescue(IDocument document, Rescue[] rescues) {
+		IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		if (!(editor instanceof ITextEditor)) {
+			editor = null;
+		}
+		
 		ArrayList<Pair<String, Integer>> imports = null;
 		String text = document.get();
 		String[] lines = text.split("\r?\n");
@@ -403,7 +421,7 @@ public class JavaLangOptions extends LangOptions {
 						imports = new ArrayList<Pair<String, Integer>>();
 						importStart = prepareImports(imports, lines, importStart);
 					}
-					rescueImport(rescue, importStart, imports, document);
+					rescueImport(rescue, importStart, imports, document, (ITextEditor)editor);
 				}
 			} else {
 				System.out.println(String.format("Unknown rescue type %s with value=%s", rescue.type, rescue.value));
