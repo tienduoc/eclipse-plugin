@@ -229,7 +229,7 @@ public class AiXUpdater {
 
 		String patchUrl = selectBestMirror(patchUrlList, token);
 		String localVersion = getCurrentLocalVersion(localPath);
-		String localPathParent = FilenameUtils.concat(localPath, "..");
+		String localPathParent = FilenameUtils.normalize(FilenameUtils.concat(localPath, ".."));
 		if (null != patchUrl) {
 			String filename = patchUrl.substring(patchUrl.lastIndexOf("/") + 1);
 			try {

@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.2.4] - 2020-02-03
+### Fixed
+- A first time installation bug on OS X and Linux
+
 ## [1.2.3] - 2020-01-20
 
 ### Added
