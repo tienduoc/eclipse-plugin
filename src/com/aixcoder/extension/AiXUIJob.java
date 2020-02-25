@@ -82,47 +82,66 @@ public abstract class AiXUIJob extends UIJob {
 				try {
 					computeProposals(fComputedProposal, fFilteredProposal, (AiXCoder) fSorter);
 
-					Field fIsFilterPendingField = completionProposalPopupClz.getDeclaredField("fIsFilterPending");
-					fIsFilterPendingField.setAccessible(true);
-					boolean fIsFilterPending = fIsFilterPendingField.getBoolean(fProposalPopup);
-					if (fIsFilterPending) {
-						Field fFilterRunnableField = completionProposalPopupClz.getDeclaredField("fFilterRunnable");
-						fFilterRunnableField.setAccessible(true);
-						Runnable fFilterRunnable = (Runnable) fFilterRunnableField.get(fProposalPopup);
-						fFilterRunnable.run();
+					// remove stub
+					int stub = -1;
+					for (int i = 0; i < fComputedProposal.size(); i++) {
+						if (fComputedProposal.get(i).getDisplayString().equals(" ")) {
+							stub = i;
+							break;
+						}
+					}
+					if (stub >= 0) {
+						fComputedProposal.remove(stub);
 					}
 
-					setProposalList(fProposalPopup, completionProposalPopupClz, "fFilteredProposals",
-							fFilteredProposal);
-
-					// call proposal table update function
-//					log("setProposals: " + fComputedProposal);
-//					log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
-					try {
-						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals", List.class,
-								boolean.class);
-						setProposals.setAccessible(true);
-						setProposals.invoke(fProposalPopup, fComputedProposal, false);
-					} catch (NoSuchMethodException e) {
-						Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals",
-								Class.forName("[Lorg.eclipse.jface.text.contentassist.ICompletionProposal;"),
-								boolean.class);
-						setProposals.setAccessible(true);
-						setProposals.invoke(fProposalPopup, fComputedProposal.toArray(new ICompletionProposal[0]),
-								false);
-					}
-					Field fIsFilteredSubsetField = completionProposalPopupClz.getDeclaredField("fIsFilteredSubset");
-					fIsFilteredSubsetField.setAccessible(true);
-					if (fIsFilteredSubsetField.getBoolean(fProposalPopup)) {
-//						log("filterProposals");
-						Method filterProposalsMethod = completionProposalPopupClz.getDeclaredMethod("filterProposals");
-						filterProposalsMethod.setAccessible(true);
-						filterProposalsMethod.invoke(fProposalPopup);
+					if (fComputedProposal.size() == 0) {
+						Method hide = completionProposalPopupClz.getDeclaredMethod("hide");
+						hide.setAccessible(true);
+						hide.invoke(fProposalPopup);
 					} else {
-//						log("displayProposals" + fComputedProposal);
-						Method dislayProposals = completionProposalPopupClz.getDeclaredMethod("displayProposals");
-						dislayProposals.setAccessible(true);
-						dislayProposals.invoke(fProposalPopup);
+						Field fIsFilterPendingField = completionProposalPopupClz.getDeclaredField("fIsFilterPending");
+						fIsFilterPendingField.setAccessible(true);
+						boolean fIsFilterPending = fIsFilterPendingField.getBoolean(fProposalPopup);
+						if (fIsFilterPending) {
+							Field fFilterRunnableField = completionProposalPopupClz.getDeclaredField("fFilterRunnable");
+							fFilterRunnableField.setAccessible(true);
+							Runnable fFilterRunnable = (Runnable) fFilterRunnableField.get(fProposalPopup);
+							fFilterRunnable.run();
+						}
+
+						setProposalList(fProposalPopup, completionProposalPopupClz, "fFilteredProposals",
+								fFilteredProposal);
+
+						// call proposal table update function
+//						log("setProposals: " + fComputedProposal);
+//						log(viewer.getDocument().get().substring(Math.max(0, viewer.getDocument().getLength() - 100)));
+						try {
+							Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals",
+									List.class, boolean.class);
+							setProposals.setAccessible(true);
+							setProposals.invoke(fProposalPopup, fComputedProposal, false);
+						} catch (NoSuchMethodException e) {
+							Method setProposals = completionProposalPopupClz.getDeclaredMethod("setProposals",
+									Class.forName("[Lorg.eclipse.jface.text.contentassist.ICompletionProposal;"),
+									boolean.class);
+							setProposals.setAccessible(true);
+							setProposals.invoke(fProposalPopup, fComputedProposal.toArray(new ICompletionProposal[0]),
+									false);
+						}
+						Field fIsFilteredSubsetField = completionProposalPopupClz.getDeclaredField("fIsFilteredSubset");
+						fIsFilteredSubsetField.setAccessible(true);
+						if (fIsFilteredSubsetField.getBoolean(fProposalPopup)) {
+//							log("filterProposals");
+							Method filterProposalsMethod = completionProposalPopupClz
+									.getDeclaredMethod("filterProposals");
+							filterProposalsMethod.setAccessible(true);
+							filterProposalsMethod.invoke(fProposalPopup);
+						} else {
+//							log("displayProposals" + fComputedProposal);
+							Method dislayProposals = completionProposalPopupClz.getDeclaredMethod("displayProposals");
+							dislayProposals.setAccessible(true);
+							dislayProposals.invoke(fProposalPopup);
+						}
 					}
 				} catch (AiXAbortInsertionException e) {
 					System.out.println(e);

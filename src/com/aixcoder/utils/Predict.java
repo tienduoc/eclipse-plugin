@@ -2,7 +2,6 @@ package com.aixcoder.utils;
 
 import com.aixcoder.core.API;
 import com.aixcoder.core.PredictContext;
-import com.aixcoder.utils.shims.CollectionUtils;
 
 public class Predict {
 
@@ -25,7 +24,7 @@ public class Predict {
 		public String[] tokens;
 		public Rescue[] rescues;
 		public String[] rCompletions;
-		
+
 		public LongPredictResult(String[] tokens, String current, Rescue[] rescues, String[] rCompletions) {
 			super();
 			this.tokens = tokens;
@@ -33,8 +32,25 @@ public class Predict {
 			this.rescues = rescues;
 			this.rCompletions = rCompletions;
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < tokens.length; i++) {
+				sb.append(tokens[i]);
+				sb.append(" ");
+			}
+			if (rCompletions.length > 0) {
+				sb.append(" -> ");
+				for (int i = 0; i < rCompletions.length; i++) {
+					sb.append(rCompletions[i]);
+					sb.append(" ");
+				}
+			}
+			return sb.toString();
+		}
 	}
-	
+
 	public static class PredictResult {
 		public SortResult[] sortResults;
 		public LongPredictResult[] longPredicts;
@@ -45,8 +61,14 @@ public class Predict {
 			this.sortResults = sortResults;
 		}
 
+		@Override
 		public String toString() {
-			return "PredictResult: " + CollectionUtils.join(" ", longPredicts) + "]";
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < longPredicts.length; i++) {
+				sb.append(longPredicts[i].toString());
+				sb.append(" ");
+			}
+			return "PredictResult: " + sb.toString() + "]";
 		}
 	}
 

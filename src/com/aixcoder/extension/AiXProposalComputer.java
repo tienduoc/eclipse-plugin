@@ -15,6 +15,8 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
@@ -81,6 +83,8 @@ public class AiXProposalComputer extends JavaAllCompletionProposalComputer {
 			}
 		}
 //		List<ICompletionProposal> superProposals = super.computeCompletionProposals(context, monitor);
-		return new ArrayList<ICompletionProposal>();
+		ArrayList<ICompletionProposal> r = new ArrayList<ICompletionProposal>();
+		r.add(new AiXCompletionProposal("", context.getInvocationOffset(), 0, context.getInvocationOffset(), null, " ", null, null, null, null));		
+		return r;
 	}
 }

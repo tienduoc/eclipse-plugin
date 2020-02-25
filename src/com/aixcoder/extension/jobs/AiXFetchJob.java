@@ -48,7 +48,7 @@ public class AiXFetchJob extends Job {
 		try {
 			PredictResult predictResult = PredictCache.getInstance().get(predictContext.prefix);
 			ITextViewer viewer = proposalFactory.context.getViewer();
-			if (predictResult == null) {
+			if (predictResult == null || predictResult.sortResults.length == 0) {
 				System.out.println("HTTP!!!");
 				String lastUUID = UUID.randomUUID().toString();
 				predictResult = Predict.predict(predictContext, remainingText, lastUUID);

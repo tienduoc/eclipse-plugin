@@ -188,6 +188,12 @@ public class AiXCoder implements ICompletionProposalSorter {
 
 	@Override
 	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
+		if (p1.getDisplayString().equals(" ")) {
+			return 1;
+		}
+		if (p2.getDisplayString().equals(" ")) {
+			return -1;
+		}
 		double scoreDiff = getScore(p1) - getScore(p2);
 		if (scoreDiff > 0) {
 			return -1;
