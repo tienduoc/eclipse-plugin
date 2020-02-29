@@ -430,26 +430,28 @@ public class Preference {
 			}
 		}
 	}
-
+	static boolean localOnlineSwitchWindow = false;
 	public static String getEndpoint(String ext) {
 		String endpoint;
 		if (hasLoginFile) {
 			ConcurrentHashMap<String, LocalServerStatus> mc = Preference.models;
 			if (mc.size() == 0) {
 				// prompt for switching to local
-				PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToLocal,
-						new String[] { Localization.yes, Localization.no }, new Consumer<String>() {
-
-							@Override
-							public void apply(String choice) {
-								if (choice.equals(Localization.yes)) {
-									LocalService.switchToLocal(true);
-								} else if (choice.equals(Localization.no)) {
-									LocalService.switchToLocal(false);
+				if (!localOnlineSwitchWindow) {
+					localOnlineSwitchWindow = true;
+					PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToLocal,
+							new String[] { Localization.yes, Localization.no }, new Consumer<String>() {
+								@Override
+								public void apply(String choice) {
+									if (choice.equals(Localization.yes)) {
+										LocalService.switchToLocal(true);
+									} else if (choice.equals(Localization.no)) {
+										LocalService.switchToLocal(false);
+									}
+									localOnlineSwitchWindow = false;
 								}
-							}
-
-						});
+							});
+				}
 				endpoint = getRemoteEndpoint();
 			} else {
 				endpoint = getEndpointBasedonModelConfig(mc, ext);
