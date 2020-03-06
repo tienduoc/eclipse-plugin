@@ -16,6 +16,9 @@ import com.aixcoder.lang.LangOptions;
 import com.aixcoder.utils.Rescue;
 import com.aixcoder.utils.shims.CollectionUtils;
 
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocumentListener;
+
 /**
  * This represents a single proposal item in the proposals (a.k.a. suggestions)
  * list. Code copied from
@@ -32,6 +35,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	/** The replacement length. */
 	private int fReplacementLength;
 	/** The cursor position after this proposal has been applied. */
+	/** bug: there might be other completion auto added by IDE(eg. import xxx). So, do not use the input fCursorPosition. **/
 	private int fCursorPosition;
 	/** The image to be displayed in the completion proposal popup. */
 	private Image fImage;
@@ -40,6 +44,8 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	private String[] fRCompletion;
 	private Rescue[] fRescues;
 	private LangOptions fLangOptions;
+	private int newOffset;
+	private boolean cursorShouldMove;
 
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the
@@ -69,7 +75,7 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		fReplacementString = replacementString;
 		fReplacementOffset = replacementOffset;
 		fReplacementLength = replacementLength;
-		fCursorPosition = cursorPosition;
+//		fCursorPosition = cursorPosition;
 		fImage = image;
 		fDisplayString = displayString;
 		if (rCompletion != null && rCompletion.length > 0) {
@@ -79,15 +85,45 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 		fRCompletion = rCompletion;
 		fRescues = rescues;
 		fLangOptions = langOptions;
+		newOffset = fReplacementOffset;
+		cursorShouldMove = true;
 	}
+	IDocumentListener aixlistener = new IDocumentListener() {
+		public void documentAboutToBeChanged(DocumentEvent event) {
+			// do nothing
+		}
+		public void documentChanged(DocumentEvent event) {
+			if (cursorShouldMove && event.getOffset() <= newOffset) {
+				newOffset += event.getText().length();
+			}
+		}
+	};
 
 	@Override
 	public void apply(IDocument document) {
 		try {
+			document.addDocumentListener(aixlistener);
+//			final String updateCategory = "aixcoder-completion";
+//			IPositionUpdater aixUpdater = new DefaultPositionUpdater(updateCategory);
+//			Position aixPosition = new Position(fReplacementOffset, fReplacementLength);
+//			document.addPositionCategory(updateCategory);
+////			document.insertPositionUpdater(aixUpdater, 0);
+//			document.addPositionUpdater(aixUpdater);
+//			document.addPosition(updateCategory, aixPosition);
+			cursorShouldMove = true;
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+			cursorShouldMove = true;
+
+//			DocumentEvent aixEvent = new DocumentEvent(document, fReplacementOffset, fReplacementLength, fReplacementString);
+//			aixUpdater.update(aixEvent);
+//			document.removePosition(updateCategory, aixPosition);
+//			document.removePositionUpdater(aixUpdater);
+//			document.removePositionCategory(updateCategory);
 			if (fRCompletion != null) {
+				cursorShouldMove = false;
 				document.replace(fReplacementOffset + fReplacementString.length(), 0,
 						CollectionUtils.join("", fRCompletion));
+				cursorShouldMove = true;
 			}
 			if (fRescues != null && fRescues.length > 0) {
 				fLangOptions.rescue(document, fRescues);
@@ -95,12 +131,14 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 			new AiXReportJob(ReportType.LONG_USE, fDisplayString.split("\\b").length, fDisplayString.length()).schedule();
 		} catch (BadLocationException x) {
 			// ignore
+			x.printStackTrace();
 		}
 	}
 
 	@Override
 	public Point getSelection(IDocument document) {
-		return new Point(fReplacementOffset + fCursorPosition, 0);
+		document.removeDocumentListener(aixlistener);
+		return new Point(newOffset, 0);
 	}
 
 	@Override
