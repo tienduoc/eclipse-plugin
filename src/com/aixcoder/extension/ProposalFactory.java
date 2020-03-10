@@ -27,6 +27,6 @@ public class ProposalFactory {
 	public ICompletionProposal createForcedSortProposal(int invocationOffset, String word, String current,
 			double score) {
 		return new AiXForcedSortCompletionProposal(word, invocationOffset - current.length(), current.length(),
-				current.length() + word.length(), null, word, null, score);
+				word.length(), null, word, null, score);
 	}
 }
