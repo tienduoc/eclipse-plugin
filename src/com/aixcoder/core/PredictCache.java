@@ -100,12 +100,12 @@ public class PredictCache {
 						List<LongPredictResult> newTokensList = new ArrayList<LongPredictResult>();
 						for (LongPredictResult longPredict : pr.longPredicts) {
 							if (longPredict.tokens.length > i) {
-								String[] newTokens = new String[second.tokens.length - i + 1];
-								System.arraycopy(second.tokens, i, newTokens, 1, second.tokens.length - i);
+								String[] newTokens = new String[longPredict.tokens.length - i + 1];
+								System.arraycopy(longPredict.tokens, i, newTokens, 1, longPredict.tokens.length - i);
 								newTokens[0] = "";
-								String newCurrent = second.tokens[i - 1];
+								String newCurrent = longPredict.tokens[i - 1];
 								if (i == 1) {
-									newCurrent = second.current + newCurrent;
+									newCurrent = longPredict.current + newCurrent;
 								}
 								
 								newTokensList.add(new LongPredictResult(newTokens, newCurrent, longPredict.rescues,
@@ -123,7 +123,7 @@ public class PredictCache {
 						List<LongPredictResult> newTokensList = new ArrayList<LongPredictResult>();
 						for (LongPredictResult longPredict : pr.longPredicts) {
 							if (longPredict.tokens.length > i) {
-								String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
+								String[] newTokens = Arrays.copyOfRange(longPredict.tokens, i, longPredict.tokens.length);
 								newTokensList.add(new LongPredictResult(newTokens, "", longPredict.rescues,
 										longPredict.rCompletions));
 							}
@@ -139,7 +139,7 @@ public class PredictCache {
 						List<LongPredictResult> newTokensList = new ArrayList<LongPredictResult>();
 						for (LongPredictResult longPredict : pr.longPredicts) {
 							if (longPredict.tokens.length > i) {
-								String[] newTokens = Arrays.copyOfRange(second.tokens, i, second.tokens.length);
+								String[] newTokens = Arrays.copyOfRange(longPredict.tokens, i, longPredict.tokens.length);
 								newTokens[0] = newTokens[0].substring(newString.length());
 								newTokensList.add(new LongPredictResult(newTokens, newString, longPredict.rescues,
 										longPredict.rCompletions));
