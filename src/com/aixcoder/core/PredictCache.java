@@ -64,12 +64,18 @@ public class PredictCache {
 			}
 			if (second == null) return null;
 			SortResult[] sortResults = pr.sortResults;
+			String[] realInputTokens = new String[second.tokens.length];
 			for (; i < second.tokens.length; i++) {
 				String ltrimedNewString = ltrim(newString);
-				if (ltrimedNewString.startsWith(second.tokens[i])) {
-					newString = ltrimedNewString.substring(second.tokens[i].length());
+				if (second.tokens[i].isEmpty()) {
+					realInputTokens[i] = newString.substring(newString.length()-ltrimedNewString.length());
 				} else {
-					break;
+					if (ltrimedNewString.startsWith(second.tokens[i])) {
+						realInputTokens[i] = second.tokens[i];
+						newString = ltrimedNewString.substring(second.tokens[i].length());
+					} else {
+						break;
+					}
 				}
 			}
 			if (second.tokens.length > i && second.tokens[i].startsWith(newString.trim())) {
@@ -103,7 +109,7 @@ public class PredictCache {
 								String[] newTokens = new String[longPredict.tokens.length - i + 1];
 								System.arraycopy(longPredict.tokens, i, newTokens, 1, longPredict.tokens.length - i);
 								newTokens[0] = "";
-								String newCurrent = longPredict.tokens[i - 1];
+								String newCurrent = realInputTokens[i - 1];
 								if (i == 1) {
 									newCurrent = longPredict.current + newCurrent;
 								}
