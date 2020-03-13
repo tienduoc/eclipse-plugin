@@ -78,7 +78,7 @@ public class PredictCache {
 					}
 				}
 			}
-			if (second.tokens.length > i && second.tokens[i].startsWith(newString.trim())) {
+			if (second.tokens.length > i && second.tokens[i].startsWith(newString)) {
 				if (i == 0) {
 					// cache : St [ring, s, =]
 					// newPrefix: Str
