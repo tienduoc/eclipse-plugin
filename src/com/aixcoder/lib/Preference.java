@@ -461,19 +461,21 @@ public class Preference {
 				ConcurrentHashMap<String, LocalServerStatus> mc = Preference.models;
 				if (mc.size() == 0) {
 					// prompt for switching to local
-					PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToOnline,
-							new String[] { Localization.login, Localization.continueToUseLocal }, new Consumer<String>() {
-
-								@Override
-								public void apply(String choice) {
-									if (choice.equals(Localization.login)) {
-										PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
-									} else if (choice.equals(Localization.continueToUseLocal)) {
-										LocalService.switchToLocal(true);
+					if (!localOnlineSwitchWindow) {
+						localOnlineSwitchWindow = true;
+						PromptUtils.promptQuestion("Local Online Switch", null, Localization.switchToOnline,
+								new String[] { Localization.login, Localization.continueToUseLocal }, new Consumer<String>() {
+									@Override
+									public void apply(String choice) {
+										if (choice.equals(Localization.login)) {
+											PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
+										} else if (choice.equals(Localization.continueToUseLocal)) {
+											LocalService.switchToLocal(true);
+										}
+										localOnlineSwitchWindow = false;
 									}
-								}
-
-							});
+								});
+					}
 					endpoint = getDefaultLocalEndpoint();
 				} else {
 					endpoint = getEndpointBasedonModelConfig(mc, ext);
