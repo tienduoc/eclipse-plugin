@@ -84,8 +84,8 @@ public class ZH extends Localization {
 		m.put(localInitializing, "aixcoder\u6b63\u5728\u521d\u6b21\u7d22\u5f15\u60a8\u7684\u9879\u76ee\u3002\u5728\u8fd9\u7ed3\u675f\u4e4b\u524d\u63d0\u793a\u53ef\u80fd\u662f\u4e0d\u51c6\u786e\u7684\u3002\u4f60\u60f3\u8981\u5728\u7d22\u5f15\u5b8c\u6210\u4e4b\u524d\u663e\u793a\u53ef\u80fd\u4e0d\u51c6\u786e\u7684\u63d0\u793a\u5417\uff1f");
 //		m.put(allowLocalIncomplete, "在索引完成前显示不完整的推荐");
 		m.put(allowLocalIncomplete, "\u5728\u7d22\u5f15\u5b8c\u6210\u524d\u663e\u793a\u4e0d\u5b8c\u6574\u7684\u63a8\u8350");
-//      m.put(switchToLocal, "aiXcoder正在使用线上服务，是否切换到本地服务？。");
-		m.put(switchToLocal, "aixcoder\u6b63\u5728\u4f7f\u7528\u7ebf\u4e0a\u670d\u52a1\uff0c\u662f\u5426\u5207\u6362\u5230\u672c\u5730\u670d\u52a1\uff1f");
+//      m.put(switchToLocal, "aiXcoder代码补全功能正在使用线上服务，是否切换到本地服务？");
+		m.put(switchToLocal, "aixcoder\u4ee3\u7801\u8865\u5168\u529f\u80fd\u6b63\u5728\u4f7f\u7528\u7ebf\u4e0a\u670d\u52a1\uff0c\u662f\u5426\u5207\u6362\u5230\u672c\u5730\u670d\u52a1\uff1f");
 //      m.put(yes, "是");
 		m.put(yes, "\u662f");
 //      m.put(no, "否");

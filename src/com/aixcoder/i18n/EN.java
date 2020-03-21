@@ -50,7 +50,7 @@ public class EN extends Localization {
 		m.put(localInitializingTitle, "aiXcoder is indexing your project.");
 		m.put(localInitializing, "aiXcoder is indexing your project for the first time. The suggestions may not be accurate until it is done. Do you want to show incomplete suggestions while wait for indexing to finish?");
 		m.put(allowLocalIncomplete, "Show incomplete suggestions before indexing finishes");
-		m.put(switchToLocal, "aiXcoder is working in online mode. Do you want to switch to local service?");
+		m.put(switchToLocal, "aiXcoder code completion service is running in online mode. Do you want to switch to the local service?");
 		m.put(yes, "Yes");
 		m.put(no, "No");
 		m.put(useLocalService, "Use Local Service");
