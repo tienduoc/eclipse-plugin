@@ -443,10 +443,12 @@ public class Preference {
 							new String[] { Localization.yes, Localization.no }, new Consumer<String>() {
 								@Override
 								public void apply(String choice) {
-									if (choice.equals(Localization.yes)) {
-										LocalService.switchToLocal(true);
-									} else if (choice.equals(Localization.no)) {
-										LocalService.switchToLocal(false);
+									if (choice != null) {
+										if (choice.equals(Localization.yes)) {
+											LocalService.switchToLocal(true);
+										} else if (choice.equals(Localization.no)) {
+											LocalService.switchToLocal(false);
+										}
 									}
 									localOnlineSwitchWindow = false;
 								}
@@ -467,10 +469,12 @@ public class Preference {
 								new String[] { Localization.login, Localization.continueToUseLocal }, new Consumer<String>() {
 									@Override
 									public void apply(String choice) {
-										if (choice.equals(Localization.login)) {
-											PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
-										} else if (choice.equals(Localization.continueToUseLocal)) {
-											LocalService.switchToLocal(true);
+										if (choice != null) {
+											if (choice.equals(Localization.login)) {
+												PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
+											} else if (choice.equals(Localization.continueToUseLocal)) {
+												LocalService.switchToLocal(true);
+											}
 										}
 										localOnlineSwitchWindow = false;
 									}
