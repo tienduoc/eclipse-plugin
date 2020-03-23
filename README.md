@@ -1,10 +1,6 @@
-# aiXcoder Eclipse Plugin for Java
+# AiXcoder Code Completer & Code Search Engine for Java
 
-An Eclipse plugin for aiXcoder, an AI-powered code completion plugin.
-
-[Update site](https://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.wb.doc.user%2Fhtml%2Finstallation%2Fupdatesite_3.5.html): https://github.com/aixcoder-plugin/eclipse-update-site/raw/master/
-
-AiXcoder is a powerful code completer based on state-of-the-art deep learning technology. It can recommend the code that most likely to be typed during your coding process. aiXcoder also has the potential of recommending you a full line of code, which will help you coding faster.
+AiXcoder is a powerful code completer & code serach engine based on state-of-the-art deep learning technology. It has the potential of recommending you a full line of code, which will help you code faster. AiXcoder also provides a code search engine to help you search for API use cases on GitHub.
 
 ![writing Java code with aiXcoder](https://github.com/aixcoder-plugin/vscode-plugin/raw/master/images/java_example.gif)
 

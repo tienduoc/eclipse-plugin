@@ -16,6 +16,9 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import java.awt.Desktop;
+import java.net.URI;
+
 import com.aixcoder.core.LocalServerStatus;
 import com.aixcoder.core.LocalService;
 import com.aixcoder.extension.Activator;
@@ -67,6 +70,8 @@ public class Preference {
 	private static boolean isProfessional = false;
 	public static boolean isProfessionalError = false;
 	public static boolean isProfessionalFetched = true;
+	
+	public static final String urlLearnMoreLocalService = "https://www.aixcoder.com/#/versionInfo";
 
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
@@ -448,6 +453,17 @@ public class Preference {
 											LocalService.switchToLocal(true);
 										} else if (choice.equals(Localization.no)) {
 											LocalService.switchToLocal(false);
+										} else if (choice.equals(Localization.learnMoreLocalService)) {
+											try {
+										        Desktop desktop = Desktop.getDesktop();
+										        if (Desktop.isDesktopSupported()
+										                && desktop.isSupported(Desktop.Action.BROWSE)) {
+										            URI uri = new URI(Preference.urlLearnMoreLocalService);
+										            desktop.browse(uri);
+										        }
+										    } catch (Exception e) {
+										    	e.printStackTrace();
+										    }
 										}
 									}
 									localOnlineSwitchWindow = false;
@@ -474,6 +490,17 @@ public class Preference {
 												PromptUtils.promptMessage("Login", null, Localization.promptToLogin);
 											} else if (choice.equals(Localization.continueToUseLocal)) {
 												LocalService.switchToLocal(true);
+											} else if (choice.equals(Localization.learnMoreLocalService)) {
+												try {
+											        Desktop desktop = Desktop.getDesktop();
+											        if (Desktop.isDesktopSupported()
+											                && desktop.isSupported(Desktop.Action.BROWSE)) {
+											            URI uri = new URI(Preference.urlLearnMoreLocalService);
+											            desktop.browse(uri);
+											        }
+											    } catch (Exception e) {
+											    	e.printStackTrace();
+											    }
 											}
 										}
 										localOnlineSwitchWindow = false;

@@ -104,6 +104,9 @@ public class ZH extends Localization {
 		m.put(continueToUseLocal, "\u7ee7\u7eed\u4f7f\u7528\u672c\u5730\u670d\u52a1");
 //		m.put(promptToLogin, "请用aiXcoder安装器登录您的账号以使用线上服务");
 		m.put(promptToLogin, "\u8bf7\u7528aixcoder\u5b89\u88c5\u5668\u767b\u5f55\u60a8\u7684\u8d26\u53f7\u4ee5\u4f7f\u7528\u7ebf\u4e0a\u670d\u52a1");
+//		m.put(learnMoreLocalService, "关于本地服务");
+		m.put(learnMoreLocalService, "\u5173\u4e8e\u672c\u5730\u670d\u52a1");
+		
 	}
 
 	public static String R(String input) {

@@ -60,6 +60,8 @@ public class EN extends Localization {
 		m.put(login, "Login");
 		m.put(continueToUseLocal, "Keep Using Local Service");
 		m.put(promptToLogin, "Please login on aiXcoder Installer before using online service");
+		m.put(learnMoreLocalService, "About LocalService");
+		
 	}
 
 	public static String R(String input) {

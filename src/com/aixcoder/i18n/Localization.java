@@ -53,6 +53,8 @@ public class Localization {
 	public static final String login = "login";
 	public static final String continueToUseLocal = "continueToUseLocal";
 	public static final String promptToLogin = "promptToLogin";
+	
+	public static final String learnMoreLocalService = "learnMoreLocalService";
 
 	public static String R(String input) {
 		if (input == null) {
