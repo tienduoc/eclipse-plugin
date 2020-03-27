@@ -101,7 +101,19 @@ public abstract class AiXUIJob extends UIJob {
 					} else {
 						Field fIsFilterPendingField = completionProposalPopupClz.getDeclaredField("fIsFilterPending");
 						fIsFilterPendingField.setAccessible(true);
-						boolean fIsFilterPending = fIsFilterPendingField.getBoolean(fProposalPopup);
+						boolean fIsFilterPending = false;
+						try {
+							Object fIsFilterPendingObj = fIsFilterPendingField.get(fProposalPopup);
+							if (fIsFilterPendingObj instanceof java.lang.Boolean) {
+								// before Eclipse2020
+								fIsFilterPending = ((java.lang.Boolean) fIsFilterPendingObj).booleanValue();
+							} else if (fIsFilterPendingObj instanceof java.util.concurrent.atomic.AtomicBoolean) {
+								// Eclipse2020
+								fIsFilterPending = ((java.util.concurrent.atomic.AtomicBoolean) fIsFilterPendingObj).get();
+							}
+						} catch (IllegalAccessException | IllegalArgumentException | NullPointerException | ExceptionInInitializerError e) {
+							e.printStackTrace();
+						}
 						if (fIsFilterPending) {
 							Field fFilterRunnableField = completionProposalPopupClz.getDeclaredField("fFilterRunnable");
 							fFilterRunnableField.setAccessible(true);
