@@ -111,7 +111,7 @@ public abstract class AiXUIJob extends UIJob {
 								// Eclipse2020
 								fIsFilterPending = ((java.util.concurrent.atomic.AtomicBoolean) fIsFilterPendingObj).get();
 							}
-						} catch (IllegalAccessException | IllegalArgumentException | NullPointerException | ExceptionInInitializerError e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 						if (fIsFilterPending) {

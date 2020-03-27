@@ -281,7 +281,7 @@ public class Preference {
 		if (login != null && login.length() > 0) {
 			// 可能登录过校验 uuid
 			JsonObject json = new Gson().fromJson(login, JsonObject.class);
-			String token = json.get("token").getAsString();
+//			String token = json.get("token").getAsString();
 			String uuid = json.get("uuid").getAsString();
 			if (uuid.startsWith("local-")) {
 				// 本地服务生成的假uuid，继续使用本地版

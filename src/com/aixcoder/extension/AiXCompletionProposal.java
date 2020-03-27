@@ -35,8 +35,8 @@ public class AiXCompletionProposal implements ICompletionProposal, ICompletionPr
 	/** The replacement length. */
 	private int fReplacementLength;
 	/** The cursor position after this proposal has been applied. */
-	/** bug: there might be other completion auto added by IDE(eg. import xxx). So, do not use the input fCursorPosition. **/
-	private int fCursorPosition;
+//	/** bug: there might be other completion auto added by IDE(eg. import xxx). So, do not use the input fCursorPosition. **/
+//	private int fCursorPosition;
 	/** The image to be displayed in the completion proposal popup. */
 	private Image fImage;
 	/** The context information of this proposal. */
