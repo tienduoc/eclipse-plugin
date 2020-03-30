@@ -294,6 +294,19 @@ public class AiXUpdater {
 			move(localPath, FilenameUtils.concat(localPathParent, localVersion).toString());
 		}
 		move(patchFolder, localPath);
+		try {
+			if (localPath.contains("localserver")) { // be careful, do not remove in other dir
+				final File parentDir = new File(FilenameUtils.concat(localPath, ".."));
+				final File[] siblingFiles = parentDir.listFiles();
+				for (int i=0; i< siblingFiles.length; i++) {
+					if (!localPath.equals(siblingFiles[i].getPath())) {
+						delFile(siblingFiles[i]);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return getCurrentLocalVersion(localPath);
 	}
 
