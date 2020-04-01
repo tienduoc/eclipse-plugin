@@ -9,7 +9,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 
@@ -112,11 +111,15 @@ public class Activator extends AbstractUIPlugin {
 	    					if (delta.getResource() != null) {
 	    						if (delta.getResource().getType() == IResource.FILE &&
 	    								(delta.getKind() == IResourceDelta.ADDED || delta.getKind() == IResourceDelta.CHANGED)) {
-	    							String filename = delta.getResource().getName();
-	    							String fullpath = delta.getResource().getLocation().toString();
-	    							String pathWithProj = delta.getResource().getFullPath().toString();
-	    							String pathInProj = delta.getProjectRelativePath().toString(); // not include project
-	    							System.out.printf("filename=%s \n fullpath=%s \n pathWithProj=%s \n pathInProj=%s\n", filename, fullpath, pathWithProj, pathInProj );
+	    							String ext = Preference.getModel();
+	    							String langFromExt = "java";
+	    							if (langFromExt.equals(delta.getResource().getFileExtension())) {
+		    							String fullpath = delta.getResource().getLocation().toString();
+		    							String projectName = delta.getResource().getProject().getName();
+		    							String projectPath = delta.getResource().getProject().getLocation().toString();
+
+	    								com.aixcoder.core.API.notifyFileChange("text", langFromExt, fullpath, projectName, projectPath);
+	    							}
 	    						}
 	    					}
 	    					return true; // to visit child
@@ -127,7 +130,7 @@ public class Activator extends AbstractUIPlugin {
 	        	}
 	           }
 		};
-		
+		System.out.println("##########################ADD listener");
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener, IResourceChangeEvent.POST_CHANGE);
 		
 	}
