@@ -598,4 +598,38 @@ public class API {
 			};
 		}.start();
 	}
+	/**
+	 * let local server know there's file changed
+	 * @param text
+	 * @param ext
+	 * @param fileID
+	 * @param projName
+	 * @param projRoot
+	 */
+	public static void notifyFileChange(String text, String ext, String fileID, String projName, String projRoot) {
+		final String endpoint = Preference.getEndpoint(ext);
+		if (endpoint.contains("localhost")) {
+			return;
+		}
+		
+		final String uuid = Preference.getUUID();
+		Map<String, String> m = new HashMap<String, String>();
+		m.put("text", text);
+		m.put("ext", ext);
+		m.put("uuid", uuid);
+		m.put("fileid", fileID);
+		m.put("project", projName);
+		m.put("projectRoot", projRoot);
+		
+		try {
+			HttpHelper.post(Preference.getRemoteEndpoint() + "eventChanged", m);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		} catch (HttpRequestException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
 }

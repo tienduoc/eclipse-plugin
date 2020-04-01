@@ -2,8 +2,16 @@ package com.aixcoder.extension;
 
 import java.io.IOException;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 
 import com.aixcoder.core.API;
 import com.aixcoder.i18n.EN;
@@ -90,6 +98,38 @@ public class Activator extends AbstractUIPlugin {
 					});
 		}
 		API.checkUpdate(context.getBundle().getVersion());
+		
+		IResourceChangeListener listener = new IResourceChangeListener() {
+			@Override
+	        public void resourceChanged(IResourceChangeEvent event) {
+				if (event.getType() != IResourceChangeEvent.POST_CHANGE) {
+					return;
+				}
+	        	try {
+	        		event.getDelta().accept(new IResourceDeltaVisitor() {
+	    				@Override
+	    				public boolean visit(IResourceDelta delta) throws org.eclipse.core.runtime.CoreException {
+	    					if (delta.getResource() != null) {
+	    						if (delta.getResource().getType() == IResource.FILE &&
+	    								(delta.getKind() == IResourceDelta.ADDED || delta.getKind() == IResourceDelta.CHANGED)) {
+	    							String filename = delta.getResource().getName();
+	    							String fullpath = delta.getResource().getLocation().toString();
+	    							String pathWithProj = delta.getResource().getFullPath().toString();
+	    							String pathInProj = delta.getProjectRelativePath().toString(); // not include project
+	    							System.out.printf("filename=%s \n fullpath=%s \n pathWithProj=%s \n pathInProj=%s\n", filename, fullpath, pathWithProj, pathInProj );
+	    						}
+	    					}
+	    					return true; // to visit child
+	    				}
+	    			});	        		
+	        	} catch (Exception e) {
+	        		e.printStackTrace();
+	        	}
+	           }
+		};
+		
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener, IResourceChangeEvent.POST_CHANGE);
+		
 	}
 
 	/*
