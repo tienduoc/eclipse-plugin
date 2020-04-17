@@ -72,6 +72,8 @@ public class Preference {
 	public static boolean isProfessionalFetched = true;
 	
 	public static final String urlLearnMoreLocalService = "https://www.aixcoder.com/#/versionInfo";
+	
+	public static String mavenUserSettingXML = null;
 
 	public static boolean isActive() {
 		new AiXPreInitializer().initializeDefaultPreferences();
@@ -523,6 +525,14 @@ public class Preference {
 
 	public static String getRemoteEndpoint() {
 		return "https://api.aixcoder.com/";
+	}
+	
+	public static String getMavenUserSettingXML() {
+		return Preference.mavenUserSettingXML;
+	}
+	
+	public static void setMavenUserSettingXML(String userSettingsXML) {
+		Preference.mavenUserSettingXML = userSettingsXML;
 	}
 
 }

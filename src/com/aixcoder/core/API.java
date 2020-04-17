@@ -287,6 +287,10 @@ public class API {
 				localParameter.put("laterCode", laterCode);
 				localParameter.put("laterOffset", String.valueOf(laterOffset));
 				localParameter.put("laterMd5", laterMd5);
+				String mavenUserSettingXml = Preference.getMavenUserSettingXML();
+				if (mavenUserSettingXml != null) {
+					localParameter.put("mavenConfigPath", mavenUserSettingXml);
+				}
 			}
 
 			String string = HttpHelper.post(endpoint + "predict", new Consumer<HttpRequest>() {

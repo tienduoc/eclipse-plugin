@@ -1,6 +1,15 @@
 package com.aixcoder.extension;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -30,6 +39,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+	
+	public volatile static Map<String, Long> filesChangeTimestampMap = new ConcurrentHashMap<>();
 
 	public WebView webview;
 
@@ -37,6 +48,48 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
+	}
+	
+	/**
+	 * 
+	 * let localserver know, there are file changes
+	 *
+	 */
+	class FileChangeTimerTask extends java.util.TimerTask {
+		private long currentTimestamp;
+		private String langFromExt;
+		private String fullpath;
+		private String projectName;
+		private String projectPath;
+		
+		FileChangeTimerTask (long currentTimestamp, String langFromExt, String fullpath, String projectName, String projectPath) {
+			this.currentTimestamp = currentTimestamp;
+			this.langFromExt = langFromExt;
+			this.fullpath = fullpath;
+			this.projectName = projectName;
+			this.projectPath = projectPath;
+		}
+        public void run() {
+        	long filesChangeTimestamp = filesChangeTimestampMap.get(fullpath);
+        	if (currentTimestamp == filesChangeTimestamp) {
+        		String fileStr = "";
+        		try {
+        			if (new File(fullpath).exists()) {
+        				try
+        		        {
+        					fileStr = new String (Files.readAllBytes(Paths.get(fullpath)));
+        					com.aixcoder.core.API.notifyFileChange(fileStr, langFromExt, fullpath, projectName, projectPath);
+        		        } 
+        		        catch (IOException e) 
+        		        {
+        		            e.printStackTrace();
+        		        }
+        			}
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        		}
+        	}
+        }
 	}
 
 	/*
@@ -113,12 +166,17 @@ public class Activator extends AbstractUIPlugin {
 	    								(delta.getKind() == IResourceDelta.ADDED || delta.getKind() == IResourceDelta.CHANGED)) {
 	    							String ext = Preference.getModel();
 	    							String langFromExt = "java";
+	    							final long MATURE_DELAY_SECONDS = 5000L;
 	    							if (langFromExt.equals(delta.getResource().getFileExtension())) {
 		    							String fullpath = delta.getResource().getLocation().toString();
 		    							String projectName = delta.getResource().getProject().getName();
 		    							String projectPath = delta.getResource().getProject().getLocation().toString();
-
-	    								com.aixcoder.core.API.notifyFileChange("text", langFromExt, fullpath, projectName, projectPath);
+		    							if (fullpath != null) {
+			    							long currentTimestamp = System.currentTimeMillis();
+		    								filesChangeTimestampMap.put(fullpath, currentTimestamp);
+			    							java.util.Timer timer = new java.util.Timer();
+			    							timer.schedule(new FileChangeTimerTask(currentTimestamp, langFromExt, fullpath, projectName, projectPath), MATURE_DELAY_SECONDS);
+		    							}
 	    							}
 	    						}
 	    					}
@@ -130,9 +188,38 @@ public class Activator extends AbstractUIPlugin {
 	        	}
 	           }
 		};
-		System.out.println("##########################ADD listener");
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener, IResourceChangeEvent.POST_CHANGE);
-		
+		// read maven user settings
+		String mavenUserSettingXML = null;
+		String workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+		Path mavenSettingfilePath = Paths.get(workspaceRoot, ".metadata", ".plugins", "org.eclipse.core.runtime", ".settings", "org.eclipse.m2e.core.prefs");
+		try {
+			if (Files.exists(mavenSettingfilePath)) {
+				File file = mavenSettingfilePath.toFile();
+				BufferedReader reader = null;
+				try {
+					reader = new BufferedReader(new FileReader(file));
+					String tmpLineStr = null;
+					final String lineHead= "eclipse.m2.userSettingsFile=";
+					while ((tmpLineStr = reader.readLine()) != null) {
+						if (tmpLineStr.startsWith(lineHead)) {
+							mavenUserSettingXML = tmpLineStr.substring(lineHead.length());
+							break;
+						}
+		            }
+				} catch (Exception e) {
+				} finally {
+		            if (reader != null) {
+		                try {
+		                    reader.close();
+		                } catch (IOException e1) {
+		                }
+		            }
+		        }
+			}
+		} catch (Exception e) {
+		}
+		Preference.setMavenUserSettingXML(mavenUserSettingXML);
 	}
 
 	/*
