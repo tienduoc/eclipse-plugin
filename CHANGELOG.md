@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to the "aiXcoder" extension will be documented in this file.
 
+## [1.3.2] - 2020-04-20
+### Added
+- clean some old local server files
+- improve predict by file change detect, reuse maven info
+
+
+## [1.3.1] - 2020-03-30
+### Added
+- compatible with eclipse 2020
+
+### Fixed
+- sometimes cursor position error.
+
+
 ## [1.2.5] - 
 ### Fixed
 - Sometimes closes proposals popup preemptively.
